@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <OutputType>exe</OutputType>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Remove="Derived.mxml" />
+        <None Remove="Derived2.mxml" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <AdditionalFiles Include="Derived2.mxml" />
+        <AdditionalFiles Include="Derived.mxml" />
+        <AdditionalFiles Include="Base.mxml" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\CodeGenerators\CSharp.SourceGenerator\CSharp.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Update="derived.xml">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+
+</Project>
