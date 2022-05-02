@@ -43,6 +43,8 @@ namespace UnitTests
 ";
             var result = SchemaParser.Parse(XDocument.Parse(xml));
 
+            result.Validate();
+
         }
     }
 }

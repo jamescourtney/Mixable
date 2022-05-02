@@ -22,43 +22,21 @@ internal static class SchemaParser
         return Classify(null, document.Root, new TypeNameStack(), validator);
     }
 
-    internal static SchemaElement Classify(SchemaElement? parent, XElement element, TypeNameStack stack, IAttributeValidator validator)
+    internal static SchemaElement Classify(SchemaElement? parent, XElement xElement, TypeNameStack stack, IAttributeValidator validator)
     {
-        stack.Push(element.Name.LocalName);
+        stack.Push(xElement.Name.LocalName);
 
         try
         {
-            MetadataAttributes attrs = validator.Validate(element);
+            MetadataAttributes attrs = validator.Validate(xElement);
+            List<XElement> children = xElement
+                .GetChildren()
+                .Where(x => x.Name.NamespaceName != Constants.XMLNamespace) // ignore our metadata namespace.
+                .ToList();
 
-            // Custom logic for this subtree.
-            if (attrs.CustomParser is not null)
+            if (TryCreateScalarSchemaElement(attrs, xElement, parent, stack, children, out var schemaElement))
             {
-                if (attrs.TypeName is null)
-                {
-                    throw new ConfiguratorDotNetException($"The '{Constants.Structure.TypeAttributeName}' attribute is required when using '{Constants.Structure.CustomParserAttributeName}'.");
-                }
-
-                return new ScalarSchemaElement(attrs.TypeName, attrs.CustomParser, parent);
-            }
-
-            List<XElement> children = element.GetChildren().Where(x => x.Name.NamespaceName != Constants.XMLNamespace).ToList();
-
-            // Leaf node. Infer type or use type name attribute.
-            if (children.Count == 0)
-            {
-                if (string.IsNullOrEmpty(element.Value))
-                {
-                    throw new ConfiguratorDotNetException("Unable to infer types for empty nodes.");
-                }
-
-                string typeName = InferType(element.Value);
-
-                if (attrs.TypeName is not null)
-                {
-                    typeName = attrs.TypeName;
-                }
-
-                return new ScalarSchemaElement(typeName, null, parent);
+                return schemaElement;
             }
 
             int distinctChildTagNames = children.Select(x => x.Name).Distinct().Count();
@@ -66,7 +44,6 @@ internal static class SchemaParser
 
             bool looksLikeList = distinctChildTagNames == 1 && children.Count > 1;
             bool looksLikeMap = distinctChildTagNames == children.Count;
-
             bool isList = looksLikeList;
 
             if (attrs.List is not null)
@@ -81,7 +58,7 @@ internal static class SchemaParser
                     throw new ConfiguratorDotNetException($"List element '{stack}' had more than one distinct child name.");
                 }
 
-                ListSchemaElement listElement = new(parent);
+                ListSchemaElement listElement = new(parent, xElement);
                 foreach (var child in children)
                 {
                     listElement.AddChild(Classify(listElement, child, stack, validator));
@@ -96,7 +73,7 @@ internal static class SchemaParser
                     throw new ConfiguratorDotNetException($"Map element '{stack}' had duplicate child tags.");
                 }
 
-                MapSchemaElement mapElement = new(parent) { TypeName = stack.ToString() };
+                MapSchemaElement mapElement = new(parent, xElement) { TypeName = stack.ToString() };
                 foreach (var child in children)
                 {
                     mapElement.AddChild(
@@ -113,7 +90,48 @@ internal static class SchemaParser
         }
     }
 
-    internal static string InferType(string text)
+    private static bool TryCreateScalarSchemaElement(
+        MetadataAttributes attrs,
+        XElement xElement,
+        SchemaElement? parent,
+        TypeNameStack stack,
+        List<XElement> children,
+        [NotNullWhen(true)] out SchemaElement? element)
+    {
+        element = null;
+
+        if (attrs.CustomParser is not null)
+        {
+            // Custom logic for this subtree.
+            if (attrs.TypeName is null)
+            {
+                throw new ConfiguratorDotNetException($"The '{Constants.Structure.TypeAttributeName}' attribute is required when using '{Constants.Structure.CustomParserAttributeName}'.");
+            }
+
+            element = new ScalarSchemaElement(attrs.TypeName, attrs.CustomParser, parent, xElement);
+        }
+        else if (children.Count == 0)
+        {
+            // Leaf node. Infer type or use type name attribute.
+            if (string.IsNullOrEmpty(xElement.Value))
+            {
+                throw new ConfiguratorDotNetException("Unable to infer types for empty nodes.");
+            }
+
+            string typeName = InferType(xElement.Value);
+
+            if (attrs.TypeName is not null)
+            {
+                typeName = attrs.TypeName;
+            }
+
+            element = new ScalarSchemaElement(typeName, null, parent, xElement);
+        }
+        
+        return element is not null;
+    }
+
+    private static string InferType(string text)
     {
         if (string.Equals(text, "true", StringComparison.OrdinalIgnoreCase) || 
             string.Equals(text, "false", StringComparison.OrdinalIgnoreCase))
