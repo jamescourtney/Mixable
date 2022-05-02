@@ -41,7 +41,7 @@ namespace UnitTests
   </FancyList>
 </Configuration>
 ";
-            var result = ElementClassifier.Parse(XDocument.Parse(xml));
+            var result = SchemaParser.Parse(XDocument.Parse(xml));
 
         }
     }

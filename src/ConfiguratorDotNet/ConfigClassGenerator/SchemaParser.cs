@@ -1,34 +1,9 @@
-﻿using System.IO;
-using System.Linq;
-using System.Text;
+﻿using System.Linq;
 using ConfiguratorDotNet.Runtime;
 
 namespace ConfiguratorDotNet.Generator;
 
-internal abstract class SchemaElement
-{
-    protected SchemaElement(SchemaElement? parent)
-    {
-        this.Parent = parent;
-    }
-
-    /// <summary>
-    /// Gets or sets the type name for the current schema element.
-    /// </summary>
-    public string? TypeName { get; set; }
-
-    public SchemaElement? Parent { get; }
-
-    public virtual IEnumerable<SchemaElement> Children => Array.Empty<SchemaElement>();
-}
-
-internal enum ListMergePolicy
-{
-    Concatenate = 0,
-    Replace = 1,
-}
-
-internal static class ElementClassifier
+internal static class SchemaParser
 {
     internal static SchemaElement Parse(XDocument document)
     {
@@ -87,24 +62,25 @@ internal static class ElementClassifier
             }
 
             int distinctChildTagNames = children.Select(x => x.Name).Distinct().Count();
-            bool isList = false;
+            int maxChildTagCount = children.GroupBy(x => x.Name).Select(g => g.Count()).Max();
 
-            if (distinctChildTagNames == 1 && children.Count == 1)
+            bool looksLikeList = distinctChildTagNames == 1 && children.Count > 1;
+            bool looksLikeMap = distinctChildTagNames == children.Count;
+
+            bool isList = looksLikeList;
+
+            if (attrs.List is not null)
             {
-                if (attrs.List is null)
-                {
-                    throw new ConfiguratorDotNetException($"Element '{stack}' was ambiguous. It can be either a list or a map. Use the '{Constants.Structure.ListAttributeName}' attribute to distinguish.");
-                }
-
                 isList = attrs.List.Value;
-            }
-            else if (distinctChildTagNames == 1)
-            {
-                isList = true;
             }
 
             if (isList)
             {
+                if (distinctChildTagNames > 1)
+                {
+                    throw new ConfiguratorDotNetException($"List element '{stack}' had more than one distinct child name.");
+                }
+
                 ListSchemaElement listElement = new(parent);
                 foreach (var child in children)
                 {
@@ -115,6 +91,11 @@ internal static class ElementClassifier
             }
             else
             {
+                if (maxChildTagCount > 1)
+                {
+                    throw new ConfiguratorDotNetException($"Map element '{stack}' had duplicate child tags.");
+                }
+
                 MapSchemaElement mapElement = new(parent) { TypeName = stack.ToString() };
                 foreach (var child in children)
                 {
@@ -151,70 +132,5 @@ internal static class ElementClassifier
         }
 
         return "string";
-    }
-}
-
-internal class ScalarSchemaElement : SchemaElement
-{
-    public ScalarSchemaElement(string typeName, string? customParser, SchemaElement? parent)
-        : base(parent)
-    {
-        this.TypeName = typeName;
-        this.CustomParser = customParser;
-    }
-
-    public string? CustomParser { get; set; }
-}
-
-internal class ListSchemaElement : SchemaElement
-{
-    private readonly List<SchemaElement> children = new();
-
-    public ListSchemaElement(SchemaElement? parent) : base(parent)
-    {
-    }
-
-    public override IEnumerable<SchemaElement> Children => this.children;
-
-    public void AddChild(SchemaElement element)
-    {
-        this.TypeName = $"List<{element.TypeName}>";
-        this.children.Add(element);
-    }
-}
-
-internal class MapSchemaElement : SchemaElement
-{
-    private readonly Dictionary<string, SchemaElement> children = new();
-
-    public MapSchemaElement(SchemaElement? parent) : base(parent)
-    {
-    }
-
-    public override IEnumerable<SchemaElement> Children => this.children.Values;
-
-    public void AddChild(string tagName, SchemaElement child)
-    {
-        this.children.Add(tagName, child);
-    }
-}
-
-internal class TypeNameStack
-{
-    private readonly LinkedList<string> parts = new();
-
-    public void Push(string value)
-    {
-        this.parts.AddLast(value);
-    }
-
-    public void Pop()
-    {
-        this.parts.RemoveLast();
-    }
-
-    public override string ToString()
-    {
-        return string.Join("_", this.parts);
     }
 }
