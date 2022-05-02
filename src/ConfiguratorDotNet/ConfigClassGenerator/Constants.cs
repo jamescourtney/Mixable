@@ -1,8 +1,30 @@
 ﻿namespace ConfiguratorDotNet.Generator;
 
-internal class Constants
+internal static class Constants
 {
-    public const string ControlCharacter = "@";
+    public const string XMLNamespace = "http://configurator.net";
 
-    public const string MetadataPropertyName = $"{ControlCharacter}CDN-Metadata";
+    public static class Metadata
+    {
+        public static readonly XName RootTagName = XName.Get("Metadata", XMLNamespace);
+
+        public static readonly XName BaseFileName = XName.Get("Inherit", XMLNamespace);
+
+        public static readonly XName OutputXmlFileTagName = XName.Get("OutputXmlFile", XMLNamespace);
+
+        public static readonly XName GenerateCSharptagName = XName.Get("GenerateCSharp", XMLNamespace);
+
+        public static readonly XName NamespaceTagName = XName.Get("NamespaceName", XMLNamespace);
+    }
+
+    public static class Structure
+    {
+        public static readonly XName TypeAttributeName = XName.Get("Type", XMLNamespace);
+
+        public static readonly XName CustomParserAttributeName = XName.Get("CustomParser", XMLNamespace);
+
+        public static readonly XName ListAttributeName = XName.Get("List", XMLNamespace);
+
+        public static readonly XName ListMergeStrategyName = XName.Get("ListMergeStrategy", XMLNamespace);
+    }
 }

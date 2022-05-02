@@ -1,3 +1,5 @@
+using ConfiguratorDotNet.Generator;
+using System.Xml.Linq;
 using Xunit;
 
 namespace UnitTests
@@ -7,28 +9,40 @@ namespace UnitTests
         [Fact]
         public void Test1()
         {
-            string yaml =
+            string xml =
 @"
-configuration:
-  value1: !!str 3
-  value2: 3.14
-  value3: 4UL
-  value4: 5L
-  value6: true
-  subItem:
-    Foo: Bar
-    Bar: Baz
-  list:
-  - 1
-  - 2
-  - 3
-  classList:
-  - a: foo
-    b: bar
-  - a: foo2
-    b: bar2
+<Configuration xmlns:cdn=""http://configurator.net"">
+  <cdn:Metadata>
+    <cdn:NamespaceName>Foo.Bar.Baz</cdn:NamespaceName>
+  </cdn:Metadata>
+
+  <Mapping>
+    <A>4</A>
+    <B>string</B>
+    <C>
+      <C>2.0</C>
+    </C>
+  </Mapping>
+  <List>
+    <Item>1</Item>
+    <Item>2</Item>
+    <Item>3</Item>
+  </List>
+  <FancyList>
+    <Item>
+      <Value>1</Value>
+    </Item>
+    <Item>
+      <Value>2</Value>
+    </Item>
+    <Item>
+      <Value>3</Value>
+    </Item>
+  </FancyList>
+</Configuration>
 ";
-            var item = ConfiguratorDotNet.Generator.YamlSchemaReader.ParseSchema(yaml);
+            var result = ElementClassifier.Parse(XDocument.Parse(xml));
+
         }
     }
 }
