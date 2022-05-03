@@ -2,41 +2,48 @@
 
 internal class ListSchemaElement : SchemaElement
 {
-    private SchemaElement? template;
-    private readonly XName childTagName;
+    private SchemaElement template;
 
     public ListSchemaElement(
         SchemaElement? parent,
         XElement node,
-        XName childTagName) : base(parent, node)
+        SchemaElement templateChild) : base(parent, node)
     {
-        this.childTagName = childTagName;
+        this.template = templateChild;
+        this.TypeName = $"List<{templateChild.TypeName}>";
     }
 
     public override IEnumerable<SchemaElement> Children => new[] { this.template };
 
-    public void AddChild(SchemaElement element)
+    public override bool MatchesSchema(
+        XElement element,
+        IAttributeValidator validator,
+        out string path,
+        out string error)
     {
-        this.TypeName = $"List<{element.TypeName}>";
-
-        if (this.template is null)
+        if (!validator.TryValidate(element, out path, out error, out _))
         {
-            this.template = element;
-        }
-        else if (this.template != element)
-        {
-            throw new ConfiguratorDotNetException($"Children of List '{this.XPath}' have differing schemas.");
-        }
-    }
-
-    public override void Validate()
-    {
-        if (this.template is null)
-        {
-            throw new ConfiguratorDotNetException($"Lists cannot be empty (needed to determine the type). Path = '{this.XPath}'");
+            return false;
         }
 
-        this.template.Validate();
+        foreach (XElement child in element.GetFilteredChildren())
+        {
+            if (child.Name != this.template.xElement.Name)
+            {
+                path = this.XPath;
+                error = $"Expected tag name: '{this.template.xElement.Name}'. Got: '{element.Name}'.";
+                return false;
+            }
+
+            if (!this.template.MatchesSchema(child, validator, out path, out error))
+            {
+                return false;
+            }
+        }
+
+        path = string.Empty;
+        error = string.Empty;
+        return true;
     }
 
     public override void MergeWith(XElement element, IAttributeValidator validator)
@@ -52,21 +59,6 @@ internal class ListSchemaElement : SchemaElement
             }
 
             return;
-        }
-
-        TypeNameStack stack = new();
-        stack.Push(this.Parent?.TypeName ?? string.Empty);
-
-        SchemaParser.TryCreateListSchemaElement(
-            element,
-            this.Parent,
-            stack,
-            validator,
-            out ListSchemaElement? value);
-
-        if (value.template != this.template)
-        {
-            throw new ConfiguratorDotNetException($"List merging error -- templates do not share the same schema. Path = {this.xElement.GetDocumentPath()}");
         }
 
         if (attrs.ListMergePolicy == ListMergePolicy.Replace)

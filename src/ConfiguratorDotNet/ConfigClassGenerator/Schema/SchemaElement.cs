@@ -2,7 +2,7 @@
 
 internal abstract class SchemaElement
 {
-    protected readonly XElement xElement;
+    protected internal readonly XElement xElement;
 
     protected SchemaElement(SchemaElement? parent, XElement xElement)
     {
@@ -13,7 +13,7 @@ internal abstract class SchemaElement
     /// <summary>
     /// Gets or sets the type name for the current schema element.
     /// </summary>
-    public string? TypeName { get; set; }
+    public string TypeName { get; set; } = string.Empty;
 
     public string XPath => $"{this.Parent?.XPath}/{this.xElement.Name}";
 
@@ -21,9 +21,15 @@ internal abstract class SchemaElement
 
     public virtual IEnumerable<SchemaElement> Children => Array.Empty<SchemaElement>();
 
-    public abstract void MergeWith(XElement element, IAttributeValidator validator);
+    public abstract void MergeWith(
+        XElement element,
+        IAttributeValidator validator);
 
-    public abstract void Validate();
+    public abstract bool MatchesSchema(
+        XElement element,
+        IAttributeValidator validator,
+        out string mismatchPath,
+        out string error);
 
     public static bool operator ==(SchemaElement? a, SchemaElement? b)
     {

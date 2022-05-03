@@ -1,18 +1,20 @@
-﻿using ConfiguratorDotNet.Runtime;
-
-namespace ConfiguratorDotNet.Generator;
+﻿namespace ConfiguratorDotNet.Generator;
 
 internal class BaseSchemaAttributeValidator : IAttributeValidator
 {
-    public MetadataAttributes Validate(XElement element)
+    public bool TryValidate(XElement element, out string path, out string error, out MetadataAttributes attrs)
     {
-        MetadataAttributes attributes = MetadataAttributes.Extract(element);
+        attrs = MetadataAttributes.Extract(element);
 
-        if (attributes.ListMergePolicy is not null)
+        if (attrs.ListMergePolicy is not null)
         {
-            throw new ConfiguratorDotNetException("Base schemas may not have a merge policy defined.");
+            error = "Base schemas may not have a merge policy defined.";
+            path = element.GetDocumentPath();
+            return false;
         }
 
-        return attributes;
+        error = string.Empty;
+        path = string.Empty;
+        return true;
     }
 }

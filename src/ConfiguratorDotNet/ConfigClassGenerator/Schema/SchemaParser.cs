@@ -1,7 +1,4 @@
-﻿using System.Linq;
-using ConfiguratorDotNet.Runtime;
-
-namespace ConfiguratorDotNet.Generator;
+﻿namespace ConfiguratorDotNet.Generator;
 
 internal static class SchemaParser
 {
@@ -9,14 +6,10 @@ internal static class SchemaParser
     {
         XmlMetadata data = new XmlMetadata(document);
 
-        IAttributeValidator validator;
+        IAttributeValidator validator = new BaseSchemaAttributeValidator();
         if (string.IsNullOrEmpty(data.BaseFileName))
         {
             validator = new BaseSchemaAttributeValidator();
-        }
-        else
-        {
-            validator = new DerivedSchemaAttributeValidator();
         }
 
         return Classify(null, document.Root, new TypeNameStack(), validator);
@@ -33,9 +26,9 @@ internal static class SchemaParser
                 .GetFilteredChildren()
                 .ToList();
 
-            if (TryCreateScalarSchemaElement(attrs, xElement, parent, children, out var schemaElement))
+            if (children.Count == 0)
             {
-                return schemaElement;
+                return CreateScalarElement(attrs, xElement, parent, children);
             }
 
             int distinctChildTagNames = children.Select(x => x.Name).Distinct().Count();
@@ -88,64 +81,49 @@ internal static class SchemaParser
             throw new ConfiguratorDotNetException($"List element '{xElement.GetDocumentPath()}' had more than one distinct child name.");
         }
 
-        ListSchemaElement listElement = new(parent, xElement, children[0].Name);
+        SchemaElement template = Classify(parent, children[0], stack, validator);
+        ListSchemaElement listElement = new(parent, xElement, template);
+
         foreach (var child in children)
         {
-            listElement.AddChild(Classify(listElement, child, stack, validator));
+            if (!listElement.MatchesSchema(xElement, validator, out string errorXPath, out string error))
+            {
+                throw new ConfiguratorDotNetException($"List itemp child does not match template. Error = {error}, Path = {errorXPath}");
+            }
         }
 
         element =  listElement;
         return true;
     }
 
-    internal static bool TryCreateScalarSchemaElement(
+    internal static ScalarSchemaElement CreateScalarElement(
         MetadataAttributes attrs,
         XElement xElement,
         SchemaElement? parent,
-        List<XElement> children,
-        [NotNullWhen(true)] out SchemaElement? element)
+        List<XElement> children)
     {
-        element = null;
-
         if (children.Count == 0)
         {
-            // Leaf node. Infer type or use type name attribute.
-            if (string.IsNullOrEmpty(xElement.Value))
+            ScalarType? scalarType;
+            if (attrs.TypeName is null)
             {
-                throw new ConfiguratorDotNetException($"Unable to infer types for empty nodes. Path = '{parent?.XPath}'.");
+                scalarType = ScalarType.GetInferredScalarType(xElement.Value);
+            }
+            else if (!ScalarType.TryGetExplicitScalarType(attrs.TypeName, out scalarType))
+            {
+                throw new ConfiguratorDotNetException($"Unable to find explicit scalar type '{attrs.TypeName}'. Path = '{xElement.GetDocumentPath()}'.");
             }
 
-            string typeName = InferType(xElement.Value);
-
-            if (attrs.TypeName is not null)
+            if (!scalarType.Parser.CanParse(xElement.Value))
             {
-                typeName = attrs.TypeName;
+                throw new ConfiguratorDotNetException($"Unable to find parse '{xElement.Value}' as a '{scalarType.TypeName}'. Path = '{xElement.GetDocumentPath()}'.");
             }
 
-            element = new ScalarSchemaElement(typeName, null, parent, xElement);
+            return new ScalarSchemaElement(scalarType, parent, xElement);
         }
-        
-        return element is not null;
-    }
-
-    private static string InferType(string text)
-    {
-        if (string.Equals(text, "true", StringComparison.OrdinalIgnoreCase) || 
-            string.Equals(text, "false", StringComparison.OrdinalIgnoreCase))
+        else
         {
-            return "bool";
+            throw new ConfiguratorDotNetException("Can't create scalar schema node when it has children");
         }
-
-        if (int.TryParse(text, out _))
-        {
-            return "int";
-        }
-
-        if (double.TryParse(text, out _))
-        {
-            return "double";
-        }
-
-        return "string";
     }
 }

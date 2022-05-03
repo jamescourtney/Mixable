@@ -1,7 +1,4 @@
-﻿using ConfiguratorDotNet.Runtime;
-using System.Linq;
-
-namespace ConfiguratorDotNet.Generator;
+﻿namespace ConfiguratorDotNet.Generator;
 
 internal class MapSchemaElement : SchemaElement
 {
@@ -16,14 +13,6 @@ internal class MapSchemaElement : SchemaElement
     public void AddChild(string tagName, SchemaElement child)
     {
         this.children.Add(tagName, child);
-    }
-
-    public override void Validate()
-    {
-        foreach (var kvp in this.children)
-        {
-            kvp.Value.Validate();
-        }
     }
 
     public override bool Equals(SchemaElement? other)
@@ -69,17 +58,46 @@ internal class MapSchemaElement : SchemaElement
         return hash;
     }
 
-    public override void MergeWith(XElement element, IAttributeValidator validator)
+    public override bool MatchesSchema(
+        XElement element,
+        IAttributeValidator validator,
+        out string mismatchPath,
+        out string error)
     {
+        if (!validator.TryValidate(element, out mismatchPath, out error, out _))
+        {
+            return false;
+        }
+
         Dictionary<XName, XElement> map = element.GetFilteredChildren().ToDictionary(x => x.Name, x => x);
 
         foreach (var kvp in map)
         {
             if (!this.children.TryGetValue(kvp.Key, out SchemaElement? value))
             {
-                throw new ConfiguratorDotNetException("Merged file contains key not present in base file. Merging may not add new keys.");
+                error = "Merged file contains key not present in base file. Merging may not add new keys.";
+                mismatchPath = element.GetDocumentPath();
+                return false;
             }
 
+            if (!value.MatchesSchema(kvp.Value, validator, out mismatchPath, out error))
+            {
+                return false;
+            }
+        }
+
+        mismatchPath = string.Empty;
+        error = string.Empty;
+        return true;
+    }
+
+    public override void MergeWith(XElement element, IAttributeValidator validator)
+    {
+        Dictionary<XName, XElement> map = element.GetFilteredChildren().ToDictionary(x => x.Name, x => x);
+
+        foreach (var kvp in map)
+        {
+            SchemaElement value = this.children[kvp.Key];
             value.MergeWith(kvp.Value, validator);
         }
     }

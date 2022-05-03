@@ -1,23 +1,25 @@
-﻿using ConfiguratorDotNet.Runtime;
-
-namespace ConfiguratorDotNet.Generator;
+﻿namespace ConfiguratorDotNet.Generator;
 
 internal class DerivedSchemaAttributeValidator : IAttributeValidator
 {
-    public MetadataAttributes Validate(XElement element)
+    public bool TryValidate(XElement element, out string path, out string error, out MetadataAttributes attrs)
     {
-        MetadataAttributes attributes = MetadataAttributes.Extract(element);
+        attrs = MetadataAttributes.Extract(element);
+        path = element.GetDocumentPath();
 
-        if (attributes.List is not null)
+        if (attrs.List is not null)
         {
-            throw new ConfiguratorDotNetException("Derived schemas may not have the List attribute defined.");
+            error = "Derived schemas may not have the List attribute defined.";
+            return false;
         }
 
-        if (attributes.TypeName is not null)
+        if (attrs.TypeName is not null)
         {
-            throw new ConfiguratorDotNetException("Derived schemas may not have the TypeName attribute defined.");
+            error = "Derived schemas may not have the TypeName attribute defined.";
+            return false;
         }
 
-        return attributes;
+        error = string.Empty;
+        return true;
     }
 }

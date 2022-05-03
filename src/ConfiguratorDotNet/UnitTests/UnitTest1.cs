@@ -62,8 +62,7 @@ namespace UnitTests
 
             var result = SchemaParser.Parse(XDocument.Parse(xml));
 
-            result.Validate();
-
+            Assert.True(result.MatchesSchema(XDocument.Parse(overrideSchema).Root, new DerivedSchemaAttributeValidator(), out _, out _));
             result.MergeWith(XDocument.Parse(overrideSchema).Root, new DerivedSchemaAttributeValidator());
 
         }

@@ -1,14 +1,17 @@
-﻿using System.Linq;
-
-namespace ConfiguratorDotNet.Generator;
+﻿namespace ConfiguratorDotNet.Generator;
 
 internal class ScalarSchemaElement : SchemaElement
 {
-    public ScalarSchemaElement(string typeName, string? customParser, SchemaElement? parent, XElement element)
+    private readonly ScalarType scalarType;
+
+    public ScalarSchemaElement(
+        ScalarType scalarType,
+        SchemaElement? parent,
+        XElement element)
         : base(parent, element)
     {
-        this.TypeName = typeName;
-        this.CustomParser = customParser;
+        this.TypeName = scalarType.TypeName;
+        this.scalarType = scalarType;
     }
 
     public string? CustomParser { get; set; }
@@ -20,28 +23,42 @@ internal class ScalarSchemaElement : SchemaElement
             return false;
         }
 
-        return scalar.TypeName == this.TypeName
-            && scalar.CustomParser == this.CustomParser;
+        return scalar.TypeName == this.TypeName;
     }
 
-    public override void Validate()
+    public override bool MatchesSchema(
+        XElement element,
+        IAttributeValidator validator,
+        out string mismatchPath,
+        out string error)
     {
+        if (!validator.TryValidate(element, out mismatchPath, out error, out _))
+        {
+            return false;
+        }
+
+        List<XElement> children = element.GetChildren().ToList();
+        if (children.Count > 0)
+        {
+            mismatchPath = this.XPath;
+            error = "Override schemas may not introduce children to scalar nodes.";
+            return false;
+        }
+
+        if (!this.scalarType.Parser.CanParse(element.Value))
+        {
+            mismatchPath = this.XPath;
+            error = $"Failed to parse '{element.Value}' as a type of '{this.TypeName}'.";
+            return false;
+        }
+
+        mismatchPath = string.Empty;
+        error = string.Empty;
+        return true;
     }
 
     public override void MergeWith(XElement element, IAttributeValidator validator)
     {
-        MetadataAttributes attrs = validator.Validate(element);
-
-        if (!SchemaParser.TryCreateScalarSchemaElement(
-            attrs,
-            element,
-            this.Parent,
-            element.GetFilteredChildren().ToList(),
-            out var schemaElem))
-        {
-            throw new ConfiguratorDotNetException("Scalar elements may not have children introduced by merging.");
-        }
-
         this.xElement.Value = element.Value;
     }
 
