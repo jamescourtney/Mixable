@@ -1,8 +1,11 @@
-﻿namespace ConfiguratorDotNet.Generator;
+﻿using ConfiguratorDotNet.Runtime;
+using System.Linq;
+
+namespace ConfiguratorDotNet.Generator;
 
 internal class MapSchemaElement : SchemaElement
 {
-    private readonly Dictionary<string, SchemaElement> children = new();
+    private readonly Dictionary<XName, SchemaElement> children = new();
 
     public MapSchemaElement(SchemaElement? parent, XElement node) : base(parent, node)
     {
@@ -37,7 +40,7 @@ internal class MapSchemaElement : SchemaElement
 
         foreach (var kvp in this.children)
         {
-            string key = kvp.Key;
+            XName key = kvp.Key;
             SchemaElement value = kvp.Value;
 
             if (!map.children.TryGetValue(key, out SchemaElement otherValue))
@@ -64,5 +67,20 @@ internal class MapSchemaElement : SchemaElement
         }
 
         return hash;
+    }
+
+    public override void MergeWith(XElement element, IAttributeValidator validator)
+    {
+        Dictionary<XName, XElement> map = element.GetFilteredChildren().ToDictionary(x => x.Name, x => x);
+
+        foreach (var kvp in map)
+        {
+            if (!this.children.TryGetValue(kvp.Key, out SchemaElement? value))
+            {
+                throw new ConfiguratorDotNetException("Merged file contains key not present in base file. Merging may not add new keys.");
+            }
+
+            value.MergeWith(kvp.Value, validator);
+        }
     }
 }

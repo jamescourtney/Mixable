@@ -41,9 +41,30 @@ namespace UnitTests
   </FancyList>
 </Configuration>
 ";
+            string overrideSchema =
+@"
+<Configuration xmlns:cdn=""http://configurator.net"">
+  <cdn:Metadata>
+    <cdn:BaseFile>base.xml</cdn:BaseFile>
+  </cdn:Metadata>
+
+  <List>
+     <Item>4</Item>
+  </List>
+
+  <Mapping>
+    <A>5</A>
+  </Mapping>
+
+  <FancyList cdn:ListMerge=""Replace"" />
+</Configuration>
+";
+
             var result = SchemaParser.Parse(XDocument.Parse(xml));
 
             result.Validate();
+
+            result.MergeWith(XDocument.Parse(overrideSchema).Root, new DerivedSchemaAttributeValidator());
 
         }
     }

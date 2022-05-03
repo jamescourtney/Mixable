@@ -1,4 +1,6 @@
-﻿namespace ConfiguratorDotNet.Generator;
+﻿using System.Linq;
+
+namespace ConfiguratorDotNet.Generator;
 
 internal class ScalarSchemaElement : SchemaElement
 {
@@ -24,6 +26,23 @@ internal class ScalarSchemaElement : SchemaElement
 
     public override void Validate()
     {
+    }
+
+    public override void MergeWith(XElement element, IAttributeValidator validator)
+    {
+        MetadataAttributes attrs = validator.Validate(element);
+
+        if (!SchemaParser.TryCreateScalarSchemaElement(
+            attrs,
+            element,
+            this.Parent,
+            element.GetFilteredChildren().ToList(),
+            out var schemaElem))
+        {
+            throw new ConfiguratorDotNetException("Scalar elements may not have children introduced by merging.");
+        }
+
+        this.xElement.Value = element.Value;
     }
 
     public override int GetHashCode()

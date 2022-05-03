@@ -8,7 +8,7 @@ internal static class Constants
     {
         public static readonly XName RootTagName = XName.Get("Metadata", XMLNamespace);
 
-        public static readonly XName BaseFileName = XName.Get("Inherit", XMLNamespace);
+        public static readonly XName BaseFileName = XName.Get("BaseFile", XMLNamespace);
 
         public static readonly XName OutputXmlFileTagName = XName.Get("OutputXmlFile", XMLNamespace);
 
@@ -21,10 +21,8 @@ internal static class Constants
     {
         public static readonly XName TypeAttributeName = XName.Get("Type", XMLNamespace);
 
-        public static readonly XName CustomParserAttributeName = XName.Get("CustomParser", XMLNamespace);
-
         public static readonly XName ListAttributeName = XName.Get("List", XMLNamespace);
 
-        public static readonly XName ListMergeStrategyName = XName.Get("ListMergeStrategy", XMLNamespace);
+        public static readonly XName ListMergeStrategyName = XName.Get("ListMerge", XMLNamespace);
     }
 }

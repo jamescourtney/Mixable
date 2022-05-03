@@ -8,11 +8,6 @@ internal class DerivedSchemaAttributeValidator : IAttributeValidator
     {
         MetadataAttributes attributes = MetadataAttributes.Extract(element);
 
-        if (attributes.CustomParser is not null)
-        {
-            throw new ConfiguratorDotNetException("Derived schemas may not have a Custom Parser defined.");
-        }
-
         if (attributes.List is not null)
         {
             throw new ConfiguratorDotNetException("Derived schemas may not have the List attribute defined.");

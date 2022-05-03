@@ -4,8 +4,6 @@ internal record struct MetadataAttributes
 {
     public string? TypeName { get; init; }
 
-    public string? CustomParser { get; init; }
-
     public ListMergePolicy? ListMergePolicy { get; init; }
 
     public bool? List { get; init; }
@@ -15,8 +13,6 @@ internal record struct MetadataAttributes
         return new MetadataAttributes
         {
             TypeName = element.Attribute(Constants.Structure.TypeAttributeName)?.Value,
-
-            CustomParser = element.Attribute(Constants.Structure.CustomParserAttributeName)?.Value,
 
             List = element.Attribute(Constants.Structure.ListAttributeName)?.Value?.ToLowerInvariant() switch
             {

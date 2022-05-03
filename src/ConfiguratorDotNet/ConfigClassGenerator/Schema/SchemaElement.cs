@@ -21,6 +21,8 @@ internal abstract class SchemaElement
 
     public virtual IEnumerable<SchemaElement> Children => Array.Empty<SchemaElement>();
 
+    public abstract void MergeWith(XElement element, IAttributeValidator validator);
+
     public abstract void Validate();
 
     public static bool operator ==(SchemaElement? a, SchemaElement? b)
