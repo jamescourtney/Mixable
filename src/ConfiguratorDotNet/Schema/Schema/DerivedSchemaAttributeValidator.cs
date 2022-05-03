@@ -1,4 +1,4 @@
-﻿namespace ConfiguratorDotNet.Generator;
+﻿namespace ConfiguratorDotNet.Schema;
 
 internal class DerivedSchemaAttributeValidator : IAttributeValidator
 {

@@ -1,4 +1,4 @@
-using ConfiguratorDotNet.Generator;
+using ConfiguratorDotNet.Schema;
 using System.Xml.Linq;
 using Xunit;
 

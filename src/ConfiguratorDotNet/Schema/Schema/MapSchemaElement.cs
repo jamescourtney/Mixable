@@ -1,4 +1,4 @@
-﻿namespace ConfiguratorDotNet.Generator;
+﻿namespace ConfiguratorDotNet.Schema;
 
 internal class MapSchemaElement : SchemaElement
 {
@@ -32,7 +32,7 @@ internal class MapSchemaElement : SchemaElement
             XName key = kvp.Key;
             SchemaElement value = kvp.Value;
 
-            if (!map.children.TryGetValue(key, out SchemaElement otherValue))
+            if (!map.children.TryGetValue(key, out SchemaElement? otherValue))
             {
                 return false;
             }

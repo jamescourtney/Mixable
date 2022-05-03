@@ -1,9 +1,9 @@
 ﻿using System.Linq;
 using System.Text;
 
-namespace ConfiguratorDotNet.Generator;
+namespace ConfiguratorDotNet.Schema;
 
-internal static class Extension
+internal static class Extensions
 {
     public static IEnumerable<XElement> GetChildren(this XElement element)
     {

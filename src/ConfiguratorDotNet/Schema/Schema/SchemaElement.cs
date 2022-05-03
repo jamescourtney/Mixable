@@ -1,4 +1,4 @@
-﻿namespace ConfiguratorDotNet.Generator;
+﻿namespace ConfiguratorDotNet.Schema;
 
 internal abstract class SchemaElement
 {
@@ -54,7 +54,7 @@ internal abstract class SchemaElement
         return !(a == b);
     }
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         if (obj is not SchemaElement otherSchema)
         {

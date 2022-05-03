@@ -1,10 +1,15 @@
-﻿namespace ConfiguratorDotNet.Generator;
+﻿namespace ConfiguratorDotNet.Schema;
 
 internal static class SchemaParser
 {
     internal static SchemaElement Parse(XDocument document)
     {
-        XmlMetadata data = new XmlMetadata(document);
+        if (document.Root is null)
+        {
+            throw new System.IO.InvalidDataException("XML document did not have a root element.");
+        }
+
+        XmlMetadata data = new XmlMetadata(document.Root);
 
         IAttributeValidator validator = new BaseSchemaAttributeValidator();
         if (string.IsNullOrEmpty(data.BaseFileName))
@@ -38,8 +43,7 @@ internal static class SchemaParser
 
             if (isList)
             {
-                TryCreateListSchemaElement(xElement, parent, stack, validator, out ListSchemaElement? listElement);
-                return listElement;
+                return CreateListSchemaElement(xElement, parent, stack, validator);
             }
             else
             {
@@ -66,12 +70,11 @@ internal static class SchemaParser
         }
     }
 
-    internal static bool TryCreateListSchemaElement(
+    internal static ListSchemaElement CreateListSchemaElement(
         XElement xElement,
         SchemaElement? parent,
         TypeNameStack stack,
-        IAttributeValidator validator,
-        [NotNullWhen(true)] out ListSchemaElement? element)
+        IAttributeValidator validator)
     {
         List<XElement> children = xElement.GetFilteredChildren().ToList();
         int distinctChildTagNames = children.Select(x => x.Name).Distinct().Count();
@@ -88,12 +91,11 @@ internal static class SchemaParser
         {
             if (!listElement.MatchesSchema(xElement, validator, out string errorXPath, out string error))
             {
-                throw new ConfiguratorDotNetException($"List itemp child does not match template. Error = {error}, Path = {errorXPath}");
+                throw new ConfiguratorDotNetException($"List item child does not match template. Error = {error}, Path = {errorXPath}");
             }
         }
 
-        element =  listElement;
-        return true;
+        return listElement;
     }
 
     internal static ScalarSchemaElement CreateScalarElement(
