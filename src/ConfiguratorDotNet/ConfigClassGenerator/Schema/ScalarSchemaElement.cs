@@ -47,7 +47,7 @@ internal class ScalarSchemaElement : SchemaElement
 
         if (!this.scalarType.Parser.CanParse(element.Value))
         {
-            mismatchPath = this.XPath;
+            mismatchPath = this.xElement.GetDocumentPath();
             error = $"Failed to parse '{element.Value}' as a type of '{this.TypeName}'.";
             return false;
         }

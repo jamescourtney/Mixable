@@ -30,8 +30,8 @@ internal class ListSchemaElement : SchemaElement
         {
             if (child.Name != this.template.xElement.Name)
             {
-                path = this.XPath;
-                error = $"Expected tag name: '{this.template.xElement.Name}'. Got: '{element.Name}'.";
+                path = child.GetDocumentPath();
+                error = $"Expected tag name: '{this.template.xElement.Name}'. Got: '{child.Name}'.";
                 return false;
             }
 

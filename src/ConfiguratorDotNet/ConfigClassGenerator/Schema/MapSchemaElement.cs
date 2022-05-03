@@ -76,7 +76,7 @@ internal class MapSchemaElement : SchemaElement
             if (!this.children.TryGetValue(kvp.Key, out SchemaElement? value))
             {
                 error = "Merged file contains key not present in base file. Merging may not add new keys.";
-                mismatchPath = element.GetDocumentPath();
+                mismatchPath = kvp.Value.GetDocumentPath();
                 return false;
             }
 

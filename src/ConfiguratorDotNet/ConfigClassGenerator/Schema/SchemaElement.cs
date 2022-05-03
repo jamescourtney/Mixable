@@ -15,7 +15,7 @@ internal abstract class SchemaElement
     /// </summary>
     public string TypeName { get; set; } = string.Empty;
 
-    public string XPath => $"{this.Parent?.XPath}/{this.xElement.Name}";
+    public string XPath => this.xElement.GetDocumentPath();
 
     public SchemaElement? Parent { get; }
 
@@ -67,4 +67,9 @@ internal abstract class SchemaElement
     public abstract bool Equals(SchemaElement? other);
 
     public override abstract int GetHashCode();
+
+    public string ToXml()
+    {
+        return this.xElement.ToString();
+    }
 }
