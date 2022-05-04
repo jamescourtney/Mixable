@@ -12,6 +12,13 @@ public class MapSchemaElement : SchemaElement
     {
     }
 
+    public IEnumerable<KeyValuePair<XName, SchemaElement>> Children => this.children;
+
+    public override T Accept<T>(ISchemaVisitor<T> visitor)
+    {
+        return visitor.Accept(this);
+    }
+
     public void AddChild(string tagName, SchemaElement child)
     {
         this.children.Add(tagName, child);

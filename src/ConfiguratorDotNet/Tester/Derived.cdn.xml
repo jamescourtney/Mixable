@@ -1,0 +1,18 @@
+﻿<Configuration xmlns:cdn="http://configurator.net">
+    <cdn:Metadata>
+        <cdn:BaseFile>Base.cdn.xml</cdn:BaseFile>
+        <cdn:OutputXmlFile>derived.xml</cdn:OutputXmlFile>
+    </cdn:Metadata>
+
+    <Mapping>
+        <A>10</A>
+    </Mapping>
+    <List>
+        <Item>4</Item>
+    </List>
+    <FancyList cdn:ListMerge="Replace">
+        <Item>
+            <Value>12</Value>
+        </Item>
+    </FancyList>
+</Configuration>

@@ -16,6 +16,11 @@ public class ScalarSchemaElement : SchemaElement
 
     public ScalarType ScalarType { get; }
 
+    public override T Accept<T>(ISchemaVisitor<T> visitor)
+    {
+        return visitor.Accept(this);
+    }
+
     public override bool Equals(SchemaElement? other)
     {
         if (other is not ScalarSchemaElement scalar)

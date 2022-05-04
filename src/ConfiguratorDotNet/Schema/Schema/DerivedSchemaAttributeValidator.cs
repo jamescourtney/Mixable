@@ -1,6 +1,6 @@
 ﻿namespace ConfiguratorDotNet.Schema;
 
-internal class DerivedSchemaAttributeValidator : IAttributeValidator
+public class DerivedSchemaAttributeValidator : IAttributeValidator
 {
     public bool TryValidate(XElement element, out string path, out string error, out MetadataAttributes attrs)
     {

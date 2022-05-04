@@ -3,7 +3,7 @@ using System.Text;
 
 namespace ConfiguratorDotNet.Schema;
 
-internal static class Extensions
+public static class Extensions
 {
     public static IEnumerable<XElement> GetChildren(this XElement element)
     {

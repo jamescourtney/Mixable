@@ -3,20 +3,20 @@
 /// <summary>
 /// Visits elements of a schema.
 /// </summary>
-public interface ISchemaVisitor
+public interface ISchemaVisitor<T>
 {
     /// <summary>
     /// Visits a list element.
     /// </summary>
-    void Accept(ListSchemaElement list);
+    T Accept(ListSchemaElement list);
 
     /// <summary>
     /// Visits a map element.
     /// </summary>
-    void Accept(MapSchemaElement map);
+    T Accept(MapSchemaElement map);
 
     /// <summary>
     /// Visits a scalar element.
     /// </summary>
-    void Accept(ScalarSchemaElement scalar);
+    T Accept(ScalarSchemaElement scalar);
 }

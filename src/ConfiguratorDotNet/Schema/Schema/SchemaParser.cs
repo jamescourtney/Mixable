@@ -1,15 +1,15 @@
 ﻿namespace ConfiguratorDotNet.Schema;
 
-internal static class SchemaParser
+public static class SchemaParser
 {
-    internal static SchemaElement Parse(XDocument document)
+    public static SchemaElement Parse(XDocument document)
     {
         if (document.Root is null)
         {
             throw new System.IO.InvalidDataException("XML document did not have a root element.");
         }
 
-        XmlMetadata data = new XmlMetadata(document.Root);
+        DocumentMetadata data = new DocumentMetadata(document.Root);
         if (!data.ValidateAsTemplateFile(out string? error))
         {
             throw new ConfiguratorDotNetException(error);

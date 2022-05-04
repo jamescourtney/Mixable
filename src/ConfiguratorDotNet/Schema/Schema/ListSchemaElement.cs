@@ -15,6 +15,11 @@ public class ListSchemaElement : SchemaElement
 
     public SchemaElement Template { get; }
 
+    public override T Accept<T>(ISchemaVisitor<T> visitor)
+    {
+        return visitor.Accept(this);
+    }
+
     public override bool MatchesSchema(
         XElement element,
         IAttributeValidator validator,

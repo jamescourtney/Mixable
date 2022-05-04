@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Configuration xmlns:cdn="http://configurator.net">
+  <cdn:Metadata>
+    <cdn:NamespaceName>Foo.Bar.Baz</cdn:NamespaceName>
+    <cdn:GenerateCSharp>true</cdn:GenerateCSharp>
+  </cdn:Metadata>
+  <Mapping>
+    <A>10</A>
+    <B>string</B>
+    <C>
+      <C>2.0</C>
+    </C>
+  </Mapping>
+  <List>
+    <Item>1</Item>
+    <Item>2</Item>
+    <Item>3</Item>
+    <Item>4</Item>
+  </List>
+  <FancyList>
+    <Item>
+      <Value>12</Value>
+    </Item>
+  </FancyList>
+</Configuration>

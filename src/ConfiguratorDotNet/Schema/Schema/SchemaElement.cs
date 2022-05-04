@@ -76,4 +76,6 @@ public abstract class SchemaElement
     public abstract bool Equals(SchemaElement? other);
 
     public override abstract int GetHashCode();
+
+    public abstract T Accept<T>(ISchemaVisitor<T> visitor);
 }

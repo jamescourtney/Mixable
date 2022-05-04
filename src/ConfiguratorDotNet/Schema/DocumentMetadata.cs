@@ -1,13 +1,16 @@
 ﻿namespace ConfiguratorDotNet.Schema;
 
-internal class XmlMetadata
+/// <summary>
+/// Describes metadata about a document and how CDN should process it.
+/// </summary>
+public class DocumentMetadata
 {
     private string? namespaceName;
     private string? baseFileName;
     private string? outputXmlName;
     private bool? generateCSharp;
 
-    public XmlMetadata(XElement root)
+    public DocumentMetadata(XElement root)
     {
         XElement? metadataElement = root
             .GetChildren()
@@ -33,6 +36,34 @@ internal class XmlMetadata
                 _ => null,
             };
         }
+    }
+
+    public static bool TryCreateFromXml(string xml, [NotNullWhen(true)] out DocumentMetadata? metadata)
+    {
+        XDocument document;
+        try
+        {
+            document = XDocument.Parse(xml);
+        }
+        catch
+        {
+            metadata = null;
+            return false;
+        }
+
+        XElement? metadataElement = document
+            .Root?
+            .GetChildren()
+            .SingleOrDefault(x => x.Name == Constants.Metadata.RootTagName);
+
+        if (metadataElement is null)
+        {
+            metadata = null;
+            return false;
+        }
+
+        metadata = new DocumentMetadata(document.Root!);
+        return true;
     }
 
     public bool ValidateAsTemplateFile([NotNullWhen(false)] out string? error)
