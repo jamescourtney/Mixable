@@ -14,5 +14,8 @@
         <Item>
             <Value>12</Value>
         </Item>
+        <Item>
+            <Value>13</Value>
+        </Item>
     </FancyList>
 </Configuration>
