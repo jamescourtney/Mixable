@@ -10,14 +10,14 @@ internal class DerivedSchemaAttributeValidator : IAttributeValidator
         if (attrs.List is not null)
         {
             errorCollector.Error(
-               $"Derived schemas may not have the {Constants.Structure.ListAttributeName.LocalName} attribute defined.",
+               $"Derived schemas may not have the {Constants.Attributes.List.LocalName} attribute defined.",
                path);
         }
 
         if (attrs.TypeName is not null)
         {
             errorCollector.Error(
-                $"Derived schemas may not have the {Constants.Structure.TypeAttributeName.LocalName} attribute defined.",
+                $"Derived schemas may not have the {Constants.Attributes.Type.LocalName} attribute defined.",
                 path);
         }
 

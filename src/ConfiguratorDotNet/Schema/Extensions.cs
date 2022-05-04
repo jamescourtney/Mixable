@@ -5,6 +5,11 @@ namespace ConfiguratorDotNet.Schema;
 
 public static class Extensions
 {
+    public static IEnumerable<XElement> GetChildren(this XElement element, XName tagFilter)
+    {
+        return element.Elements().OfType<XElement>().Where(x => x.Name == tagFilter);
+    }
+
     public static IEnumerable<XElement> GetChildren(this XElement element)
     {
         return element.Elements().OfType<XElement>();

@@ -15,7 +15,6 @@
         <Compile Include="..\Schema\Schema\*.cs">
             <LinkBase>Schema\Schema</LinkBase>
         </Compile>
-        <Compile Include="..\Runtime\ConfiguratorDotNetException.cs" />
     </ItemGroup>
 
     <ItemGroup>

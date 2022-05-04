@@ -3,7 +3,7 @@
         <cdn:NamespaceName>Foo.Bar.Baz.Bat</cdn:NamespaceName>
         <cdn:GenerateCSharp>true</cdn:GenerateCSharp>
     </cdn:Metadata>
-
+    
     <Mapping>
         <A>4</A>
         <B>string</B>
@@ -17,6 +17,13 @@
         <Item>3</Item>
     </List>
     <FancyList>
+        <cdn:ItemTemplate>
+            <Item>
+                <Value cdn:Type="int" />
+                <OtherValue cdn:Type="int" cdn:Optional="true" />
+            </Item>
+        </cdn:ItemTemplate>
+        
         <Item>
             <Value>1</Value>
         </Item>

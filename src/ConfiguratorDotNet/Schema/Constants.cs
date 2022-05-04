@@ -4,7 +4,7 @@ internal static class Constants
 {
     public const string XMLNamespace = "http://configurator.net";
 
-    public static class Metadata
+    public static class Tags
     {
         public static readonly XName RootTagName = XName.Get("Metadata", XMLNamespace);
 
@@ -15,16 +15,18 @@ internal static class Constants
         public static readonly XName GenerateCSharptagName = XName.Get("GenerateCSharp", XMLNamespace);
 
         public static readonly XName NamespaceTagName = XName.Get("NamespaceName", XMLNamespace);
+
+        public static readonly XName ListTemplateTagName = XName.Get("ListItemTemplate", XMLNamespace);
     }
 
-    public static class Structure
+    public static class Attributes
     {
-        public static readonly XName ListTemplateAttributeName = XName.Get("ListTemplate", XMLNamespace);
+        public static readonly XName Optional = XName.Get("Optional", XMLNamespace);
 
-        public static readonly XName TypeAttributeName = XName.Get("Type", XMLNamespace);
+        public static readonly XName Type = XName.Get("Type", XMLNamespace);
 
-        public static readonly XName ListAttributeName = XName.Get("List", XMLNamespace);
+        public static readonly XName List = XName.Get("List", XMLNamespace);
 
-        public static readonly XName ListMergeStrategyName = XName.Get("ListMerge", XMLNamespace);
+        public static readonly XName ListMerge = XName.Get("ListMerge", XMLNamespace);
     }
 }

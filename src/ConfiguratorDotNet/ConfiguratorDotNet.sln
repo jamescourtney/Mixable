@@ -3,15 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31912.275
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Runtime", "Runtime\Runtime.csproj", "{BDF2E2CB-BB86-4A55-83A9-2FAF9BE8B66C}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnitTests", "UnitTests\UnitTests.csproj", "{F1D1C4E3-70A7-4114-85B5-DAD4928F2452}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Schema", "Schema\Schema.csproj", "{ED8A6E00-2EB3-49C3-B550-3D75E15620BF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SourceGenerator", "SourceGenerator\SourceGenerator.csproj", "{C19061C6-9BCA-479B-9757-1D7601049D3C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SourceGenerator", "SourceGenerator\SourceGenerator.csproj", "{C19061C6-9BCA-479B-9757-1D7601049D3C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tester", "Tester\Tester.csproj", "{57EADF84-5436-40A0-95E1-67A9A0D9341E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tester", "Tester\Tester.csproj", "{57EADF84-5436-40A0-95E1-67A9A0D9341E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,10 +17,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{BDF2E2CB-BB86-4A55-83A9-2FAF9BE8B66C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BDF2E2CB-BB86-4A55-83A9-2FAF9BE8B66C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BDF2E2CB-BB86-4A55-83A9-2FAF9BE8B66C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BDF2E2CB-BB86-4A55-83A9-2FAF9BE8B66C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F1D1C4E3-70A7-4114-85B5-DAD4928F2452}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F1D1C4E3-70A7-4114-85B5-DAD4928F2452}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F1D1C4E3-70A7-4114-85B5-DAD4928F2452}.Release|Any CPU.ActiveCfg = Release|Any CPU

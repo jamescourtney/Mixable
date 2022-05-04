@@ -12,16 +12,16 @@ public record struct MetadataAttributes
     {
         return new MetadataAttributes
         {
-            TypeName = element.Attribute(Constants.Structure.TypeAttributeName)?.Value,
+            TypeName = element.Attribute(Constants.Attributes.Type)?.Value,
 
-            List = element.Attribute(Constants.Structure.ListAttributeName)?.Value?.ToLowerInvariant() switch
+            List = element.Attribute(Constants.Attributes.List)?.Value?.ToLowerInvariant() switch
             {
                 "true" => true,
                 "false" => false,
                 _ => null,
             },
 
-            ListMergePolicy = element.Attribute(Constants.Structure.ListMergeStrategyName)?.Value?.ToLowerInvariant() switch
+            ListMergePolicy = element.Attribute(Constants.Attributes.ListMerge)?.Value?.ToLowerInvariant() switch
             {
                 string s => (ListMergePolicy)Enum.Parse(typeof(ListMergePolicy), s, ignoreCase: true),
                 _ => null,

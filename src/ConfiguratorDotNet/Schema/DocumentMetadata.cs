@@ -10,24 +10,15 @@ public class DocumentMetadata
     private string? outputXmlName;
     private bool? generateCSharp;
 
-    public DocumentMetadata(XElement root)
+    private DocumentMetadata(XElement metadataElement)
     {
-        XElement? metadataElement = root
-            .GetChildren()
-            .SingleOrDefault(x => x.Name == Constants.Metadata.RootTagName);
-
-        if (metadataElement is null)
-        {
-            throw new ConfiguratorDotNetException("Missing <Metadata> element.");
-        }
-
         Dictionary<XName, string> children = metadataElement.GetChildren().ToDictionary(x => x.Name, x => x.Value);
 
-        children.TryGetValue(Constants.Metadata.NamespaceTagName, out this.namespaceName);
-        children.TryGetValue(Constants.Metadata.OutputXmlFileTagName, out this.outputXmlName);
-        children.TryGetValue(Constants.Metadata.BaseFileName, out this.baseFileName);
+        children.TryGetValue(Constants.Tags.NamespaceTagName, out this.namespaceName);
+        children.TryGetValue(Constants.Tags.OutputXmlFileTagName, out this.outputXmlName);
+        children.TryGetValue(Constants.Tags.BaseFileName, out this.baseFileName);
 
-        if (children.TryGetValue(Constants.Metadata.GenerateCSharptagName, out string? generateCSharp))
+        if (children.TryGetValue(Constants.Tags.GenerateCSharptagName, out string? generateCSharp))
         {
             this.generateCSharp = generateCSharp.Trim().ToLowerInvariant() switch
             {
@@ -55,10 +46,18 @@ public class DocumentMetadata
             return false;
         }
 
+        return TryCreateFromXDocument(document, errorCollector, out metadata);
+    }
+
+    public static bool TryCreateFromXDocument(
+        XDocument document,
+        IErrorCollector errorCollector,
+        [NotNullWhen(true)] out DocumentMetadata? metadata)
+    {
         XElement? metadataElement = document
             .Root?
             .GetChildren()
-            .SingleOrDefault(x => x.Name == Constants.Metadata.RootTagName);
+            .SingleOrDefault(x => x.Name == Constants.Tags.RootTagName);
 
         if (metadataElement is null)
         {
@@ -68,6 +67,8 @@ public class DocumentMetadata
         }
 
         metadata = new DocumentMetadata(document.Root!);
+        metadata.Validate(errorCollector);
+
         return true;
     }
 

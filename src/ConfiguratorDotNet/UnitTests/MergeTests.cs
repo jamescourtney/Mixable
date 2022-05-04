@@ -27,6 +27,9 @@ public class MergeTests
         <Item>3</Item>
     </List>
     <FancyList>
+        <cdn:ListItemTemplate>
+            <Item><Value cdn:Type=""double"">0</Value></Item>
+        </cdn:ListItemTemplate>
         <Item>
             <Value>1</Value>
         </Item>

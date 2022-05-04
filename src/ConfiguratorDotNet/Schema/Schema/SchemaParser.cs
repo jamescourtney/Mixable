@@ -18,8 +18,10 @@ public static class SchemaParser
             return false;
         }
 
-        DocumentMetadata data = new DocumentMetadata(document.Root);
-        data.Validate(errorCollector);
+        if (!DocumentMetadata.TryCreateFromXDocument(document, errorCollector, out _))
+        {
+            return false;
+        }
 
         element = Classify(null, document.Root, errorCollector);
         return true;
@@ -43,14 +45,10 @@ public static class SchemaParser
 
         int distinctChildTagNames = children.Select(x => x.Name).Distinct().Count();
 
-        // If the user said it's a list or it just looks like a list.
-        bool isList = attrs.List ?? (distinctChildTagNames == 1 && children.Count > 1);
+        bool hasListTemplateChild = xElement.GetChildren().Any(x => x.Name == Constants.Tags.ListTemplateTagName);
 
-        if (children.Count == 1 && 
-            children[0].Attribute(Constants.Structure.ListTemplateAttributeName) != null)
-        {
-            isList = true;
-        }
+        bool isList = attrs.List
+            ?? (hasListTemplateChild || (distinctChildTagNames == 1 && children.Count > 1));
 
         if (isList)
         {
@@ -93,7 +91,35 @@ public static class SchemaParser
                 xElement.GetDocumentPath());
         }
 
-        SchemaElement template = Classify(parent, children[0], errorCollector);
+        XElement templateElement = children[0];
+
+        // See if there is a template node, and use it.
+        {
+            List<XElement> templateNodes = xElement.GetChildren(Constants.Tags.ListTemplateTagName).ToList();
+            if (templateNodes.Count > 0)
+            {
+                if (templateNodes.Count != 1)
+                {
+                    errorCollector.Error("Lists may only have a single template node.", templateNodes[0].GetDocumentPath());
+                }
+
+                List<XElement> templateChildren = templateNodes[0].GetFilteredChildren().ToList();
+                if (templateChildren.Count != 1)
+                {
+                    errorCollector.Error("List templates must have a single child.", templateNodes[0].GetDocumentPath());
+                }
+
+                templateElement = templateChildren[0];
+                
+                foreach (var node in templateNodes)
+                {
+                    node.Remove();
+                }
+            }
+        }
+
+
+        SchemaElement template = Classify(parent, templateElement, errorCollector);
         ListSchemaElement listElement = new(parent, xElement, template);
 
         if (!listElement.MatchesSchema(xElement, AttributeValidator, errorCollector))
