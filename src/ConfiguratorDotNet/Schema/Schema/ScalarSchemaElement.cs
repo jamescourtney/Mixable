@@ -31,38 +31,41 @@ public class ScalarSchemaElement : SchemaElement
         return scalar.ScalarType.TypeName == this.ScalarType.TypeName;
     }
 
-    public override bool MatchesSchema(
+    protected internal override bool MatchesSchema(
         XElement element,
         IAttributeValidator validator,
-        out string mismatchPath,
-        out string error)
+        IErrorCollector errorCollector)
     {
-        if (!validator.TryValidate(element, out mismatchPath, out error, out _))
-        {
-            return false;
-        }
+        bool returnValue = true;
+
+        validator.Validate(element, errorCollector);
 
         List<XElement> children = element.GetChildren().ToList();
         if (children.Count > 0)
         {
-            mismatchPath = this.XmlElement.GetDocumentPath();
-            error = "Override schemas may not introduce children to scalar nodes.";
-            return false;
+            errorCollector.Error(
+                "Override schemas may not introduce children to scalar nodes.",
+                this.XmlElement.GetDocumentPath());
+
+            returnValue = false;
         }
 
         if (!this.ScalarType.Parser.CanParse(element.Value))
         {
-            mismatchPath = this.XmlElement.GetDocumentPath();
-            error = $"Failed to parse '{element.Value}' as a type of '{this.ScalarType.TypeName}'.";
-            return false;
+            errorCollector.Error(
+                $"Failed to parse '{element.Value}' as a type of '{this.ScalarType.TypeName}'.",
+                this.XmlElement.GetDocumentPath());
+
+            returnValue = false;
         }
 
-        mismatchPath = string.Empty;
-        error = string.Empty;
-        return true;
+        return returnValue;
     }
 
-    public override void MergeWith(XElement element, IAttributeValidator validator)
+    protected internal override void MergeWithProtected(
+        XElement element,
+        IAttributeValidator validator,
+        IErrorCollector collector)
     {
         this.XmlElement.Value = element.Value;
     }

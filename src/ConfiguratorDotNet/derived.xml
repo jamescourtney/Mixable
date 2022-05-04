@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Configuration xmlns:cdn="http://configurator.net">
   <cdn:Metadata>
-    <cdn:NamespaceName>Foo.Bar.Baz.Bat</cdn:NamespaceName>
+    <cdn:NamespaceName>Foo.Bar.Baz</cdn:NamespaceName>
     <cdn:GenerateCSharp>true</cdn:GenerateCSharp>
   </cdn:Metadata>
   <Mapping>

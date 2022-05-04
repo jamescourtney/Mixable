@@ -10,11 +10,11 @@ namespace Tester
     {
         public static void Main(string[] args)
         {
-            XmlSerializer serializer = new XmlSerializer(typeof(Foo.Bar.Baz.Configuration));
+            XmlSerializer serializer = new XmlSerializer(typeof(Foo.Bar.Baz.Bat.Configuration));
 
             using (var sw = new StringWriter())
             {
-                var c = (Foo.Bar.Baz.Configuration)serializer.Deserialize(File.OpenRead("derived.xml"));
+                var c = (Foo.Bar.Baz.Bat.Configuration)serializer.Deserialize(File.OpenRead("derived.xml"));
 
                 serializer.Serialize(sw, c);
                 Console.WriteLine(sw.ToString());

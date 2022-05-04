@@ -20,51 +20,34 @@ public class ListSchemaElement : SchemaElement
         return visitor.Accept(this);
     }
 
-    public override bool MatchesSchema(
+    protected internal override bool MatchesSchema(
         XElement element,
         IAttributeValidator validator,
-        out string path,
-        out string error)
+        IErrorCollector errorCollector)
     {
-        if (!validator.TryValidate(element, out path, out error, out _))
-        {
-            return false;
-        }
+        bool returnValue = true;
+        validator.Validate(element, errorCollector);
 
         foreach (XElement child in element.GetFilteredChildren())
         {
             if (child.Name != this.Template.XmlElement.Name)
             {
-                path = child.GetDocumentPath();
-                error = $"Expected tag name: '{this.Template.XmlElement.Name}'. Got: '{child.Name}'.";
-                return false;
+                errorCollector.Error($"Expected tag name: '{this.Template.XmlElement.Name}'. Got: '{child.Name}'.", child.GetDocumentPath());
+                returnValue = false;
             }
 
-            if (!this.Template.MatchesSchema(child, validator, out path, out error))
-            {
-                return false;
-            }
+            returnValue &= this.Template.MatchesSchema(child, validator, errorCollector);
         }
 
-        path = string.Empty;
-        error = string.Empty;
-        return true;
+        return returnValue;
     }
 
-    public override void MergeWith(XElement element, IAttributeValidator validator)
+    protected internal override void MergeWithProtected(
+        XElement element,
+        IAttributeValidator validator,
+        IErrorCollector collector)
     {
-        MetadataAttributes attrs = validator.Validate(element);
-
-        if (!element.GetFilteredChildren().Any())
-        {
-            // no elements.
-            if (attrs.ListMergePolicy == ListMergePolicy.Replace)
-            {
-                this.XmlElement.RemoveNodes();
-            }
-
-            return;
-        }
+        MetadataAttributes attrs = validator.Validate(element, collector);
 
         if (attrs.ListMergePolicy == ListMergePolicy.Replace)
         {

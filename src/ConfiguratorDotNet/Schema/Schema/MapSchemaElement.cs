@@ -67,47 +67,46 @@ public class MapSchemaElement : SchemaElement
         return hash;
     }
 
-    public override bool MatchesSchema(
+    protected internal override bool MatchesSchema(
         XElement element,
         IAttributeValidator validator,
-        out string mismatchPath,
-        out string error)
+        IErrorCollector errorCollector)
     {
-        if (!validator.TryValidate(element, out mismatchPath, out error, out _))
-        {
-            return false;
-        }
+        bool returnValue = true;
+        validator.Validate(element, errorCollector);
 
         Dictionary<XName, XElement> map = element.GetFilteredChildren().ToDictionary(x => x.Name, x => x);
 
         foreach (var kvp in map)
         {
-            if (!this.children.TryGetValue(kvp.Key, out SchemaElement? value))
+            if (this.children.TryGetValue(kvp.Key, out SchemaElement? value))
             {
-                error = "Merged file contains key not present in base file. Merging may not add new keys.";
-                mismatchPath = kvp.Value.GetDocumentPath();
-                return false;
+                returnValue &= value.MatchesSchema(kvp.Value, validator, errorCollector);
             }
-
-            if (!value.MatchesSchema(kvp.Value, validator, out mismatchPath, out error))
+            else
             {
-                return false;
+                errorCollector.Error(
+                    "Merged file contains key not present in base file. Merging may not add new keys.",
+                    kvp.Value.GetDocumentPath());
+
+                returnValue = false;
             }
         }
 
-        mismatchPath = string.Empty;
-        error = string.Empty;
-        return true;
+        return returnValue;
     }
 
-    public override void MergeWith(XElement element, IAttributeValidator validator)
+    protected internal override void MergeWithProtected(
+        XElement element,
+        IAttributeValidator validator,
+        IErrorCollector collector)
     {
         Dictionary<XName, XElement> map = element.GetFilteredChildren().ToDictionary(x => x.Name, x => x);
 
         foreach (var kvp in map)
         {
             SchemaElement value = this.children[kvp.Key];
-            value.MergeWith(kvp.Value, validator);
+            value.MergeWithProtected(kvp.Value, validator, collector);
         }
     }
 }

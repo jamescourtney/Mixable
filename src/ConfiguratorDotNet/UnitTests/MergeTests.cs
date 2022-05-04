@@ -1,6 +1,7 @@
 using ConfiguratorDotNet.Schema;
 using System.Xml.Linq;
 using Xunit;
+using System.Collections.Generic;
 
 namespace UnitTests;
 
@@ -168,27 +169,55 @@ public class MergeTests
             "/Configuration/SomethingElse");
     }
 
-    private static void MergeInvalidSchema(string overrideXml, string expectedError, string expectedPath)
+    private static void MergeInvalidSchema(
+        string overrideXml,
+        string expectedError,
+        string expectedPath)
     {
-        var result = SchemaParser.Parse(XDocument.Parse(BaseXml));
+        TestErrorCollector tec = new();
+        Assert.True(SchemaParser.TryParse(XDocument.Parse(BaseXml), tec, out var result));
 
         XElement @override = XDocument.Parse(overrideXml).Root!;
+        Assert.False(result.MergeWith(@override, tec));
 
-        Assert.False(result.MatchesSchema(@override, new DerivedSchemaAttributeValidator(), out string path, out string err));
-        Assert.Equal(expectedPath, path);
-        Assert.Equal(expectedError, err);
+        Assert.Contains(tec.Errors, x => x.path == expectedPath && x.msg == expectedError);
     }
 
     private static void Merge(string overrideXml, string expectedXml)
     {
-        var result = SchemaParser.Parse(XDocument.Parse(BaseXml));
+        var tec = new TestErrorCollector();
+        Assert.True(SchemaParser.TryParse(XDocument.Parse(BaseXml), tec, out var result));
 
         XElement @override = XDocument.Parse(overrideXml).Root!;
-        Assert.True(result.MatchesSchema(@override, new DerivedSchemaAttributeValidator(), out _, out _));
-        result.MergeWith(@override, new DerivedSchemaAttributeValidator());
+        result!.MergeWith(@override, tec);
 
         string merged = result.XmlElement.ToString();
 
         Assert.Equal(expectedXml, merged);
+        Assert.False(tec.HasErrors);
+    }
+
+    private class TestErrorCollector : IErrorCollector
+    {
+        public List<(string msg, string? path)> Errors = new();
+        public List<(string msg, string? path)> Warnings = new();
+        public List<(string msg, string? path)> Infos = new();
+
+        public bool HasErrors => this.Errors.Count > 0;
+
+        public void Error(string message, string? path = null)
+        {
+            this.Errors.Add((message, path));
+        }
+
+        public void Info(string message, string? path = null)
+        {
+            this.Infos.Add((message, path));
+        }
+
+        public void Warning(string message, string? path = null)
+        {
+            this.Warnings.Add((message, path));
+        }
     }
 }

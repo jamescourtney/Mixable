@@ -38,7 +38,10 @@ public class DocumentMetadata
         }
     }
 
-    public static bool TryCreateFromXml(string xml, [NotNullWhen(true)] out DocumentMetadata? metadata)
+    public static bool TryCreateFromXml(
+        string xml,
+        IErrorCollector errorCollector,
+        [NotNullWhen(true)] out DocumentMetadata? metadata)
     {
         XDocument document;
         try
@@ -47,6 +50,7 @@ public class DocumentMetadata
         }
         catch
         {
+            errorCollector.Error("Unable to parse XML document");
             metadata = null;
             return false;
         }
@@ -58,6 +62,7 @@ public class DocumentMetadata
 
         if (metadataElement is null)
         {
+            errorCollector.Error("Unable to find CDN metadata node.");
             metadata = null;
             return false;
         }
@@ -66,40 +71,32 @@ public class DocumentMetadata
         return true;
     }
 
-    public bool ValidateAsTemplateFile([NotNullWhen(false)] out string? error)
+    public void Validate(IErrorCollector errorCollector)
     {
-        if (string.IsNullOrEmpty(this.NamespaceName))
+        if (this.GenerateCSharp == true)
         {
-            error = "Template XML files must include a Namespace.";
-            return false;
-        }
+            if (string.IsNullOrEmpty(this.NamespaceName))
+            {
+                errorCollector.Warning("Namespace must be specified when 'GenerateCSharp' is true.");
+            }
 
-        if (!string.IsNullOrEmpty(this.BaseFileName))
+            if (!string.IsNullOrEmpty(this.BaseFileName))
+            {
+                errorCollector.Warning("BaseFileName should not be specified when GenerateCSharp is true.");
+            }
+        }
+        else
         {
-            error = "Template XML files may not include a base file name";
-            return false;
+            if (!string.IsNullOrEmpty(this.NamespaceName))
+            {
+                errorCollector.Warning("Namespace Name may not be specified when GenerateCSharp is false.");
+            }
+
+            if (string.IsNullOrEmpty(this.BaseFileName))
+            {
+                errorCollector.Warning("BaseFileName should be specified when GenerateCSharp is false.");
+            }
         }
-
-        error = null;
-        return true;
-    }
-
-    public bool ValidateAsOverrideFile([NotNullWhen(false)] out string? error)
-    {
-        if (!string.IsNullOrEmpty(this.NamespaceName))
-        {
-            error = "Override files may not specify a namespace name.";
-            return false;
-        }
-
-        if (string.IsNullOrEmpty(this.BaseFileName))
-        {
-            error = "Override files must include a base file name.";
-            return false;
-        }
-
-        error = null;
-        return true;
     }
 
     public string? NamespaceName => this.namespaceName;

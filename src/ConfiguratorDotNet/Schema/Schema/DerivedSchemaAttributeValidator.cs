@@ -1,25 +1,26 @@
 ﻿namespace ConfiguratorDotNet.Schema;
 
-public class DerivedSchemaAttributeValidator : IAttributeValidator
+internal class DerivedSchemaAttributeValidator : IAttributeValidator
 {
-    public bool TryValidate(XElement element, out string path, out string error, out MetadataAttributes attrs)
+    public MetadataAttributes Validate(XElement element, IErrorCollector errorCollector)
     {
-        attrs = MetadataAttributes.Extract(element);
-        path = element.GetDocumentPath();
+        var attrs = MetadataAttributes.Extract(element);
+        var path = element.GetDocumentPath();
 
         if (attrs.List is not null)
         {
-            error = $"Derived schemas may not have the {Constants.Structure.ListAttributeName.LocalName} attribute defined.";
-            return false;
+            errorCollector.Error(
+               $"Derived schemas may not have the {Constants.Structure.ListAttributeName.LocalName} attribute defined.",
+               path);
         }
 
         if (attrs.TypeName is not null)
         {
-            error = $"Derived schemas may not have the {Constants.Structure.TypeAttributeName.LocalName} attribute defined.";
-            return false;
+            errorCollector.Error(
+                $"Derived schemas may not have the {Constants.Structure.TypeAttributeName.LocalName} attribute defined.",
+                path);
         }
 
-        error = string.Empty;
-        return true;
+        return attrs;
     }
 }

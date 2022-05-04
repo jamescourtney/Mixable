@@ -1,20 +1,16 @@
 ﻿namespace ConfiguratorDotNet.Schema;
 
-public class BaseSchemaAttributeValidator : IAttributeValidator
+internal class BaseSchemaAttributeValidator : IAttributeValidator
 {
-    public bool TryValidate(XElement element, out string path, out string error, out MetadataAttributes attrs)
+    public MetadataAttributes Validate(XElement element, IErrorCollector errorCollector)
     {
-        attrs = MetadataAttributes.Extract(element);
+        var attrs = MetadataAttributes.Extract(element);
 
         if (attrs.ListMergePolicy is not null)
         {
-            error = "Base schemas may not have a merge policy defined.";
-            path = element.GetDocumentPath();
-            return false;
+            errorCollector.Error("Base schemas may not have a merge policy defined.", element.GetDocumentPath());
         }
 
-        error = string.Empty;
-        path = string.Empty;
-        return true;
+        return attrs;
     }
 }

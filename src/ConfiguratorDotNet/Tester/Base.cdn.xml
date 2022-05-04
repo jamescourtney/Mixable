@@ -1,6 +1,6 @@
 ﻿<Configuration xmlns:cdn="http://configurator.net">
     <cdn:Metadata>
-        <cdn:NamespaceName>Foo.Bar.Baz</cdn:NamespaceName>
+        <cdn:NamespaceName>Foo.Bar.Baz.Bat</cdn:NamespaceName>
         <cdn:GenerateCSharp>true</cdn:GenerateCSharp>
     </cdn:Metadata>
 

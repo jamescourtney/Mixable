@@ -1,11 +1,5 @@
 ﻿using ConfiguratorDotNet.Schema;
-using Microsoft.CodeAnalysis;
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Text;
-using System.Xml.Linq;
-using System.Xml.Serialization;
 
 namespace SourceGenerator;
 
@@ -63,7 +57,6 @@ public class SchemaVisitor : ISchemaVisitor<TypeContext>
             properties.AddRange(valueType.Attributes);
             properties.Add($"public {valueType.TypeName} {name} {{ get; set; }}");
         }
-
 
         this.StringBuilder.AppendLine($"public class {className}");
         this.StringBuilder.AppendLine("{");

@@ -23,22 +23,39 @@ public abstract class SchemaElement
     public XElement XmlElement { get; }
 
     /// <summary>
+    /// Merges the given element with the schema, assuming it passes validation.
+    /// </summary>
+    public bool MergeWith(XElement element, IErrorCollector? collector)
+    {
+        collector ??= new NoOpErrorCollector();
+
+        IAttributeValidator validator = new DerivedSchemaAttributeValidator();
+        if (!this.MatchesSchema(element, validator, collector))
+        {
+            return false;
+        }
+
+        this.MergeWithProtected(element, validator, collector);
+        return !collector.HasErrors;
+    }
+
+    /// <summary>
     /// Recursively merges the given element into this one. Assumes that 
     /// <see cref="MatchesSchema(XElement, IAttributeValidator, out string, out string)"/>
     /// has been invoked.
     /// </summary>
-    public abstract void MergeWith(
+    protected internal abstract void MergeWithProtected(
         XElement element,
-        IAttributeValidator validator);
+        IAttributeValidator validator,
+        IErrorCollector errorCollector);
 
     /// <summary>
     /// Recursively tests whether the given element matches the current schema.
     /// </summary>
-    public abstract bool MatchesSchema(
+    protected internal abstract bool MatchesSchema(
         XElement element,
         IAttributeValidator validator,
-        out string mismatchPath,
-        out string error);
+        IErrorCollector errorCollector);
 
     public static bool operator ==(SchemaElement? a, SchemaElement? b)
     {

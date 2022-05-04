@@ -2,33 +2,43 @@
 
 public static class SchemaParser
 {
-    public static SchemaElement Parse(XDocument document)
+    private static readonly BaseSchemaAttributeValidator AttributeValidator = new();
+
+    public static bool TryParse(
+        XDocument document,
+        IErrorCollector? errorCollector,
+        [NotNullWhen(true)] out SchemaElement? element)
     {
+        errorCollector ??= new NoOpErrorCollector();
+        element = null;
+
         if (document.Root is null)
         {
-            throw new System.IO.InvalidDataException("XML document did not have a root element.");
+            errorCollector.Error("XML Document did not have a root element.");
+            return false;
         }
 
         DocumentMetadata data = new DocumentMetadata(document.Root);
-        if (!data.ValidateAsTemplateFile(out string? error))
-        {
-            throw new ConfiguratorDotNetException(error);
-        }
+        data.Validate(errorCollector);
 
-        IAttributeValidator validator = new BaseSchemaAttributeValidator();
-        return Classify(null, document.Root, validator);
+        element = Classify(null, document.Root, errorCollector);
+        return true;
     }
 
-    internal static SchemaElement Classify(SchemaElement? parent, XElement xElement, IAttributeValidator validator)
+    private static SchemaElement Classify(
+        SchemaElement? parent,
+        XElement xElement,
+        IErrorCollector errorCollector)
     {
-        MetadataAttributes attrs = validator.Validate(xElement);
+        MetadataAttributes attrs = AttributeValidator.Validate(xElement, errorCollector);
+
         List<XElement> children = xElement
             .GetFilteredChildren()
             .ToList();
 
         if (children.Count == 0)
         {
-            return CreateScalarElement(attrs, xElement, parent, children);
+            return CreateScalarElement(attrs, xElement, parent, children, errorCollector);
         }
 
         int distinctChildTagNames = children.Select(x => x.Name).Distinct().Count();
@@ -38,14 +48,16 @@ public static class SchemaParser
 
         if (isList)
         {
-            return CreateListSchemaElement(xElement, parent, validator);
+            return CreateListSchemaElement(xElement, parent, errorCollector);
         }
         else
         {
             int maxChildTagCount = children.GroupBy(x => x.Name).Select(g => g.Count()).Max();
             if (maxChildTagCount > 1)
             {
-                throw new ConfiguratorDotNetException($"Map element '{xElement.GetDocumentPath()}' had duplicate child tags.");
+                errorCollector.Error(
+                    $"Map element had duplicate child tags.",
+                    xElement.GetDocumentPath());
             }
 
             MapSchemaElement mapElement = new(parent, xElement);
@@ -53,7 +65,7 @@ public static class SchemaParser
             {
                 mapElement.AddChild(
                     child.Name.LocalName,
-                    Classify(mapElement, child, validator));
+                    Classify(mapElement, child, errorCollector));
             }
 
             return mapElement;
@@ -63,24 +75,28 @@ public static class SchemaParser
     internal static ListSchemaElement CreateListSchemaElement(
         XElement xElement,
         SchemaElement? parent,
-        IAttributeValidator validator)
+        IErrorCollector errorCollector)
     {
         List<XElement> children = xElement.GetFilteredChildren().ToList();
         int distinctChildTagNames = children.Select(x => x.Name).Distinct().Count();
         
         if (distinctChildTagNames > 1)
         {
-            throw new ConfiguratorDotNetException($"List element '{xElement.GetDocumentPath()}' had more than one distinct child name.");
+            errorCollector.Error(
+                "List element has more than one distinct child tag name.",
+                xElement.GetDocumentPath());
         }
 
-        SchemaElement template = Classify(parent, children[0], validator);
+        SchemaElement template = Classify(parent, children[0], errorCollector);
         ListSchemaElement listElement = new(parent, xElement, template);
 
         foreach (var child in children)
         {
-            if (!listElement.MatchesSchema(xElement, validator, out string errorXPath, out string error))
+            if (!listElement.MatchesSchema(xElement, AttributeValidator, errorCollector))
             {
-                throw new ConfiguratorDotNetException($"List item child does not match template. Error = {error}, Path = {errorXPath}");
+                errorCollector.Error(
+                    "List element has more than one distinct child tag name.",
+                    xElement.GetDocumentPath());
             }
         }
 
@@ -91,30 +107,41 @@ public static class SchemaParser
         MetadataAttributes attrs,
         XElement xElement,
         SchemaElement? parent,
-        List<XElement> children)
+        List<XElement> children,
+        IErrorCollector errorCollector)
     {
+        ScalarType? scalarType = null;
+
         if (children.Count == 0)
         {
-            ScalarType? scalarType;
             if (attrs.TypeName is null)
             {
                 scalarType = ScalarType.GetInferredScalarType(xElement.Value);
             }
             else if (!ScalarType.TryGetExplicitScalarType(attrs.TypeName, out scalarType))
             {
-                throw new ConfiguratorDotNetException($"Unable to find explicit scalar type '{attrs.TypeName}'. Path = '{xElement.GetDocumentPath()}'.");
+                errorCollector.Error(
+                    $"Unable to find explicit scalar type '{attrs.TypeName}'.",
+                    xElement.GetDocumentPath());
             }
 
-            if (!scalarType.Parser.CanParse(xElement.Value))
+            if (scalarType is not null)
             {
-                throw new ConfiguratorDotNetException($"Unable to find parse '{xElement.Value}' as a '{scalarType.TypeName}'. Path = '{xElement.GetDocumentPath()}'.");
+                if (!scalarType.Parser.CanParse(xElement.Value))
+                {
+                    errorCollector.Error(
+                        $"Unable to find parse '{xElement.Value}' as a '{scalarType.TypeName}'.",
+                        xElement.GetDocumentPath());
+                }
             }
-
-            return new ScalarSchemaElement(scalarType, parent, xElement);
         }
         else
         {
-            throw new ConfiguratorDotNetException("Can't create scalar schema node when it has children");
+            errorCollector.Error(
+                "Can't create scalar schema node when it has children",
+                xElement.GetDocumentPath());
         }
+
+        return new ScalarSchemaElement(scalarType ?? ScalarType.String, parent, xElement);
     }
 }
