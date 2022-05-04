@@ -30,6 +30,11 @@ public class ListSchemaElement : SchemaElement
 
         foreach (XElement child in element.GetFilteredChildren())
         {
+            if (child.Attribute(Constants.Structure.ListTemplateAttributeName) is not null)
+            {
+                continue;
+            }
+
             if (child.Name != this.Template.XmlElement.Name)
             {
                 errorCollector.Error($"Expected tag name: '{this.Template.XmlElement.Name}'. Got: '{child.Name}'.", child.GetDocumentPath());

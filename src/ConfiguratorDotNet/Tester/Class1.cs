@@ -15,7 +15,7 @@ namespace Tester
             using (var sw = new StringWriter())
             {
                 var c = (Foo.Bar.Baz.Bat.Configuration)serializer.Deserialize(File.OpenRead("derived.xml"));
-
+                
                 serializer.Serialize(sw, c);
                 Console.WriteLine(sw.ToString());
             }

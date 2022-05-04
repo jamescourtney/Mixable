@@ -62,6 +62,10 @@ public class ConfiguratorDotNetCSharpSourceGenerator : ISourceGenerator
             catch (BailOutException)
             {
             }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debugger.Launch();
+            }
         }
     }
 

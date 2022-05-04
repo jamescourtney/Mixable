@@ -19,9 +19,18 @@ public class MapSchemaElement : SchemaElement
         return visitor.Accept(this);
     }
 
-    public void AddChild(string tagName, SchemaElement child)
+    public void AddChild(SchemaElement child, IErrorCollector errorCollector)
     {
-        this.children.Add(tagName, child);
+        if (this.children.ContainsKey(child.XmlElement.Name))
+        {
+            errorCollector.Error(
+                "Duplicate tag name under map element",
+                child.XmlElement.GetDocumentPath());
+        }
+        else
+        {
+            this.children[child.XmlElement.Name] = child;
+        }
     }
 
     public override bool Equals(SchemaElement? other)
@@ -75,7 +84,21 @@ public class MapSchemaElement : SchemaElement
         bool returnValue = true;
         validator.Validate(element, errorCollector);
 
-        Dictionary<XName, XElement> map = element.GetFilteredChildren().ToDictionary(x => x.Name, x => x);
+        Dictionary<XName, XElement> map = new();
+
+        foreach (var child in element.GetFilteredChildren())
+        {
+            if (map.ContainsKey(child.Name))
+            {
+                errorCollector.Error(
+                    "Duplicate tag detected in map element",
+                    child.GetDocumentPath());
+            }
+            else
+            {
+                map[child.Name] = child;
+            }
+        }
 
         foreach (var kvp in map)
         {

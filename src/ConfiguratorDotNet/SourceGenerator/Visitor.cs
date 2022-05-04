@@ -47,6 +47,7 @@ public class SchemaVisitor : ISchemaVisitor<TypeContext>
         string className = GetClassName(map.XmlElement);
 
         List<string> properties = new();
+        List<string> caseStatements = new();
 
         foreach (var kvp in map.Children)
         {
@@ -56,15 +57,47 @@ public class SchemaVisitor : ISchemaVisitor<TypeContext>
 
             properties.AddRange(valueType.Attributes);
             properties.Add($"public {valueType.TypeName} {name} {{ get; set; }}");
+
+            caseStatements.Add($"case \"{name}\": {{ child = this.{name}; return true; }}");
         }
 
         this.StringBuilder.AppendLine($"public class {className}");
         this.StringBuilder.AppendLine("{");
-        
+
         foreach (string property in properties)
         {
             this.StringBuilder.AppendLine(property);
         }
+
+        this.StringBuilder.AppendLine(@$"
+    public bool TryGetChild(string name, out object child)
+    {{
+            child = null;
+            switch (name)
+            {{
+                {string.Join("\r\n", caseStatements)}
+            }}
+
+            return false;
+    }}");
+
+        this.StringBuilder.AppendLine($@"
+    public object this[string name]
+    {{
+        get
+        {{
+            object child;
+            if (this.TryGetChild(name, out child))
+            {{
+                return child;
+            }}
+
+            throw new KeyNotFoundException();
+        }}
+    }}
+
+    ");
+
 
         this.StringBuilder.AppendLine("}");
 

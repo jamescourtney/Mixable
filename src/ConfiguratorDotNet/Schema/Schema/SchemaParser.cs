@@ -46,6 +46,12 @@ public static class SchemaParser
         // If the user said it's a list or it just looks like a list.
         bool isList = attrs.List ?? (distinctChildTagNames == 1 && children.Count > 1);
 
+        if (children.Count == 1 && 
+            children[0].Attribute(Constants.Structure.ListTemplateAttributeName) != null)
+        {
+            isList = true;
+        }
+
         if (isList)
         {
             return CreateListSchemaElement(xElement, parent, errorCollector);
@@ -64,8 +70,8 @@ public static class SchemaParser
             foreach (var child in children)
             {
                 mapElement.AddChild(
-                    child.Name.LocalName,
-                    Classify(mapElement, child, errorCollector));
+                    Classify(mapElement, child, errorCollector),
+                    errorCollector);
             }
 
             return mapElement;
@@ -90,14 +96,11 @@ public static class SchemaParser
         SchemaElement template = Classify(parent, children[0], errorCollector);
         ListSchemaElement listElement = new(parent, xElement, template);
 
-        foreach (var child in children)
+        if (!listElement.MatchesSchema(xElement, AttributeValidator, errorCollector))
         {
-            if (!listElement.MatchesSchema(xElement, AttributeValidator, errorCollector))
-            {
-                errorCollector.Error(
-                    "List element has more than one distinct child tag name.",
-                    xElement.GetDocumentPath());
-            }
+            errorCollector.Error(
+                "List element has more than one distinct child tag name.",
+                xElement.GetDocumentPath());
         }
 
         return listElement;

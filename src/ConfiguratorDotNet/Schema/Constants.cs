@@ -19,6 +19,8 @@ internal static class Constants
 
     public static class Structure
     {
+        public static readonly XName ListTemplateAttributeName = XName.Get("ListTemplate", XMLNamespace);
+
         public static readonly XName TypeAttributeName = XName.Get("Type", XMLNamespace);
 
         public static readonly XName ListAttributeName = XName.Get("List", XMLNamespace);
