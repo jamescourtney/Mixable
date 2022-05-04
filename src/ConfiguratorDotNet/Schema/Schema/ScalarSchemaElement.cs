@@ -1,20 +1,20 @@
 ﻿namespace ConfiguratorDotNet.Schema;
 
-internal class ScalarSchemaElement : SchemaElement
+/// <summary>
+/// Represents a scalar element.
+/// </summary>
+public class ScalarSchemaElement : SchemaElement
 {
-    private readonly ScalarType scalarType;
-
     public ScalarSchemaElement(
         ScalarType scalarType,
         SchemaElement? parent,
         XElement element)
         : base(parent, element)
     {
-        this.TypeName = scalarType.TypeName;
-        this.scalarType = scalarType;
+        this.ScalarType = scalarType;
     }
 
-    public string? CustomParser { get; set; }
+    public ScalarType ScalarType { get; }
 
     public override bool Equals(SchemaElement? other)
     {
@@ -23,7 +23,7 @@ internal class ScalarSchemaElement : SchemaElement
             return false;
         }
 
-        return scalar.TypeName == this.TypeName;
+        return scalar.ScalarType.TypeName == this.ScalarType.TypeName;
     }
 
     public override bool MatchesSchema(
@@ -40,15 +40,15 @@ internal class ScalarSchemaElement : SchemaElement
         List<XElement> children = element.GetChildren().ToList();
         if (children.Count > 0)
         {
-            mismatchPath = this.XPath;
+            mismatchPath = this.XmlElement.GetDocumentPath();
             error = "Override schemas may not introduce children to scalar nodes.";
             return false;
         }
 
-        if (!this.scalarType.Parser.CanParse(element.Value))
+        if (!this.ScalarType.Parser.CanParse(element.Value))
         {
-            mismatchPath = this.xElement.GetDocumentPath();
-            error = $"Failed to parse '{element.Value}' as a type of '{this.TypeName}'.";
+            mismatchPath = this.XmlElement.GetDocumentPath();
+            error = $"Failed to parse '{element.Value}' as a type of '{this.ScalarType.TypeName}'.";
             return false;
         }
 
@@ -59,11 +59,11 @@ internal class ScalarSchemaElement : SchemaElement
 
     public override void MergeWith(XElement element, IAttributeValidator validator)
     {
-        this.xElement.Value = element.Value;
+        this.XmlElement.Value = element.Value;
     }
 
     public override int GetHashCode()
     {
-        return this.TypeName.GetHashCode() ^ this.CustomParser?.GetHashCode() ?? 0;
+        return this.ScalarType.TypeName.GetHashCode();
     }
 }

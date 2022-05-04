@@ -187,7 +187,7 @@ public class MergeTests
         Assert.True(result.MatchesSchema(@override, new DerivedSchemaAttributeValidator(), out _, out _));
         result.MergeWith(@override, new DerivedSchemaAttributeValidator());
 
-        string merged = result.ToXml();
+        string merged = result.XmlElement.ToString();
 
         Assert.Equal(expectedXml, merged);
     }

@@ -1,5 +1,8 @@
 ﻿namespace ConfiguratorDotNet.Schema;
 
+/// <summary>
+/// Enumerates and defines known scalar types.
+/// </summary>
 public class ScalarType
 {
     public static ScalarType Int { get; } = new()

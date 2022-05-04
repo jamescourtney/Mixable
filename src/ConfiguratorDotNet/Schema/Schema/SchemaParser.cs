@@ -16,63 +16,53 @@ internal static class SchemaParser
         }
 
         IAttributeValidator validator = new BaseSchemaAttributeValidator();
-        return Classify(null, document.Root, new TypeNameStack(), validator);
+        return Classify(null, document.Root, validator);
     }
 
-    internal static SchemaElement Classify(SchemaElement? parent, XElement xElement, TypeNameStack stack, IAttributeValidator validator)
+    internal static SchemaElement Classify(SchemaElement? parent, XElement xElement, IAttributeValidator validator)
     {
-        stack.Push(xElement.Name.LocalName);
+        MetadataAttributes attrs = validator.Validate(xElement);
+        List<XElement> children = xElement
+            .GetFilteredChildren()
+            .ToList();
 
-        try
+        if (children.Count == 0)
         {
-            MetadataAttributes attrs = validator.Validate(xElement);
-            List<XElement> children = xElement
-                .GetFilteredChildren()
-                .ToList();
-
-            if (children.Count == 0)
-            {
-                return CreateScalarElement(attrs, xElement, parent, children);
-            }
-
-            int distinctChildTagNames = children.Select(x => x.Name).Distinct().Count();
-
-            // If the user said it's a list or it just looks like a list.
-            bool isList = attrs.List ?? (distinctChildTagNames == 1 && children.Count > 1);
-
-            if (isList)
-            {
-                return CreateListSchemaElement(xElement, parent, stack, validator);
-            }
-            else
-            {
-                int maxChildTagCount = children.GroupBy(x => x.Name).Select(g => g.Count()).Max();
-                if (maxChildTagCount > 1)
-                {
-                    throw new ConfiguratorDotNetException($"Map element '{stack}' had duplicate child tags.");
-                }
-
-                MapSchemaElement mapElement = new(parent, xElement) { TypeName = stack.ToString() };
-                foreach (var child in children)
-                {
-                    mapElement.AddChild(
-                        child.Name.LocalName,
-                        Classify(mapElement, child, stack, validator));
-                }
-
-                return mapElement;
-            }
+            return CreateScalarElement(attrs, xElement, parent, children);
         }
-        finally
+
+        int distinctChildTagNames = children.Select(x => x.Name).Distinct().Count();
+
+        // If the user said it's a list or it just looks like a list.
+        bool isList = attrs.List ?? (distinctChildTagNames == 1 && children.Count > 1);
+
+        if (isList)
         {
-            stack.Pop();
+            return CreateListSchemaElement(xElement, parent, validator);
+        }
+        else
+        {
+            int maxChildTagCount = children.GroupBy(x => x.Name).Select(g => g.Count()).Max();
+            if (maxChildTagCount > 1)
+            {
+                throw new ConfiguratorDotNetException($"Map element '{xElement.GetDocumentPath()}' had duplicate child tags.");
+            }
+
+            MapSchemaElement mapElement = new(parent, xElement);
+            foreach (var child in children)
+            {
+                mapElement.AddChild(
+                    child.Name.LocalName,
+                    Classify(mapElement, child, validator));
+            }
+
+            return mapElement;
         }
     }
 
     internal static ListSchemaElement CreateListSchemaElement(
         XElement xElement,
         SchemaElement? parent,
-        TypeNameStack stack,
         IAttributeValidator validator)
     {
         List<XElement> children = xElement.GetFilteredChildren().ToList();
@@ -83,7 +73,7 @@ internal static class SchemaParser
             throw new ConfiguratorDotNetException($"List element '{xElement.GetDocumentPath()}' had more than one distinct child name.");
         }
 
-        SchemaElement template = Classify(parent, children[0], stack, validator);
+        SchemaElement template = Classify(parent, children[0], validator);
         ListSchemaElement listElement = new(parent, xElement, template);
 
         foreach (var child in children)

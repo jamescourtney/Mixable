@@ -1,6 +1,6 @@
 ﻿namespace ConfiguratorDotNet.Schema;
 
-internal record struct MetadataAttributes
+public record struct MetadataAttributes
 {
     public string? TypeName { get; init; }
 

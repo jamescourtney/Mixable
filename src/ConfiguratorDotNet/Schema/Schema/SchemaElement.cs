@@ -1,30 +1,39 @@
 ﻿namespace ConfiguratorDotNet.Schema;
 
-internal abstract class SchemaElement
+/// <summary>
+/// A generic element of an XML schema.
+/// </summary>
+public abstract class SchemaElement
 {
-    protected internal readonly XElement xElement;
-
     protected SchemaElement(SchemaElement? parent, XElement xElement)
     {
         this.Parent = parent;
-        this.xElement = xElement;
+        this.XmlElement = xElement;
     }
 
     /// <summary>
-    /// Gets or sets the type name for the current schema element.
+    /// Reference to the parent.
     /// </summary>
-    public string TypeName { get; set; } = string.Empty;
-
-    public string XPath => this.xElement.GetDocumentPath();
-
     public SchemaElement? Parent { get; }
 
-    public virtual IEnumerable<SchemaElement> Children => Array.Empty<SchemaElement>();
+    /// <summary>
+    /// The XML element associated with this schema element. Contents may change as merge operations
+    /// are applied.
+    /// </summary>
+    public XElement XmlElement { get; }
 
+    /// <summary>
+    /// Recursively merges the given element into this one. Assumes that 
+    /// <see cref="MatchesSchema(XElement, IAttributeValidator, out string, out string)"/>
+    /// has been invoked.
+    /// </summary>
     public abstract void MergeWith(
         XElement element,
         IAttributeValidator validator);
 
+    /// <summary>
+    /// Recursively tests whether the given element matches the current schema.
+    /// </summary>
     public abstract bool MatchesSchema(
         XElement element,
         IAttributeValidator validator,
@@ -67,9 +76,4 @@ internal abstract class SchemaElement
     public abstract bool Equals(SchemaElement? other);
 
     public override abstract int GetHashCode();
-
-    public string ToXml()
-    {
-        return this.xElement.ToString();
-    }
 }

@@ -1,14 +1,16 @@
 ﻿namespace ConfiguratorDotNet.Schema;
 
-internal class MapSchemaElement : SchemaElement
+/// <summary>
+/// Represents a map, where each member has a different name.
+/// </summary>
+public class MapSchemaElement : SchemaElement
 {
     private readonly Dictionary<XName, SchemaElement> children = new();
 
-    public MapSchemaElement(SchemaElement? parent, XElement node) : base(parent, node)
+    public MapSchemaElement(SchemaElement? parent, XElement node) 
+        : base(parent, node)
     {
     }
-
-    public override IEnumerable<SchemaElement> Children => this.children.Values;
 
     public void AddChild(string tagName, SchemaElement child)
     {

@@ -1,8 +1,12 @@
 ﻿namespace ConfiguratorDotNet.Schema;
 
-internal interface IAttributeValidator
+public interface IAttributeValidator
 {
-    bool TryValidate(XElement element, out string path, out string error, out MetadataAttributes attrs);
+    bool TryValidate(
+        XElement element,
+        out string path,
+        out string error,
+        out MetadataAttributes attrs);
 }
 
 internal static class IAttributeValidatorExtensions

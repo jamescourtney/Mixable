@@ -1,19 +1,19 @@
 ﻿namespace ConfiguratorDotNet.Schema;
 
-internal class ListSchemaElement : SchemaElement
+/// <summary>
+/// Represents a list of elements with a shared schema.
+/// </summary>
+public class ListSchemaElement : SchemaElement
 {
-    private SchemaElement template;
-
     public ListSchemaElement(
         SchemaElement? parent,
         XElement node,
         SchemaElement templateChild) : base(parent, node)
     {
-        this.template = templateChild;
-        this.TypeName = $"List<{templateChild.TypeName}>";
+        this.Template = templateChild;
     }
 
-    public override IEnumerable<SchemaElement> Children => new[] { this.template };
+    public SchemaElement Template { get; }
 
     public override bool MatchesSchema(
         XElement element,
@@ -28,14 +28,14 @@ internal class ListSchemaElement : SchemaElement
 
         foreach (XElement child in element.GetFilteredChildren())
         {
-            if (child.Name != this.template.xElement.Name)
+            if (child.Name != this.Template.XmlElement.Name)
             {
                 path = child.GetDocumentPath();
-                error = $"Expected tag name: '{this.template.xElement.Name}'. Got: '{child.Name}'.";
+                error = $"Expected tag name: '{this.Template.XmlElement.Name}'. Got: '{child.Name}'.";
                 return false;
             }
 
-            if (!this.template.MatchesSchema(child, validator, out path, out error))
+            if (!this.Template.MatchesSchema(child, validator, out path, out error))
             {
                 return false;
             }
@@ -55,7 +55,7 @@ internal class ListSchemaElement : SchemaElement
             // no elements.
             if (attrs.ListMergePolicy == ListMergePolicy.Replace)
             {
-                this.xElement.RemoveNodes();
+                this.XmlElement.RemoveNodes();
             }
 
             return;
@@ -63,12 +63,12 @@ internal class ListSchemaElement : SchemaElement
 
         if (attrs.ListMergePolicy == ListMergePolicy.Replace)
         {
-            this.xElement.RemoveNodes();
+            this.XmlElement.RemoveNodes();
         }
         
         foreach (var child in element.GetFilteredChildren())
         {
-            this.xElement.Add(child);
+            this.XmlElement.Add(child);
         }
     }
 
@@ -79,8 +79,8 @@ internal class ListSchemaElement : SchemaElement
             return false;
         }
 
-        bool thisHasChildren = this.template is not null;
-        bool otherHasChildren = list.template is not null;
+        bool thisHasChildren = this.Template is not null;
+        bool otherHasChildren = list.Template is not null;
 
         if (thisHasChildren != otherHasChildren)
         {
@@ -92,11 +92,11 @@ internal class ListSchemaElement : SchemaElement
             return true;
         }
 
-        return this.template == list.template;
+        return this.Template == list.Template;
     }
 
     public override int GetHashCode()
     {
-        return this.template.GetHashCode() ^ "List".GetHashCode();
+        return this.Template.GetHashCode() ^ "List".GetHashCode();
     }
 }
