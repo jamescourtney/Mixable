@@ -35,6 +35,42 @@ internal class XmlMetadata
         }
     }
 
+    public bool ValidateAsTemplateFile([NotNullWhen(false)] out string? error)
+    {
+        if (string.IsNullOrEmpty(this.NamespaceName))
+        {
+            error = "Template XML files must include a Namespace.";
+            return false;
+        }
+
+        if (!string.IsNullOrEmpty(this.BaseFileName))
+        {
+            error = "Template XML files may not include a base file name";
+            return false;
+        }
+
+        error = null;
+        return true;
+    }
+
+    public bool ValidateAsOverrideFile([NotNullWhen(false)] out string? error)
+    {
+        if (!string.IsNullOrEmpty(this.NamespaceName))
+        {
+            error = "Override files may not specify a namespace name.";
+            return false;
+        }
+
+        if (string.IsNullOrEmpty(this.BaseFileName))
+        {
+            error = "Override files must include a base file name.";
+            return false;
+        }
+
+        error = null;
+        return true;
+    }
+
     public string? NamespaceName => this.namespaceName;
 
     public string? BaseFileName => this.baseFileName;

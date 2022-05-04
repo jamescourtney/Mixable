@@ -10,13 +10,12 @@ internal static class SchemaParser
         }
 
         XmlMetadata data = new XmlMetadata(document.Root);
-
-        IAttributeValidator validator = new BaseSchemaAttributeValidator();
-        if (string.IsNullOrEmpty(data.BaseFileName))
+        if (!data.ValidateAsTemplateFile(out string? error))
         {
-            validator = new BaseSchemaAttributeValidator();
+            throw new ConfiguratorDotNetException(error);
         }
 
+        IAttributeValidator validator = new BaseSchemaAttributeValidator();
         return Classify(null, document.Root, new TypeNameStack(), validator);
     }
 
