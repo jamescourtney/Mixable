@@ -28,7 +28,10 @@ public class MergeTests
     </List>
     <FancyList>
         <cdn:ListItemTemplate>
-            <Item><Value cdn:Type=""double"">0</Value></Item>
+            <Item>
+                <Value cdn:Type=""double"">0</Value>
+                <SomethingElse>0</SomethingElse>
+            </Item>
         </cdn:ListItemTemplate>
         <Item>
             <Value>1</Value>
