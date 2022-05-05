@@ -64,7 +64,13 @@ public class MergeTests
         <A>5</A>
     </Mapping>
 
-    <FancyList cdn:ListMerge=""Replace"" />
+    <FancyList cdn:ListMerge=""Replace"">
+        <Item>
+            <Value>2.3</Value>
+            <SomethingElse>10</SomethingElse>
+        </Item>
+        <Item><Value>1.2</Value></Item>
+    </FancyList>
 </Configuration>
 ";
         string expected =
@@ -85,7 +91,15 @@ public class MergeTests
     <Item>3</Item>
     <Item>4</Item>
   </List>
-  <FancyList />
+  <FancyList>
+    <Item>
+      <Value>2.3</Value>
+      <SomethingElse>10</SomethingElse>
+    </Item>
+    <Item>
+      <Value>1.2</Value>
+    </Item>
+  </FancyList>
 </Configuration>";
 
         Merge(overrideSchema, expected);

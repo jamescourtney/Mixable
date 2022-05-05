@@ -22,20 +22,20 @@ public static class Extensions
             .Where(x => x.Name.NamespaceName != Constants.XMLNamespace); // ignore our metadata namespace.
     }
 
-    public static string GetDocumentPath(this XElement element)
+    public static string GetDocumentPath(this XElement element, Func<XName, string>? callback = null)
     {
-        static void Recurse(XElement? element, StringBuilder sb)
+        static void Recurse(XElement? element, StringBuilder sb, Func<XName, string> callback)
         {
             if (element is not null)
             {
-                Recurse(element.Parent, sb);
+                Recurse(element.Parent, sb, callback);
                 sb.Append('/');
-                sb.Append(element.Name);
+                sb.Append(callback(element.Name));
             }
         }
 
         StringBuilder sb = new();
-        Recurse(element, sb);
+        Recurse(element, sb, callback ?? (x => x.ToString()));
 
         return sb.ToString();
     }

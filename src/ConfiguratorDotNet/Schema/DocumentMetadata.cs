@@ -54,19 +54,25 @@ public class DocumentMetadata
         IErrorCollector errorCollector,
         [NotNullWhen(true)] out DocumentMetadata? metadata)
     {
-        XElement? metadataElement = document
+        IEnumerable<XElement>? metadataElements = document
             .Root?
-            .GetChildren()
-            .SingleOrDefault(x => x.Name == Constants.Tags.RootTagName);
+            .GetChildren(Constants.Tags.RootTagName);
 
-        if (metadataElement is null)
+        if (metadataElements is null || !metadataElements.Any())
         {
-            errorCollector.Error("Unable to find CDN metadata node.");
+            errorCollector.Error("Unable to find CDN metadata node. The CDN metadata node is required.");
             metadata = null;
             return false;
         }
 
-        metadata = new DocumentMetadata(document.Root!);
+        if (metadataElements.Count() != 1)
+        {
+            errorCollector.Error("Only one CDN metadata node may be specified.");
+            metadata = null;
+            return false;
+        }
+
+        metadata = new DocumentMetadata(metadataElements.First());
         metadata.Validate(errorCollector);
 
         return true;

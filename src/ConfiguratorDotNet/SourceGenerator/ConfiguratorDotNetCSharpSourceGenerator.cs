@@ -3,6 +3,8 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.IO;
 using System.Xml.Linq;
+using System.Xml;
+using System.Diagnostics;
 
 namespace SourceGenerator;
 
@@ -11,9 +13,11 @@ public class ConfiguratorDotNetCSharpSourceGenerator : ISourceGenerator
 {
     public void Execute(GeneratorExecutionContext context)
     {
+        // Debugger.Launch();
+
         foreach (var additionalFile in context.AdditionalFiles)
         {
-            try 
+            try
             {
                 if (additionalFile.Path.ToLowerInvariant().EndsWith(".cdn.xml"))
                 {
@@ -52,9 +56,10 @@ public class ConfiguratorDotNetCSharpSourceGenerator : ISourceGenerator
 
                         if (!errorCollector.HasErrors)
                         {
+                            string cSharp = visitor.StringBuilder.ToString();
                             context.AddSource(
                                 Path.GetFileNameWithoutExtension(additionalFile.Path),
-                                visitor.StringBuilder.ToString());
+                                cSharp);
                         }
                     }
                 }
@@ -65,7 +70,7 @@ public class ConfiguratorDotNetCSharpSourceGenerator : ISourceGenerator
 #if DEBUG
             catch
             {
-                System.Diagnostics.Debugger.Launch();
+                Debugger.Launch();
             }
 #endif
         }
