@@ -1,10 +1,6 @@
-﻿using ConfiguratorDotNet.Schema;
+﻿using System.IO;
 using Microsoft.CodeAnalysis;
-using System;
-using System.IO;
-using System.Xml.Linq;
-using System.Xml;
-using System.Diagnostics;
+using ConfiguratorDotNet.Schema;
 
 namespace SourceGenerator;
 
@@ -21,19 +17,15 @@ public class ConfiguratorDotNetCSharpSourceGenerator : ISourceGenerator
             {
                 if (additionalFile.Path.ToLowerInvariant().EndsWith(".cdn.xml"))
                 {
-                    ErrorCollector errorCollector = new ErrorCollector(
+                    SourceGeneratorErrorCollector errorCollector = new SourceGeneratorErrorCollector(
                         ref context,
                         additionalFile.Path);
 
-                    string text = additionalFile.GetText()?.ToString();
-                    if (!DocumentMetadata.TryCreateFromXml(text, errorCollector, out var metadata))
-                    {
-                        continue;
-                    }
-
-                    metadata.Validate(errorCollector);
-
-                    SchemaElement element = this.ProcessFile(additionalFile.Path, errorCollector, out string rootNamespace);
+                    (SchemaElement element, DocumentMetadata metadata) = this.ProcessFile(
+                        additionalFile.Path,
+                        errorCollector,
+                        new(),
+                        out string rootNamespace);
 
                     if (!string.IsNullOrEmpty(metadata.OutputXmlFileName))
                     {
@@ -50,7 +42,6 @@ public class ConfiguratorDotNetCSharpSourceGenerator : ISourceGenerator
                     if (metadata.GenerateCSharp == true)
                     {
                         var visitor = new SchemaVisitor(rootNamespace);
-
                         element.Accept(visitor);
                         visitor.Finish();
 
@@ -70,35 +61,66 @@ public class ConfiguratorDotNetCSharpSourceGenerator : ISourceGenerator
 #if DEBUG
             catch
             {
-                Debugger.Launch();
+                // Debugger.Launch();
             }
 #endif
         }
     }
 
-    private SchemaElement ProcessFile(string path, IErrorCollector errorCollector, out string rootNamespace)
+    public void Initialize(GeneratorInitializationContext context)
     {
-        rootNamespace = string.Empty;
+        // No-op
+    }
 
-        SchemaElement? baseSchema = null;
-
-        string text = File.ReadAllText(path);
-        if (DocumentMetadata.TryCreateFromXml(text, errorCollector, out DocumentMetadata? metadata))
+    private (SchemaElement element, DocumentMetadata metadata) ProcessFile(
+        string path,
+        IErrorCollector errorCollector,
+        HashSet<string> visitedPaths,
+        out string rootNamespace)
+    {
+        // 1) Load the document, bailing if necessary.
+        XDocument document;
+        try
         {
-            if (!string.IsNullOrEmpty(metadata.BaseFileName))
-            {
-                string baseFilePath = Path.IsPathRooted(metadata.BaseFileName)
-                    ? metadata.BaseFileName
-                    : Path.Combine(Path.GetDirectoryName(path), metadata.BaseFileName);
-
-                baseSchema = this.ProcessFile(baseFilePath, errorCollector, out rootNamespace);
-            }
+            document = XDocument.Parse(File.ReadAllText(path));
+        }
+        catch (Exception ex)
+        {
+            errorCollector.Error(ex.ToString(), path);
+            throw new BailOutException();
         }
 
-        XDocument document = XDocument.Parse(text);
+        // 2) Check for cycles.
+        // TODO: Use hash or something more deterministic? Symlinks and whatnot
+        // may be problematic if we're just using the literal path.
+        if (!visitedPaths.Add(path))
+        {
+            errorCollector.Error("Cycle detected in include files.", path);
+            throw new BailOutException();
+        }
+
+        rootNamespace = string.Empty;
+        SchemaElement? baseSchema = null;
+
+        // Load metadata -- bail if we fail.
+        if (!DocumentMetadata.TryCreateFromXDocument(document, errorCollector, out DocumentMetadata? metadata))
+        {
+            throw new BailOutException();
+        }
+
+        // If this XML file inherits from a base file, load that one next.
+        if (!string.IsNullOrEmpty(metadata.BaseFileName))
+        {
+            string baseFilePath = Path.IsPathRooted(metadata.BaseFileName)
+                ? metadata.BaseFileName
+                : Path.Combine(Path.GetDirectoryName(path), metadata.BaseFileName);
+
+            (baseSchema, _) = this.ProcessFile(baseFilePath, errorCollector, visitedPaths, out rootNamespace);
+        }
 
         if (baseSchema is not null)
         {
+            // Merge the contents here on top of the base.
             if (!baseSchema.MergeWith(document.Root, errorCollector))
             {
                 throw new BailOutException();
@@ -106,7 +128,9 @@ public class ConfiguratorDotNetCSharpSourceGenerator : ISourceGenerator
         }
         else
         {
-            rootNamespace = metadata?.NamespaceName ?? "";
+            // This is the bottom of the stack -- parse the base schema to build a
+            // structure.
+            rootNamespace = metadata.NamespaceName ?? "ConfiguratorDotNet.Generated";
 
             if (!SchemaParser.TryParse(document, errorCollector, out baseSchema))
             {
@@ -114,71 +138,13 @@ public class ConfiguratorDotNetCSharpSourceGenerator : ISourceGenerator
             }
         }
 
-        return baseSchema;
+        return (baseSchema, metadata);
     }
 
-    public void Initialize(GeneratorInitializationContext context)
-    {
-    }
 
-    private class ErrorCollector : IErrorCollector
-    {
-        private readonly GeneratorExecutionContext context;
-        private readonly string file;
-
-        public ErrorCollector(ref GeneratorExecutionContext context, string file)
-        {
-            this.context = context;
-            this.file = file;
-        }
-
-        public bool HasErrors { get; private set; }
-
-        public void Error(string message, string? path = null)
-        {
-            this.HasErrors = true;
-
-            this.context.ReportDiagnostic(Diagnostic.Create(
-                "CDN0001",
-                "ConfiguratorDotNet",
-                $"Message = '{message}' Path = '{path}'",
-                severity: DiagnosticSeverity.Error,
-                defaultSeverity: DiagnosticSeverity.Error,
-                isEnabledByDefault: true,
-                warningLevel: 0,
-                isSuppressed: false,
-                location: Location.Create(this.file, default, default)));
-        }
-
-        public void Info(string message, string? path = null)
-        {
-            this.context.ReportDiagnostic(Diagnostic.Create(
-                "CDN0001",
-                "ConfiguratorDotNet",
-                $"Message = '{message}' Path = '{path}'",
-                severity: DiagnosticSeverity.Info,
-                defaultSeverity: DiagnosticSeverity.Info,
-                isEnabledByDefault: true,
-                warningLevel: 2,
-                isSuppressed: false,
-                location: Location.Create(this.file, default, default)));
-        }
-
-        public void Warning(string message, string? path = null)
-        {
-            this.context.ReportDiagnostic(Diagnostic.Create(
-                "CDN0002",
-                "ConfiguratorDotNet",
-                $"Message = '{message}' Path = '{path}'",
-                severity: DiagnosticSeverity.Warning,
-                defaultSeverity: DiagnosticSeverity.Warning,
-                isEnabledByDefault: true,
-                warningLevel: 1,
-                isSuppressed: false,
-                location: Location.Create(this.file, default, default)));
-        }
-    }
-
+    /// <summary>
+    /// Special exception to bail out after encountering an unrecoverable error.
+    /// </summary>
     private class BailOutException : Exception
     {
     }

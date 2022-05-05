@@ -18,11 +18,27 @@
     <Item>4</Item>
   </List>
   <FancyList>
+    <cdn:ListItemTemplate>
+      <Item>
+        <Value cdn:Type="int">0</Value>
+        <OtherValue cdn:Type="int" cdn:Optional="true">0</OtherValue>
+      </Item>
+    </cdn:ListItemTemplate>
+    <Item>
+      <Value>1</Value>
+    </Item>
+    <Item>
+      <Value>2</Value>
+    </Item>
+    <Item>
+      <Value>3</Value>
+    </Item>
     <Item>
       <Value>12</Value>
     </Item>
     <Item>
       <Value>13</Value>
+      <OtherValue>24</OtherValue>
     </Item>
   </FancyList>
 </Configuration>

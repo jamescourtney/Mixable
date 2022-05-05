@@ -1,7 +1,7 @@
 ﻿<Configuration xmlns:cdn="http://configurator.net">
     <cdn:Metadata>
         <cdn:BaseFile>Base.cdn.xml</cdn:BaseFile>
-        <cdn:OutputXmlFile>derived.xml</cdn:OutputXmlFile>
+        <cdn:OutputXmlFile>Derived.xml</cdn:OutputXmlFile>
     </cdn:Metadata>
 
     <Mapping>
@@ -10,12 +10,13 @@
     <List>
         <Item>4</Item>
     </List>
-    <FancyList cdn:ListMerge="Replace">
+    <FancyList cdn:ListMerge="Concatenate">
         <Item>
             <Value>12</Value>
         </Item>
         <Item>
             <Value>13</Value>
+            <OtherValue>24</OtherValue>
         </Item>
     </FancyList>
 </Configuration>

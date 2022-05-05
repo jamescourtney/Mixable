@@ -110,11 +110,6 @@ public static class SchemaParser
                 }
 
                 templateElement = templateChildren[0];
-                
-                foreach (var node in templateNodes)
-                {
-                    node.Remove();
-                }
             }
         }
 

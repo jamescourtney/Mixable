@@ -7,9 +7,11 @@
 
   <ItemGroup>
     <None Remove="Derived.cdn.xml" />
+    <None Remove="Derived2.cdn.xml" />
   </ItemGroup>
 
     <ItemGroup>
+        <AdditionalFiles Include="Derived2.cdn.xml" />
         <AdditionalFiles Include="Derived.cdn.xml" />
         <AdditionalFiles Include="Base.cdn.xml" />
     </ItemGroup>
@@ -20,6 +22,9 @@
 
   <ItemGroup>
     <None Update="derived.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Derived2.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

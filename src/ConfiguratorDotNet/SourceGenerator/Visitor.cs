@@ -117,6 +117,9 @@ public class SchemaVisitor : ISchemaVisitor<TypeContext>
 
     private static string GetClassName(XElement element)
     {
-        return element.GetDocumentPath(x => x.LocalName).Trim('/').Replace('/', '_');
+        return element
+            .GetDocumentPath(select: x => x.LocalName, where: x => x.Namespace != Constants.XMLNamespace)
+            .Trim('/')
+            .Replace('/', '_');
     }
 }
