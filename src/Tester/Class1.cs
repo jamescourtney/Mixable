@@ -31,6 +31,7 @@ namespace Foo.Bar.Baz.Bat
         public void Something()
         {
             int i = this.Mapping.A;
+            return this.Mapping.C.C;
         }
     }
 }

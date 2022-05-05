@@ -196,7 +196,9 @@ public class MergeTests
         string expectedPath)
     {
         TestErrorCollector tec = new();
-        Assert.True(SchemaParser.TryParse(XDocument.Parse(BaseXml), tec, out var result));
+
+        SchemaParser parser = new SchemaParser(tec);
+        Assert.True(parser.TryParse(XDocument.Parse(BaseXml), out var result));
 
         XElement @override = XDocument.Parse(overrideXml).Root!;
         Assert.False(result.MergeWith(@override, tec));
@@ -207,7 +209,9 @@ public class MergeTests
     private static void Merge(string overrideXml, string expectedXml)
     {
         var tec = new TestErrorCollector();
-        Assert.True(SchemaParser.TryParse(XDocument.Parse(BaseXml), tec, out var result));
+
+        SchemaParser parser = new SchemaParser(tec);
+        Assert.True(parser.TryParse(XDocument.Parse(BaseXml), out var result));
 
         XElement @override = XDocument.Parse(overrideXml).Root!;
         result!.MergeWith(@override, tec);

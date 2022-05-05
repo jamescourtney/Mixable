@@ -4,6 +4,12 @@
         <cdn:OutputXmlFile>Derived2.xml</cdn:OutputXmlFile>
     </cdn:Metadata>
 
+    <Mapping>
+        <C>
+            <C>2.2</C>
+        </C>
+    </Mapping>
+
     <List cdn:ListMerge="Replace" />
     <FancyList cdn:ListMerge="Replace">
         <Item>

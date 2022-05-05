@@ -46,7 +46,7 @@ public class ListSchemaElementParser : ISchemaElementParser
     public SchemaElement Parse(
         SchemaElement? parent,
         XElement node,
-        MetadataAttributes metadataAttributes,
+        IAttributeValidator attributeValidator,
         IErrorCollector errorCollector,
         ParseCallback parseChild)
     {
@@ -54,13 +54,13 @@ public class ListSchemaElementParser : ISchemaElementParser
         XElement templateElement = this.GetTemplateNode(node, errorCollector)!; // Not null since we check up above.
 
         // Parse the template for structure.
-        SchemaElement template = parseChild(parent, templateElement, errorCollector);
+        SchemaElement template = parseChild(parent, templateElement);
 
         // Make a new list based on the template.
         ListSchemaElement listElement = new(parent, node, template);
 
         // Ensure all the current children match the schema.
-        listElement.MatchesSchema(node, MatchKind.Strict, AttributeValidator, errorCollector);
+        listElement.MatchesSchema(node, MatchKind.Strict, attributeValidator, errorCollector);
 
         return listElement;
     }

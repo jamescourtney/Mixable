@@ -12,11 +12,12 @@ public class ScalarSchemaElementParser : ISchemaElementParser
     public SchemaElement Parse(
         SchemaElement? parent,
         XElement node,
-        MetadataAttributes metadataAttributes,
+        IAttributeValidator attributeValidator,
         IErrorCollector errorCollector,
         ParseCallback parseChild)
     {
         List<XElement> children = node.GetChildren().ToList();
+        MetadataAttributes metadataAttributes = attributeValidator.Validate(node, errorCollector);
 
         ScalarType? scalarType;
         if (metadataAttributes.TypeName is null)

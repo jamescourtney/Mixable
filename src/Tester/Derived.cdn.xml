@@ -6,6 +6,9 @@
 
     <Mapping>
         <A>10</A>
+        <C>
+            <C>2.1</C>
+        </C>
     </Mapping>
     <List>
         <Item>4</Item>

@@ -132,7 +132,12 @@ public class ConfiguratorDotNetCSharpSourceGenerator : ISourceGenerator
             // structure.
             rootNamespace = metadata.NamespaceName ?? "ConfiguratorDotNet.Generated";
 
-            if (!SchemaParser.TryParse(document, errorCollector, out baseSchema))
+            SchemaParser parser = new SchemaParser
+            {
+                ErrorCollector = errorCollector
+            };
+
+            if (!parser.TryParse(document, out baseSchema))
             {
                 throw new BailOutException();
             }

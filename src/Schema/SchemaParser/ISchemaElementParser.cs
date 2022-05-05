@@ -5,8 +5,7 @@
 /// </summary>
 public delegate SchemaElement ParseCallback(
     SchemaElement? parent,
-    XElement node,
-    IErrorCollector errorCollector);
+    XElement node);
 
 /// <summary>
 /// Parser implementation for a single type of Schema Element.
@@ -25,7 +24,7 @@ public interface ISchemaElementParser
     SchemaElement Parse(
         SchemaElement? parent,
         XElement node,
-        MetadataAttributes metadataAttributes,
+        IAttributeValidator attributeValidator,
         IErrorCollector errorCollector,
         ParseCallback parseChild);
 }

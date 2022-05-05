@@ -9,11 +9,8 @@
         <Compile Include="..\Schema\*.cs">
             <LinkBase>Schema</LinkBase>
         </Compile>
-        <Compile Include="..\Schema\ScalarParsers\*.cs">
-            <LinkBase>Schema\ScalarParsers</LinkBase>
-        </Compile>
-        <Compile Include="..\Schema\Schema\*.cs">
-            <LinkBase>Schema\Schema</LinkBase>
+        <Compile Include="..\Schema\*\*.cs">
+            <LinkBase>Schema</LinkBase>
         </Compile>
     </ItemGroup>
 
