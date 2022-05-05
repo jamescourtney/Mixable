@@ -118,16 +118,10 @@ public static class SchemaParser
             }
         }
 
-
         SchemaElement template = Classify(parent, templateElement, errorCollector);
         ListSchemaElement listElement = new(parent, xElement, template);
 
-        if (!listElement.MatchesSchema(xElement, AttributeValidator, errorCollector))
-        {
-            errorCollector.Error(
-                "List element has more than one distinct child tag name.",
-                xElement.GetDocumentPath());
-        }
+        listElement.MatchesSchema(xElement, MatchKind.Strict, AttributeValidator, errorCollector);
 
         return listElement;
     }

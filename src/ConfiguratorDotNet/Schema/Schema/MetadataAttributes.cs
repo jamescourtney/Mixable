@@ -8,6 +8,8 @@ public record struct MetadataAttributes
 
     public bool? List { get; init; }
 
+    public bool Optional { get; init; }
+
     internal static MetadataAttributes Extract(XElement element)
     {
         return new MetadataAttributes
@@ -25,7 +27,9 @@ public record struct MetadataAttributes
             {
                 string s => (ListMergePolicy)Enum.Parse(typeof(ListMergePolicy), s, ignoreCase: true),
                 _ => null,
-            }
+            },
+
+            Optional = element.Attribute(Constants.Attributes.Optional)?.Value?.ToLowerInvariant() == "true",
         };
     }
 }

@@ -30,7 +30,7 @@ public class MergeTests
         <cdn:ListItemTemplate>
             <Item>
                 <Value cdn:Type=""double"">0</Value>
-                <SomethingElse>0</SomethingElse>
+                <SomethingElse cdn:Optional=""true"">0</SomethingElse>
             </Item>
         </cdn:ListItemTemplate>
         <Item>

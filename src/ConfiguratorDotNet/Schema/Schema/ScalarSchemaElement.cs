@@ -33,6 +33,7 @@ public class ScalarSchemaElement : SchemaElement
 
     protected internal override bool MatchesSchema(
         XElement element,
+        MatchKind matchKind,
         IAttributeValidator validator,
         IErrorCollector errorCollector)
     {

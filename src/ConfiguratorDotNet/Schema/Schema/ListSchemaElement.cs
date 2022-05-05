@@ -22,6 +22,7 @@ public class ListSchemaElement : SchemaElement
 
     protected internal override bool MatchesSchema(
         XElement element,
+        MatchKind matchKind,
         IAttributeValidator validator,
         IErrorCollector errorCollector)
     {
@@ -36,7 +37,13 @@ public class ListSchemaElement : SchemaElement
                 returnValue = false;
             }
 
-            returnValue &= this.Template.MatchesSchema(child, validator, errorCollector);
+            // Always use strict matching for lists. A subset of an item isn't good enough
+            // here.
+            returnValue &= this.Template.MatchesSchema(
+                child,
+                MatchKind.Strict,
+                validator,
+                errorCollector);
         }
 
         return returnValue;

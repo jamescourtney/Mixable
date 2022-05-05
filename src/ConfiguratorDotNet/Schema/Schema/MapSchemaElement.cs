@@ -78,6 +78,7 @@ public class MapSchemaElement : SchemaElement
 
     protected internal override bool MatchesSchema(
         XElement element,
+        MatchKind matchKind,
         IAttributeValidator validator,
         IErrorCollector errorCollector)
     {
@@ -104,7 +105,7 @@ public class MapSchemaElement : SchemaElement
         {
             if (this.children.TryGetValue(kvp.Key, out SchemaElement? value))
             {
-                returnValue &= value.MatchesSchema(kvp.Value, validator, errorCollector);
+                returnValue &= value.MatchesSchema(kvp.Value, matchKind, validator, errorCollector);
             }
             else
             {
@@ -113,6 +114,25 @@ public class MapSchemaElement : SchemaElement
                     kvp.Value.GetDocumentPath());
 
                 returnValue = false;
+            }
+        }
+
+        if (matchKind == MatchKind.Strict)
+        {
+            // We've already validated that the element is a strict subset of the template.
+            // However, we now need to do the reverse and validate that the element is a complete
+            // subset. We can do this with a simple count, but that produces an error message that is
+            // not helpful.
+            HashSet<XName> childNames = new(this.children.Where(x => !x.Value.Optional).Select(x => x.Key));
+
+            // childNames now contains things that we expect but are not present in the proposed element.
+            childNames.ExceptWith(map.Keys);
+
+            if (childNames.Count > 0)
+            {
+                errorCollector.Error(
+                    $"Schema mismatch. Missing children: {string.Join(",", childNames)}",
+                    element.GetDocumentPath());
             }
         }
 
