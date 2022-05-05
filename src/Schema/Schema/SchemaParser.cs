@@ -27,6 +27,14 @@ public static class SchemaParser
         return true;
     }
 
+    private static SchemaElement Parse(
+        SchemaElement? element,
+        XElement xElement,
+        IErrorCollector errorCollector)
+    {
+
+    }
+
     private static SchemaElement Classify(
         SchemaElement? parent,
         XElement xElement,

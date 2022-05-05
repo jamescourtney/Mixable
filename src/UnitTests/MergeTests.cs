@@ -38,6 +38,7 @@ public class MergeTests
         </Item>
         <Item>
             <Value>2</Value>
+            <SomethingElse>11</SomethingElse>
         </Item>
         <Item>
             <Value>3</Value>

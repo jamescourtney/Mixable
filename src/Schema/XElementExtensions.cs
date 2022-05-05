@@ -1,20 +1,32 @@
-﻿using System.Linq;
-using System.Text;
+﻿using System.Text;
 
 namespace ConfiguratorDotNet.Schema;
 
-public static class Extensions
+/// <summary>
+/// Helpers for XElement.
+/// </summary>
+public static class XElementExtensions
 {
+    /// <summary>
+    /// Returns all direct child elements of the given node that match the given tag name.
+    /// </summary>
     public static IEnumerable<XElement> GetChildren(this XElement element, XName tagFilter)
     {
-        return element.Elements().OfType<XElement>().Where(x => x.Name == tagFilter);
+        return element.Elements().Where(x => x.Name == tagFilter);
     }
 
+    /// <summary>
+    /// Returns all child nodes of the given element.
+    /// </summary>
     public static IEnumerable<XElement> GetChildren(this XElement element)
     {
-        return element.Elements().OfType<XElement>();
+        return element.Elements();
     }
 
+    /// <summary>
+    /// Returns all child nodes of the given element, with the exception of those within
+    /// the <see cref="Constants.XMLNamespace"/> namespace.
+    /// </summary>
     public static IEnumerable<XElement> GetFilteredChildren(this XElement element)
     {
         return element
@@ -22,7 +34,16 @@ public static class Extensions
             .Where(x => x.Name.NamespaceName != Constants.XMLNamespace); // ignore our metadata namespace.
     }
 
-    public static string GetDocumentPath(this XElement element, Func<XName, string>? select = null, Func<XName, bool>? where = null)
+    /// <summary>
+    /// Returns a logical XPath for the given element.
+    /// </summary>
+    /// <param name="element">The element.</param>
+    /// <param name="select">A selector, to modify the component parts.</param>
+    /// <param name="where">A fitler, to ignore certain component parts.</param>
+    public static string GetDocumentPath(
+        this XElement element,
+        Func<XName, string>? select = null,
+        Func<XName, bool>? where = null)
     {
         static void Recurse(XElement? element, StringBuilder sb, Func<XName, string> select, Func<XName, bool> where)
         {

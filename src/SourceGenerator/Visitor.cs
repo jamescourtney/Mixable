@@ -61,7 +61,7 @@ public class SchemaVisitor : ISchemaVisitor<TypeContext>
             caseStatements.Add($"case \"{name}\": {{ child = this.{name}; return true; }}");
         }
 
-        this.StringBuilder.AppendLine($"public class {className}");
+        this.StringBuilder.AppendLine($"public partial class {className}");
         this.StringBuilder.AppendLine("{");
 
         foreach (string property in properties)
@@ -97,7 +97,6 @@ public class SchemaVisitor : ISchemaVisitor<TypeContext>
     }}
 
     ");
-
 
         this.StringBuilder.AppendLine("}");
 
