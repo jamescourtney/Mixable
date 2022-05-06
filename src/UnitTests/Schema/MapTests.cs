@@ -9,20 +9,18 @@ public class MapTests
         <cdn:NamespaceName>Foo.Bar.Baz</cdn:NamespaceName>
     </cdn:Metadata>
 
-    <Mapping>
-        <A>4</A>
-        <B>string</B>
-        <C>
-            <C>2.0</C>
-        </C>
-        <D>true</D>
-        <E cdn:Type=""string"">false</E>
-    </Mapping>
+    <A>4</A>
+    <B>string</B>
+    <C>
+        <C>2.0</C>
+    </C>
+    <D>true</D>
+    <E cdn:Type=""string"">false</E>
 </Configuration>
 ";
 
     [Fact]
-    public void Map_InvalidDefinition_DuplicateTags()
+    public void Parse_InvalidBaseSchema_DuplicateTags()
     {
         string xml =
 @"
@@ -47,5 +45,38 @@ public class MapTests
         Assert.False(wholeParser.TryParse(XDocument.Parse(xml), out _));
         Assert.Single(tec.Errors);
         Assert.Equal(("No ISchemaElementParser was able to parse the given node.", "/Configuration"), tec.Errors[0]);
+    }
+
+    [Fact]
+    public void Merge_Add_Derived_Key_Not_Allowed()
+    {
+        string overrideSchema =
+@"
+<Configuration xmlns:cdn=""http://configurator.net"">
+    <SomethingElse>Foo</SomethingElse>
+</Configuration>
+";
+        MergeHelpers.MergeInvalidSchema(
+            BaseXml,
+            overrideSchema,
+            "Merged schema contains key not present in base schema. Merging may not add new keys.",
+            "/Configuration/SomethingElse");
+    }
+
+    [Fact]
+    public void Merge_Duplicate_Derived_Keys_Not_Allowed()
+    {
+        string overrideSchema =
+@"
+<Configuration xmlns:cdn=""http://configurator.net"">
+    <A>3</A>
+    <A>5</A>
+</Configuration>
+";
+        MergeHelpers.MergeInvalidSchema(
+            BaseXml,
+            overrideSchema,
+            "Duplicate tag detected in map element",
+            "/Configuration/A");
     }
 }

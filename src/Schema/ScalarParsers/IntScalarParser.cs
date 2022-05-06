@@ -6,9 +6,4 @@ public class IntScalarParser : IScalarParser
     {
         return int.TryParse(value.Trim(), out _);
     }
-
-    public string GetParseInvocation(string valueParameterName)
-    {
-        return $"int.Parse({valueParameterName}.Trim().ToLowerInvariant())";
-    }
 }

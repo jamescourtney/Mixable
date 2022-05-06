@@ -10,8 +10,23 @@ public record struct MetadataAttributes
 
     public bool Optional { get; init; }
 
-    internal static MetadataAttributes Extract(XElement element)
+    internal static MetadataAttributes Extract(XElement element, IErrorCollector? errorCollector)
     {
+        ListMergePolicy? listMerge = null;
+        if (element.Attribute(Constants.Attributes.ListMerge)?.Value is string value)
+        {
+            if (Enum.TryParse<ListMergePolicy>(value, ignoreCase: true, out var listMergeValue))
+            {
+                listMerge = listMergeValue;
+            }
+            else
+            {
+                errorCollector?.Error(
+                    $"Unable to parse '{value}' as a list merge value. Valid values are: {string.Join(",", Enum.GetNames(typeof(ListMergePolicy)))}.",
+                    element.GetDocumentPath());
+            }
+        }
+
         return new MetadataAttributes
         {
             TypeName = element.Attribute(Constants.Attributes.Type)?.Value,
@@ -23,11 +38,7 @@ public record struct MetadataAttributes
                 _ => null,
             },
 
-            ListMergePolicy = element.Attribute(Constants.Attributes.ListMerge)?.Value?.ToLowerInvariant() switch
-            {
-                string s => (ListMergePolicy)Enum.Parse(typeof(ListMergePolicy), s, ignoreCase: true),
-                _ => null,
-            },
+            ListMergePolicy = listMerge,
 
             Optional = element.Attribute(Constants.Attributes.Optional)?.Value?.ToLowerInvariant() == "true",
         };
