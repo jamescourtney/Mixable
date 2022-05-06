@@ -28,10 +28,5 @@ namespace Foo.Bar.Baz.Bat
 {
     public partial class Configuration
     {
-        public void Something()
-        {
-            int i = this.Mapping.A;
-            return this.Mapping.C.C;
-        }
     }
 }
