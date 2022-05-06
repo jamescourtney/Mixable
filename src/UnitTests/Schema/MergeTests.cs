@@ -1,8 +1,3 @@
-using ConfiguratorDotNet.Schema;
-using System.Xml.Linq;
-using Xunit;
-using System.Collections.Generic;
-
 namespace UnitTests;
 
 public class MergeTests
@@ -103,7 +98,7 @@ public class MergeTests
   </FancyList>
 </Configuration>";
 
-        Merge(overrideSchema, expected);
+        MergeHelpers.Merge(BaseXml, overrideSchema, expected);
     }
 
     [Fact]
@@ -117,7 +112,8 @@ public class MergeTests
     </Mapping>
 </Configuration>
 ";
-        MergeInvalidSchema(
+        MergeHelpers.MergeInvalidSchema(
+            BaseXml,
             overrideSchema,
             "Failed to parse 'some string' as a type of 'int'.",
             "/Configuration/Mapping/A");
@@ -134,7 +130,8 @@ public class MergeTests
     </Mapping>
 </Configuration>
 ";
-        MergeInvalidSchema(
+        MergeHelpers.MergeInvalidSchema(
+            BaseXml,
             overrideSchema,
             "Derived schemas may not have the Type attribute defined.",
             "/Configuration/Mapping/A");
@@ -151,7 +148,8 @@ public class MergeTests
     </List>
 </Configuration>
 ";
-        MergeInvalidSchema(
+        MergeHelpers.MergeInvalidSchema(
+            BaseXml,
             overrideSchema,
             "Failed to parse '3.1' as a type of 'int'.",
             "/Configuration/List/Item");
@@ -169,7 +167,8 @@ public class MergeTests
     </List>
 </Configuration>
 ";
-        MergeInvalidSchema(
+        MergeHelpers.MergeInvalidSchema(
+            BaseXml,
             overrideSchema,
             "Expected tag name: 'Item'. Got: 'NewItem'.",
             "/Configuration/List/NewItem");
@@ -184,65 +183,10 @@ public class MergeTests
     <SomethingElse>Foo</SomethingElse>
 </Configuration>
 ";
-        MergeInvalidSchema(
+        MergeHelpers.MergeInvalidSchema(
+            BaseXml,
             overrideSchema,
             "Merged file contains key not present in base file. Merging may not add new keys.",
             "/Configuration/SomethingElse");
-    }
-
-    private static void MergeInvalidSchema(
-        string overrideXml,
-        string expectedError,
-        string expectedPath)
-    {
-        TestErrorCollector tec = new();
-
-        SchemaParser parser = new SchemaParser(tec);
-        Assert.True(parser.TryParse(XDocument.Parse(BaseXml), out var result));
-
-        XElement @override = XDocument.Parse(overrideXml).Root!;
-        Assert.False(result.MergeWith(@override, tec));
-
-        Assert.Contains(tec.Errors, x => x.path == expectedPath && x.msg == expectedError);
-    }
-
-    private static void Merge(string overrideXml, string expectedXml)
-    {
-        var tec = new TestErrorCollector();
-
-        SchemaParser parser = new SchemaParser(tec);
-        Assert.True(parser.TryParse(XDocument.Parse(BaseXml), out var result));
-
-        XElement @override = XDocument.Parse(overrideXml).Root!;
-        result!.MergeWith(@override, tec);
-
-        string merged = result.XmlElement.ToString();
-
-        Assert.Equal(expectedXml, merged);
-        Assert.False(tec.HasErrors);
-    }
-
-    private class TestErrorCollector : IErrorCollector
-    {
-        public List<(string msg, string? path)> Errors = new();
-        public List<(string msg, string? path)> Warnings = new();
-        public List<(string msg, string? path)> Infos = new();
-
-        public bool HasErrors => this.Errors.Count > 0;
-
-        public void Error(string message, string? path = null)
-        {
-            this.Errors.Add((message, path));
-        }
-
-        public void Info(string message, string? path = null)
-        {
-            this.Infos.Add((message, path));
-        }
-
-        public void Warning(string message, string? path = null)
-        {
-            this.Warnings.Add((message, path));
-        }
     }
 }
