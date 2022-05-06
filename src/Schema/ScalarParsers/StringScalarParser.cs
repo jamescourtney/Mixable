@@ -6,9 +6,4 @@ public class StringScalarParser : IScalarParser
     {
         return value is not null;
     }
-
-    public string GetParseInvocation(string valueParameterName)
-    {
-        return valueParameterName;
-    }
 }

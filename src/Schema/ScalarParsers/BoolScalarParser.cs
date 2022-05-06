@@ -10,9 +10,4 @@ public class BoolScalarParser : IScalarParser
             _ => false,
         };
     }
-
-    public string GetParseInvocation(string valueParameterName)
-    {
-        return $"bool.Parse({valueParameterName}.Trim().ToLowerInvariant())";
-    }
 }
