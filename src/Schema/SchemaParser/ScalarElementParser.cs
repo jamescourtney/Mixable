@@ -6,7 +6,20 @@ public class ScalarSchemaElementParser : ISchemaElementParser
         XElement node,
         MetadataAttributes metadataAttributes)
     {
-        return !node.GetChildren().Any();
+        if (node.GetChildren().Any())
+        {
+            // We don't deal with children!
+            return false;
+        }
+
+        if (metadataAttributes.TypeName is not null
+         && !ScalarType.TryGetExplicitScalarType(metadataAttributes.TypeName, out _))
+        {
+            // Type specified but we don't know about it => we can't parse it.
+            return false;
+        }
+
+        return true;
     }
 
     public SchemaElement Parse(
@@ -36,7 +49,7 @@ public class ScalarSchemaElementParser : ISchemaElementParser
             if (!scalarType.Parser.CanParse(node.Value))
             {
                 errorCollector.Error(
-                    $"Unable to find parse '{node.Value}' as a '{scalarType.TypeName}'.",
+                    $"Unable to parse '{node.Value}' as a '{scalarType.TypeName}'.",
                     node.GetDocumentPath());
             }
         }
