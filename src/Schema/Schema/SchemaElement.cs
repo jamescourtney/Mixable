@@ -15,7 +15,7 @@ public abstract class SchemaElement
     {
         this.Parent = parent;
         this.XmlElement = xElement;
-        this.Optional = MetadataAttributes.Extract(xElement).Optional;
+        this.Optional = MetadataAttributes.Extract(xElement, null).Optional;
     }
 
     /// <summary>

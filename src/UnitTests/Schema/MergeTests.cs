@@ -173,20 +173,4 @@ public class MergeTests
             "Expected tag name: 'Item'. Got: 'NewItem'.",
             "/Configuration/List/NewItem");
     }
-
-    [Fact]
-    public void Add_Key_To_Map_NotAllowed()
-    {
-        string overrideSchema =
-@"
-<Configuration xmlns:cdn=""http://configurator.net"">
-    <SomethingElse>Foo</SomethingElse>
-</Configuration>
-";
-        MergeHelpers.MergeInvalidSchema(
-            BaseXml,
-            overrideSchema,
-            "Merged file contains key not present in base file. Merging may not add new keys.",
-            "/Configuration/SomethingElse");
-    }
 }

@@ -51,6 +51,8 @@ public class MapSchemaElement : SchemaElement
                 errorCollector.Error(
                     "Duplicate tag detected in map element",
                     child.GetDocumentPath());
+
+                returnValue = false;
             }
             else
             {
@@ -67,7 +69,7 @@ public class MapSchemaElement : SchemaElement
             else
             {
                 errorCollector.Error(
-                    "Merged file contains key not present in base file. Merging may not add new keys.",
+                    "Merged schema contains key not present in base schema. Merging may not add new keys.",
                     kvp.Value.GetDocumentPath());
 
                 returnValue = false;
@@ -88,8 +90,10 @@ public class MapSchemaElement : SchemaElement
             if (childNames.Count > 0)
             {
                 errorCollector.Error(
-                    $"Schema mismatch. Missing children: {string.Join(",", childNames)}",
+                    $"Schema mismatch. Missing required children: {string.Join(",", childNames)}",
                     element.GetDocumentPath());
+
+                returnValue = false;
             }
         }
 

@@ -19,6 +19,7 @@ public class MergeHelpers
         Assert.True(parser.TryParse(XDocument.Parse(baseXml), out var result));
 
         XElement @override = XDocument.Parse(overrideXml).Root!;
+        Assert.NotNull(@override);
         Assert.False(result.MergeWith(@override, tec));
 
         Assert.Contains(tec.Errors, x => x.path == expectedPath && x.msg == expectedError);

@@ -4,7 +4,7 @@ internal class DerivedSchemaAttributeValidator : IAttributeValidator
 {
     public MetadataAttributes Validate(XElement element, IErrorCollector errorCollector)
     {
-        var attrs = MetadataAttributes.Extract(element);
+        var attrs = MetadataAttributes.Extract(element, errorCollector);
         var path = element.GetDocumentPath();
 
         if (attrs.List is not null)
