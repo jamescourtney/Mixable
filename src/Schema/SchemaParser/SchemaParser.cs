@@ -48,10 +48,17 @@ public class SchemaParser
         }
 
         root = this.Parse(null, document.Root);
+
+        if (this.ErrorCollector.HasErrors)
+        {
+            root = null;
+            return false;
+        }
+
         return true;
     }
 
-    private SchemaElement Parse(
+    internal SchemaElement Parse(
         SchemaElement? parent,
         XElement xElement)
     {

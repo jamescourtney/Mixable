@@ -33,49 +33,6 @@ public class MapSchemaElement : SchemaElement
         }
     }
 
-    public override bool Equals(SchemaElement? other)
-    {
-        if (other is not MapSchemaElement map)
-        {
-            return false;
-        }
-
-        if (map.children.Count != this.children.Count)
-        {
-            return false;
-        }
-
-        foreach (var kvp in this.children)
-        {
-            XName key = kvp.Key;
-            SchemaElement value = kvp.Value;
-
-            if (!map.children.TryGetValue(key, out SchemaElement? otherValue))
-            {
-                return false;
-            }
-
-            if (otherValue != value)
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    public override int GetHashCode()
-    {
-        int hash = this.children.Count;
-        foreach (var key in this.children)
-        {
-            hash <<= 6;
-            hash ^= key.GetHashCode();
-        }
-
-        return hash;
-    }
-
     protected internal override bool MatchesSchema(
         XElement element,
         MatchKind matchKind,

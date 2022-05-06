@@ -21,16 +21,6 @@ public class ScalarSchemaElement : SchemaElement
         return visitor.Accept(this);
     }
 
-    public override bool Equals(SchemaElement? other)
-    {
-        if (other is not ScalarSchemaElement scalar)
-        {
-            return false;
-        }
-
-        return scalar.ScalarType.TypeName == this.ScalarType.TypeName;
-    }
-
     protected internal override bool MatchesSchema(
         XElement element,
         MatchKind matchKind,
@@ -69,10 +59,5 @@ public class ScalarSchemaElement : SchemaElement
         IErrorCollector collector)
     {
         this.XmlElement.Value = element.Value;
-    }
-
-    public override int GetHashCode()
-    {
-        return this.ScalarType.TypeName.GetHashCode();
     }
 }

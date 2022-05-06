@@ -70,42 +70,5 @@ public abstract class SchemaElement
         IAttributeValidator validator,
         IErrorCollector errorCollector);
 
-    public static bool operator ==(SchemaElement? a, SchemaElement? b)
-    {
-        bool aNull = a is null;
-        bool bNull = b is null;
-
-        if (aNull != bNull)
-        {
-            return false;
-        }
-
-        if (aNull)
-        {
-            return true;
-        }
-
-        return a!.Equals(b);
-    }
-
-    public static bool operator !=(SchemaElement? a, SchemaElement? b)
-    {
-        return !(a == b);
-    }
-
-    public override bool Equals(object? obj)
-    {
-        if (obj is not SchemaElement otherSchema)
-        {
-            return false;
-        }
-
-        return this.Equals(otherSchema);
-    }
-
-    public abstract bool Equals(SchemaElement? other);
-
-    public override abstract int GetHashCode();
-
     public abstract T Accept<T>(ISchemaVisitor<T> visitor);
 }

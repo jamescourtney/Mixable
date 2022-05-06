@@ -66,32 +66,4 @@ public class ListSchemaElement : SchemaElement
             this.XmlElement.Add(child);
         }
     }
-
-    public override bool Equals(SchemaElement? other)
-    {
-        if (other is not ListSchemaElement list)
-        {
-            return false;
-        }
-
-        bool thisHasChildren = this.Template is not null;
-        bool otherHasChildren = list.Template is not null;
-
-        if (thisHasChildren != otherHasChildren)
-        {
-            return false;
-        }
-
-        if (!thisHasChildren)
-        {
-            return true;
-        }
-
-        return this.Template == list.Template;
-    }
-
-    public override int GetHashCode()
-    {
-        return this.Template.GetHashCode() ^ "List".GetHashCode();
-    }
 }
