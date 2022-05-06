@@ -18,10 +18,13 @@ public class ScalarTests
         Assert.Single(tec.Errors, ("Unable to find explicit scalar type 'long'.", "/Configuration/Scalar"));
     }
 
-    [Fact]
-    public void Parse_ValidExplicitType_ValueNotParseable()
+    [Theory]
+    [InlineData("foo", "int")]
+    [InlineData("foo", "bool")]
+    [InlineData("foo", "double")]
+    public void Parse_ValidExplicitType_ValueNotParseable(string value, string explicitType)
     {
-        XDocument doc = CreateXml("foo", "int");
+        XDocument doc = CreateXml(value, explicitType);
         XElement element = doc.XPathSelectElement("/Configuration/Scalar");
 
         ScalarSchemaElementParser parser = new();
@@ -31,7 +34,7 @@ public class ScalarTests
         parser.Parse(null, element, new BaseSchemaAttributeValidator(), tec, null);
 
         Assert.True(tec.HasErrors);
-        Assert.Single(tec.Errors, ("Unable to parse 'foo' as a 'int'.", "/Configuration/Scalar"));
+        Assert.Single(tec.Errors, ($"Unable to parse '{value}' as a '{explicitType}'.", "/Configuration/Scalar"));
     }
 
     [Theory]
