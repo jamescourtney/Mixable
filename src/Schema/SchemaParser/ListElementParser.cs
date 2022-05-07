@@ -75,7 +75,7 @@ public class ListSchemaElementParser : ISchemaElementParser
             {
                 errorCollector.Error(
                     "Lists may only have a single template node.",
-                    firstTemplate.GetDocumentPath());
+                    node.GetDocumentPath());
             }
 
             var templateChildren  = firstTemplate.GetFilteredChildren();
@@ -85,7 +85,7 @@ public class ListSchemaElementParser : ISchemaElementParser
             {
                 errorCollector.Error(
                     "List templates must have exactly one child element.",
-                    firstTemplate.GetDocumentPath());
+                    node.GetDocumentPath());
             }
 
             return templateChildren.FirstOrDefault();

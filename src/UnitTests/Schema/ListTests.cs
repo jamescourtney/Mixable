@@ -63,6 +63,83 @@ public class ListTests
     }
 
     [Fact]
+    public void Parse_InvalidListSchema_MultipleTemplateNodes()
+    {
+        string xml =
+@"
+<Configuration xmlns:cdn=""http://configurator.net"">
+    <cdn:Metadata />
+
+    <List>
+        <cdn:ListItemTemplate>
+            <Item>4</Item>
+        </cdn:ListItemTemplate>
+        <cdn:ListItemTemplate>
+            <Item>4</Item>
+        </cdn:ListItemTemplate>
+    </List>
+</Configuration>
+";
+        TestErrorCollector tec = new();
+
+        ListSchemaElementParser parser = new ListSchemaElementParser();
+
+        var root = XDocument.Parse(xml).XPathSelectElement("/Configuration/List");
+
+        Assert.True(parser.CanParse(root, default));
+        parser.Parse(root, new BaseSchemaAttributeValidator(), tec, n => new ScalarSchemaElement(ScalarType.String, n));
+        Assert.Single(tec.Errors, ("Lists may only have a single template node.", "/Configuration/List"));
+
+        tec.Reset();
+        SchemaParser wholeParser = new(tec);
+        Assert.False(wholeParser.TryParse(XDocument.Parse(xml), out _));
+        Assert.Single(tec.Errors, ("Lists may only have a single template node.", "/Configuration/List"));
+    }
+
+    [Fact]
+    public void Parse_InvalidListSchema_EmptyTemplateNode()
+    {
+        string xml =
+@"
+<Configuration xmlns:cdn=""http://configurator.net"">
+    <cdn:Metadata />
+
+    <List>
+        <cdn:ListItemTemplate />
+    </List>
+</Configuration>
+";
+        TestErrorCollector tec = new();
+
+        SchemaParser wholeParser = new(tec);
+        Assert.False(wholeParser.TryParse(XDocument.Parse(xml), out _));
+        Assert.Single(tec.Errors, ("List templates must have exactly one child element.", "/Configuration/List"));
+    }
+
+    [Fact]
+    public void Parse_InvalidListSchema_InvalidTemplateNode()
+    {
+        string xml =
+@"
+<Configuration xmlns:cdn=""http://configurator.net"">
+    <cdn:Metadata />
+
+    <List>
+        <cdn:ListItemTemplate>
+            <Item1>4</Item1>
+            <Item2>4</Item2>
+        </cdn:ListItemTemplate>
+    </List>
+</Configuration>
+";
+        TestErrorCollector tec = new();
+
+        SchemaParser wholeParser = new(tec);
+        Assert.False(wholeParser.TryParse(XDocument.Parse(xml), out _));
+        Assert.Single(tec.Errors, ("List templates must have exactly one child element.", "/Configuration/List"));
+    }
+
+    [Fact]
     public void Merge_List_InvalidMergeStrategy()
     {
         string overrideSchema =
