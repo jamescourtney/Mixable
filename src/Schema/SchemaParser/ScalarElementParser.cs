@@ -19,11 +19,16 @@ public class ScalarSchemaElementParser : ISchemaElementParser
             return false;
         }
 
+        // Empty lists can look like scalars.
+        if (metadataAttributes.List == true)
+        {
+            return false;
+        }
+
         return true;
     }
 
     public SchemaElement Parse(
-        SchemaElement? parent,
         XElement node,
         IAttributeValidator attributeValidator,
         IErrorCollector errorCollector,
@@ -58,7 +63,6 @@ public class ScalarSchemaElementParser : ISchemaElementParser
         // and more errors to be collected.
         return new ScalarSchemaElement(
             scalarType ?? ScalarType.String,
-            parent,
             node);
     }
 }

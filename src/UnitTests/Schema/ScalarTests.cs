@@ -12,7 +12,7 @@ public class ScalarTests
         Assert.False(parser.CanParse(element, MetadataAttributes.Extract(element, null)));
 
         TestErrorCollector tec = new();
-        parser.Parse(null, element, new BaseSchemaAttributeValidator(), tec, null);
+        parser.Parse(element, new BaseSchemaAttributeValidator(), tec, null);
 
         Assert.True(tec.HasErrors);
         Assert.Single(tec.Errors, ("Unable to find explicit scalar type 'long'.", "/Configuration/Scalar"));
@@ -31,7 +31,7 @@ public class ScalarTests
         Assert.True(parser.CanParse(element, MetadataAttributes.Extract(element, null)));
 
         TestErrorCollector tec = new();
-        parser.Parse(null, element, new BaseSchemaAttributeValidator(), tec, null);
+        parser.Parse(element, new BaseSchemaAttributeValidator(), tec, null);
 
         Assert.True(tec.HasErrors);
         Assert.Single(tec.Errors, ($"Unable to parse '{value}' as a '{explicitType}'.", "/Configuration/Scalar"));
@@ -52,7 +52,7 @@ public class ScalarTests
         Assert.True(parser.CanParse(element, MetadataAttributes.Extract(element, null)));
 
         TestErrorCollector tec = new();
-        var parsed = Assert.IsType<ScalarSchemaElement>(parser.Parse(null, element, new BaseSchemaAttributeValidator(), tec, null));
+        var parsed = Assert.IsType<ScalarSchemaElement>(parser.Parse(element, new BaseSchemaAttributeValidator(), tec, null));
 
         Assert.False(tec.HasErrors);
         Assert.Equal(expectedType, parsed.ScalarType.TypeName);

@@ -21,18 +21,17 @@ public class MapSchemaElementParser : ISchemaElementParser
     }
 
     public SchemaElement Parse(
-        SchemaElement? parent,
         XElement node,
         IAttributeValidator attributeValidator,
         IErrorCollector errorCollector,
         ParseCallback parseChild)
     {
-        MapSchemaElement mapElement = new(parent, node);
+        MapSchemaElement mapElement = new(node);
 
         foreach (var child in node.GetFilteredChildren())
         {
             mapElement.AddChild(
-                parseChild(mapElement, child),
+                parseChild(child),
                 errorCollector);
         }
 

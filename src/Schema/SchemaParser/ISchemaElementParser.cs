@@ -3,9 +3,7 @@
 /// <summary>
 /// A callback to parse an XElement.
 /// </summary>
-public delegate SchemaElement ParseCallback(
-    SchemaElement? parent,
-    XElement node);
+public delegate SchemaElement ParseCallback(XElement node);
 
 /// <summary>
 /// Parser implementation for a single type of Schema Element.
@@ -22,7 +20,6 @@ public interface ISchemaElementParser
     /// Parses the given <paramref name="node"/> as a Schema Element.
     /// </summary>
     SchemaElement Parse(
-        SchemaElement? parent,
         XElement node,
         IAttributeValidator attributeValidator,
         IErrorCollector errorCollector,

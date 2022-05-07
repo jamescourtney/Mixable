@@ -50,7 +50,7 @@ public class ListTests
         var root = XDocument.Parse(xml).XPathSelectElement("/Configuration/List");
 
         Assert.False(parser.CanParse(root, default));
-        parser.Parse(null, root, new BaseSchemaAttributeValidator(), tec, (a, b) => new ScalarSchemaElement(ScalarType.String, a, b));
+        parser.Parse(root, new BaseSchemaAttributeValidator(), tec, n => new ScalarSchemaElement(ScalarType.String, n));
         Assert.Single(tec.Errors);
         Assert.Equal(("Expected tag name: 'Item1'. Got: 'Item2'.", "/Configuration/List/Item2"), tec.Errors[0]);
 
@@ -97,5 +97,74 @@ public class ListTests
             overrideSchema,
             "Schema mismatch. Missing required children: B",
             "/Configuration/List/Item");
+    }
+
+    [Fact]
+    public void List_With_Explicit_Tag_No_Template()
+    {
+        string schema =
+@"
+<Configuration xmlns:cdn=""http://configurator.net"">
+    <cdn:Metadata>
+        <cdn:NamespaceName>Foo.Bar.Baz</cdn:NamespaceName>
+    </cdn:Metadata>
+    <List cdn:List=""true"" />
+</Configuration>
+";
+
+        XDocument doc = XDocument.Parse(schema);
+        XElement element = doc.XPathSelectElement("/Configuration/List");
+
+        ListSchemaElementParser parser = new();
+        Assert.True(parser.CanParse(element, MetadataAttributes.Extract(element, null)));
+
+        TestErrorCollector tec = new();
+        Assert.False(new SchemaParser(tec).TryParse(doc, out SchemaElement? root));
+
+        Assert.Single(
+            tec.Errors,
+            ("Couldn't determine type of list item. Lists must include at least one represenative node or a Template element.", "/Configuration/List"));
+    }
+
+    [Fact]
+    public void List_With_Explicit_Tag()
+    {
+        string schema =
+@"
+<Configuration xmlns:cdn=""http://configurator.net"">
+    <cdn:Metadata>
+        <cdn:NamespaceName>Foo.Bar.Baz</cdn:NamespaceName>
+    </cdn:Metadata>
+    <List cdn:List=""true"">
+        <Item>
+            <A>6</A>
+            <C>foobar</C>
+        </Item>
+    </List>
+</Configuration>
+";
+
+        XDocument doc = XDocument.Parse(schema);
+        XElement element = doc.XPathSelectElement("/Configuration/List");
+
+        ListSchemaElementParser parser = new();
+        Assert.True(parser.CanParse(element, MetadataAttributes.Extract(element, null)));
+
+        TestErrorCollector tec = new();
+
+        Assert.True(new SchemaParser(tec).TryParse(doc, out SchemaElement? root));
+        Assert.NotNull(root);
+
+        var map = Assert.IsType<MapSchemaElement>(root);
+        var list = Assert.IsType<ListSchemaElement>(map.Children.Single().Value);
+        var template = Assert.IsType<MapSchemaElement>(list.Template);
+
+        Assert.Equal(
+            Assert.IsType<ScalarSchemaElement>(template.Children[XName.Get("A")]).ScalarType,
+            ScalarType.Int);
+
+        Assert.Equal(
+            Assert.IsType<ScalarSchemaElement>(template.Children[XName.Get("C")]).ScalarType,
+            ScalarType.String);
     }
 }
