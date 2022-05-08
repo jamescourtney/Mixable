@@ -1,7 +1,7 @@
 ﻿namespace Mixable.Schema;
 
 /// <summary>
-/// Describes metadata about a document and how CDN should process it.
+/// Describes metadata about a document and how Mixable should process it.
 /// </summary>
 public class DocumentMetadata
 {
@@ -60,14 +60,14 @@ public class DocumentMetadata
 
         if (metadataElements is null || !metadataElements.Any())
         {
-            errorCollector.Error("Unable to find CDN metadata node. The CDN metadata node is required.");
+            errorCollector.Error("Unable to find Mixable metadata node. The metadata node is required.");
             metadata = null;
             return false;
         }
 
         if (metadataElements.Count() != 1)
         {
-            errorCollector.Error("Only one CDN metadata node may be specified.");
+            errorCollector.Error("Only one Mixable metadata node may be specified.");
             metadata = null;
             return false;
         }

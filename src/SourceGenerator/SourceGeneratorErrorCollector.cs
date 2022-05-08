@@ -21,8 +21,8 @@ internal record SourceGeneratorErrorCollector : IErrorCollector
         this.HasErrors = true;
 
         this.context.ReportDiagnostic(Diagnostic.Create(
-            "CDN0001",
-            "ConfiguratorDotNet",
+            "MX0001",
+            "Mixable",
             $"Message = '{message}' Path = '{path}'",
             severity: DiagnosticSeverity.Error,
             defaultSeverity: DiagnosticSeverity.Error,
@@ -35,8 +35,8 @@ internal record SourceGeneratorErrorCollector : IErrorCollector
     public void Info(string message, string? path = null)
     {
         this.context.ReportDiagnostic(Diagnostic.Create(
-            "CDN0003",
-            "ConfiguratorDotNet",
+            "MX0003",
+            "Mixable",
             $"Message = '{message}' Path = '{path}'",
             severity: DiagnosticSeverity.Info,
             defaultSeverity: DiagnosticSeverity.Info,
@@ -49,8 +49,8 @@ internal record SourceGeneratorErrorCollector : IErrorCollector
     public void Warning(string message, string? path = null)
     {
         this.context.ReportDiagnostic(Diagnostic.Create(
-            "CDN0002",
-            "ConfiguratorDotNet",
+            "MX0002",
+            "Mixable",
             $"Message = '{message}' Path = '{path}'",
             severity: DiagnosticSeverity.Warning,
             defaultSeverity: DiagnosticSeverity.Warning,

@@ -16,11 +16,11 @@
 
 #if NETSTANDARD2_0
 
-global using NotNullWhenAttribute = ConfiguratorDotNet.Polyfills.NotNullWhenAttribute;
-global using DoesNotReturnIfAttribute = ConfiguratorDotNet.Polyfills.DoesNotReturnIfAttribute;
-global using NotNullIfNotNullAttribute = ConfiguratorDotNet.Polyfills.NotNullIfNotNullAttribute;
+global using NotNullWhenAttribute = Mixable.Polyfills.NotNullWhenAttribute;
+global using DoesNotReturnIfAttribute = Mixable.Polyfills.DoesNotReturnIfAttribute;
+global using NotNullIfNotNullAttribute = Mixable.Polyfills.NotNullIfNotNullAttribute;
 
-namespace ConfiguratorDotNet.Polyfills
+namespace Mixable.Polyfills
 {
     [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false, Inherited = true)]
     internal class NotNullWhenAttribute : Attribute

@@ -63,15 +63,15 @@ public class ScalarTests
         string explicitTypeAttribute = string.Empty;
         if (!string.IsNullOrEmpty(explicitType))
         {
-            explicitTypeAttribute = $"cdn:Type=\"{explicitType}\"";
+            explicitTypeAttribute = $"mx:Type=\"{explicitType}\"";
         }
 
         return XDocument.Parse(
             $@"
-            <Configuration xmlns:cdn=""http://configurator.net"">
-                <cdn:Metadata>
-                    <cdn:NamespaceName>Foo.Bar.Baz</cdn:NamespaceName>
-                </cdn:Metadata>
+            <Configuration xmlns:mx=""https://github.com/jamescourtney/mixable"">
+                <mx:Metadata>
+                    <mx:NamespaceName>Foo.Bar.Baz</mx:NamespaceName>
+                </mx:Metadata>
                 <Scalar {explicitTypeAttribute}>{value}</Scalar>
             </Configuration>
             ");

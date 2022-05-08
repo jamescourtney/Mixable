@@ -4,10 +4,10 @@ public class MergeTests
 {
     private const string BaseXml =
 @"
-<Configuration xmlns:cdn=""http://configurator.net"">
-    <cdn:Metadata>
-        <cdn:NamespaceName>Foo.Bar.Baz</cdn:NamespaceName>
-    </cdn:Metadata>
+<Configuration xmlns:mx=""https://github.com/jamescourtney/mixable"">
+    <mx:Metadata>
+        <mx:NamespaceName>Foo.Bar.Baz</mx:NamespaceName>
+    </mx:Metadata>
 
     <Mapping>
         <A>4</A>
@@ -22,12 +22,12 @@ public class MergeTests
         <Item>3</Item>
     </List>
     <FancyList>
-        <cdn:ListItemTemplate>
+        <mx:ListItemTemplate>
             <Item>
-                <Value cdn:Type=""double"">0</Value>
-                <SomethingElse cdn:Optional=""true"">0</SomethingElse>
+                <Value mx:Type=""double"">0</Value>
+                <SomethingElse mx:Optional=""true"">0</SomethingElse>
             </Item>
-        </cdn:ListItemTemplate>
+        </mx:ListItemTemplate>
         <Item>
             <Value>1</Value>
         </Item>
@@ -47,10 +47,10 @@ public class MergeTests
     {
         string overrideSchema =
 @"
-<Configuration xmlns:cdn=""http://configurator.net"">
-    <cdn:Metadata>
-        <cdn:BaseFile>base.xml</cdn:BaseFile>
-    </cdn:Metadata>
+<Configuration xmlns:mx=""https://github.com/jamescourtney/mixable"">
+    <mx:Metadata>
+        <mx:BaseFile>base.xml</mx:BaseFile>
+    </mx:Metadata>
 
     <List>
        <Item>4</Item>
@@ -60,7 +60,7 @@ public class MergeTests
         <A>5</A>
     </Mapping>
 
-    <FancyList cdn:ListMerge=""Replace"">
+    <FancyList mx:ListMerge=""Replace"">
         <Item>
             <Value>2.3</Value>
             <SomethingElse>10</SomethingElse>
@@ -70,10 +70,10 @@ public class MergeTests
 </Configuration>
 ";
         string expected =
-@"<Configuration xmlns:cdn=""http://configurator.net"">
-  <cdn:Metadata>
-    <cdn:NamespaceName>Foo.Bar.Baz</cdn:NamespaceName>
-  </cdn:Metadata>
+@"<Configuration xmlns:mx=""https://github.com/jamescourtney/mixable"">
+  <mx:Metadata>
+    <mx:NamespaceName>Foo.Bar.Baz</mx:NamespaceName>
+  </mx:Metadata>
   <Mapping>
     <A>5</A>
     <B>string</B>
@@ -106,7 +106,7 @@ public class MergeTests
     {
         string overrideSchema =
 @"
-<Configuration xmlns:cdn=""http://configurator.net"">
+<Configuration xmlns:mx=""https://github.com/jamescourtney/mixable"">
     <Mapping>
         <A>some string</A>
     </Mapping>
@@ -124,9 +124,9 @@ public class MergeTests
     {
         string overrideSchema =
 @"
-<Configuration xmlns:cdn=""http://configurator.net"">
+<Configuration xmlns:mx=""https://github.com/jamescourtney/mixable"">
     <Mapping>
-        <A cdn:Type=""bool"">true</A>
+        <A mx:Type=""bool"">true</A>
     </Mapping>
 </Configuration>
 ";
@@ -142,7 +142,7 @@ public class MergeTests
     {
         string overrideSchema =
 @"
-<Configuration xmlns:cdn=""http://configurator.net"">
+<Configuration xmlns:mx=""https://github.com/jamescourtney/mixable"">
     <List>
         <Item>3.1</Item>
     </List>
@@ -161,7 +161,7 @@ public class MergeTests
     {
         string overrideSchema =
 @"
-<Configuration xmlns:cdn=""http://configurator.net"">
+<Configuration xmlns:mx=""https://github.com/jamescourtney/mixable"">
     <List>
         <NewItem>3.1</NewItem>
     </List>

@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Configuration xmlns:cdn="http://configurator.net">
-  <cdn:Metadata>
-    <cdn:NamespaceName>Foo.Bar.Baz.Bat</cdn:NamespaceName>
-    <cdn:GenerateCSharp>true</cdn:GenerateCSharp>
-  </cdn:Metadata>
+<Configuration xmlns:mx="https://github.com/jamescourtney/mixable">
+  <mx:Metadata>
+    <mx:NamespaceName>Foo.Bar.Baz.Bat</mx:NamespaceName>
+    <mx:GenerateCSharp>true</mx:GenerateCSharp>
+  </mx:Metadata>
   <Mapping>
     <A>10</A>
     <B>string</B>

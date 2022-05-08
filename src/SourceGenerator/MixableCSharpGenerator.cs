@@ -15,7 +15,7 @@ public class MixableCSharpGenerator : ISourceGenerator
         {
             try
             {
-                if (additionalFile.Path.ToLowerInvariant().EndsWith(".cdn.xml"))
+                if (additionalFile.Path.ToLowerInvariant().EndsWith(".mxml"))
                 {
                     SourceGeneratorErrorCollector errorCollector = new SourceGeneratorErrorCollector(
                         ref context,
@@ -130,7 +130,7 @@ public class MixableCSharpGenerator : ISourceGenerator
         {
             // This is the bottom of the stack -- parse the base schema to build a
             // structure.
-            rootNamespace = metadata.NamespaceName ?? "ConfiguratorDotNet.Generated";
+            rootNamespace = metadata.NamespaceName ?? "Mixable.Generated";
 
             SchemaParser parser = new SchemaParser
             {

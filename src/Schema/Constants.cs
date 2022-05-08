@@ -2,7 +2,7 @@
 
 internal static class Constants
 {
-    public const string XMLNamespace = "http://configurator.net";
+    public const string XMLNamespace = "https://github.com/jamescourtney/mixable";
 
     public static class Tags
     {
