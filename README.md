@@ -42,6 +42,7 @@ Mixable input files end in the `.mxml` file extension. The first step is to defi
     <mx:NamespaceName>Some.Namespace</mx:NamespaceName>
     <mx:GenerateCSharp>true</mx:GenerateCSharp>
   </mx:Metadata>
+  
   <HttpListener>
     <ListeningPort>443</ListeningPort>
     <TlsCert>myfancydomain.com</TlsCert>
