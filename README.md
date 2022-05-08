@@ -18,6 +18,7 @@ flowchart LR
   
   subgraph Parsers
     csharp("Parser.cs")
+    python("Parser.py")
   end
   
   subgraph Merged ["Merged XML"]
