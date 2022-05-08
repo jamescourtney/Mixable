@@ -1,5 +1,3 @@
-using System.Xml.XPath;
-
 namespace UnitTests;
 
 public class ListTests

@@ -1,4 +1,4 @@
-﻿namespace ConfiguratorDotNet.Runtime;
+﻿namespace Mixable.Schema;
 
 public class DoubleScalarParser : IScalarParser
 {

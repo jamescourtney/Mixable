@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace ConfiguratorDotNet.Schema;
+namespace Mixable.Schema;
 
 /// <summary>
 /// Helpers for XElement.

@@ -1,4 +1,4 @@
-﻿namespace ConfiguratorDotNet.Schema;
+﻿namespace Mixable.Schema;
 
 public class ScalarSchemaElementParser : ISchemaElementParser
 {

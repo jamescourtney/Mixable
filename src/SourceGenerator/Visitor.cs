@@ -1,7 +1,7 @@
-﻿using ConfiguratorDotNet.Schema;
+﻿using Mixable.Schema;
 using System.Text;
 
-namespace SourceGenerator;
+namespace Mixable.SourceGenerator;
 
 public class TypeContext
 {
