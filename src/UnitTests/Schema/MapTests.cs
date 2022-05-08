@@ -36,15 +36,13 @@ public class MapTests
         MapSchemaElementParser parser = new MapSchemaElementParser();
         Assert.False(parser.CanParse(XDocument.Parse(xml).Root, default));
         parser.Parse(XDocument.Parse(xml).Root, new BaseSchemaAttributeValidator(), tec, n => new ScalarSchemaElement(ScalarType.String, n));
-        Assert.Single(tec.Errors);
-        Assert.Equal(("Duplicate tag name under map element", "/Configuration/A"), tec.Errors[0]);
+        Assert.Single(tec.Errors, ("Duplicate tag name under map element", "/Configuration/A"));
 
         tec.Reset();
         SchemaParser wholeParser = new(tec);
 
         Assert.False(wholeParser.TryParse(XDocument.Parse(xml), out _));
-        Assert.Single(tec.Errors);
-        Assert.Equal(("No ISchemaElementParser was able to parse the given node.", "/Configuration"), tec.Errors[0]);
+        Assert.Single(tec.Errors, ("No ISchemaElementParser was able to parse the given node.", "/Configuration"));
     }
 
     [Fact]

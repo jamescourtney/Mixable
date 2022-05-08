@@ -3,6 +3,7 @@
 /// <summary>
 /// A correct (but useless) implementation of IErrorCollector.
 /// </summary>
+[ExcludeFromCodeCoverage]
 internal class NoOpErrorCollector : IErrorCollector
 {
     public bool HasErrors { get; private set; }

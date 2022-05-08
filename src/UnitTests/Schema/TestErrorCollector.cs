@@ -2,9 +2,9 @@
 
 public class TestErrorCollector : IErrorCollector
 {
-    public List<(string msg, string? path)> Errors = new();
-    public List<(string msg, string? path)> Warnings = new();
-    public List<(string msg, string? path)> Infos = new();
+    public HashSet<(string msg, string? path)> Errors = new();
+    public HashSet<(string msg, string? path)> Warnings = new();
+    public HashSet<(string msg, string? path)> Infos = new();
 
     public bool HasErrors => this.Errors.Count > 0;
 

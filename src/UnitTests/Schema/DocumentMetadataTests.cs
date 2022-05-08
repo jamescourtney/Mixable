@@ -40,7 +40,6 @@ public class DocumentMetadataTests
         Assert.Single(tec.Errors, ("Namespace must be specified when 'GenerateCSharp' is true.", (string)null));
     }
 
-
     [Fact]
     public void MetadataWithCodeGen_WithBaseFile()
     {
