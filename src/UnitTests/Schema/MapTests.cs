@@ -4,10 +4,10 @@ public class MapTests
 {
     private const string BaseXml =
 @"
-<Configuration xmlns:cdn=""http://configurator.net"">
-    <cdn:Metadata>
-        <cdn:NamespaceName>Foo.Bar.Baz</cdn:NamespaceName>
-    </cdn:Metadata>
+<Configuration xmlns:mx=""https://github.com/jamescourtney/mixable"">
+    <mx:Metadata>
+        <mx:NamespaceName>Foo.Bar.Baz</mx:NamespaceName>
+    </mx:Metadata>
 
     <A>4</A>
     <B>string</B>
@@ -15,7 +15,7 @@ public class MapTests
         <C>2.0</C>
     </C>
     <D>true</D>
-    <E cdn:Type=""string"">false</E>
+    <E mx:Type=""string"">false</E>
 </Configuration>
 ";
 
@@ -24,8 +24,8 @@ public class MapTests
     {
         string xml =
 @"
-<Configuration xmlns:cdn=""http://configurator.net"">
-    <cdn:Metadata />
+<Configuration xmlns:mx=""https://github.com/jamescourtney/mixable"">
+    <mx:Metadata />
     <A>4</A>
     <B>string</B>
     <A>3</A>
@@ -52,7 +52,7 @@ public class MapTests
     {
         string overrideSchema =
 @"
-<Configuration xmlns:cdn=""http://configurator.net"">
+<Configuration xmlns:mx=""https://github.com/jamescourtney/mixable"">
     <SomethingElse>Foo</SomethingElse>
 </Configuration>
 ";
@@ -68,7 +68,7 @@ public class MapTests
     {
         string overrideSchema =
 @"
-<Configuration xmlns:cdn=""http://configurator.net"">
+<Configuration xmlns:mx=""https://github.com/jamescourtney/mixable"">
     <A>3</A>
     <A>5</A>
 </Configuration>

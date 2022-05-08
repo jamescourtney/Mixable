@@ -4,19 +4,19 @@ public class ListTests
 {
     private const string BaseXml =
 @"
-<Configuration xmlns:cdn=""http://configurator.net"">
-    <cdn:Metadata>
-        <cdn:NamespaceName>Foo.Bar.Baz</cdn:NamespaceName>
-    </cdn:Metadata>
+<Configuration xmlns:mx=""https://github.com/jamescourtney/mixable"">
+    <mx:Metadata>
+        <mx:NamespaceName>Foo.Bar.Baz</mx:NamespaceName>
+    </mx:Metadata>
 
     <List>
-        <cdn:ListItemTemplate>
+        <mx:ListItemTemplate>
             <Item>
                 <A>5</A>
                 <B>false</B>
-                <C cdn:Optional=""true"">string</C>
+                <C mx:Optional=""true"">string</C>
             </Item>
-        </cdn:ListItemTemplate>
+        </mx:ListItemTemplate>
         
         <Item>
             <A>4</A>
@@ -31,8 +31,8 @@ public class ListTests
     {
         string xml =
 @"
-<Configuration xmlns:cdn=""http://configurator.net"">
-    <cdn:Metadata />
+<Configuration xmlns:mx=""https://github.com/jamescourtney/mixable"">
+    <mx:Metadata />
 
     <List>
         <Item1>4</Item1>
@@ -65,16 +65,16 @@ public class ListTests
     {
         string xml =
 @"
-<Configuration xmlns:cdn=""http://configurator.net"">
-    <cdn:Metadata />
+<Configuration xmlns:mx=""https://github.com/jamescourtney/mixable"">
+    <mx:Metadata />
 
     <List>
-        <cdn:ListItemTemplate>
+        <mx:ListItemTemplate>
             <Item>4</Item>
-        </cdn:ListItemTemplate>
-        <cdn:ListItemTemplate>
+        </mx:ListItemTemplate>
+        <mx:ListItemTemplate>
             <Item>4</Item>
-        </cdn:ListItemTemplate>
+        </mx:ListItemTemplate>
     </List>
 </Configuration>
 ";
@@ -99,11 +99,11 @@ public class ListTests
     {
         string xml =
 @"
-<Configuration xmlns:cdn=""http://configurator.net"">
-    <cdn:Metadata />
+<Configuration xmlns:mx=""https://github.com/jamescourtney/mixable"">
+    <mx:Metadata />
 
     <List>
-        <cdn:ListItemTemplate />
+        <mx:ListItemTemplate />
     </List>
 </Configuration>
 ";
@@ -119,14 +119,14 @@ public class ListTests
     {
         string xml =
 @"
-<Configuration xmlns:cdn=""http://configurator.net"">
-    <cdn:Metadata />
+<Configuration xmlns:mx=""https://github.com/jamescourtney/mixable"">
+    <mx:Metadata />
 
     <List>
-        <cdn:ListItemTemplate>
+        <mx:ListItemTemplate>
             <Item1>4</Item1>
             <Item2>4</Item2>
-        </cdn:ListItemTemplate>
+        </mx:ListItemTemplate>
     </List>
 </Configuration>
 ";
@@ -142,8 +142,8 @@ public class ListTests
     {
         string overrideSchema =
 @"
-<Configuration xmlns:cdn=""http://configurator.net"">
-    <List cdn:ListMerge=""Invalid"" />
+<Configuration xmlns:mx=""https://github.com/jamescourtney/mixable"">
+    <List mx:ListMerge=""Invalid"" />
 </Configuration>
 ";
         MergeHelpers.MergeInvalidSchema(
@@ -158,7 +158,7 @@ public class ListTests
     {
         string overrideSchema =
 @"
-<Configuration xmlns:cdn=""http://configurator.net"">
+<Configuration xmlns:mx=""https://github.com/jamescourtney/mixable"">
     <List>
         <Item>
             <A>6</A>
@@ -179,11 +179,11 @@ public class ListTests
     {
         string schema =
 @"
-<Configuration xmlns:cdn=""http://configurator.net"">
-    <cdn:Metadata>
-        <cdn:NamespaceName>Foo.Bar.Baz</cdn:NamespaceName>
-    </cdn:Metadata>
-    <List cdn:List=""true"" />
+<Configuration xmlns:mx=""https://github.com/jamescourtney/mixable"">
+    <mx:Metadata>
+        <mx:NamespaceName>Foo.Bar.Baz</mx:NamespaceName>
+    </mx:Metadata>
+    <List mx:List=""true"" />
 </Configuration>
 ";
 
@@ -206,11 +206,11 @@ public class ListTests
     {
         string schema =
 @"
-<Configuration xmlns:cdn=""http://configurator.net"">
-    <cdn:Metadata>
-        <cdn:NamespaceName>Foo.Bar.Baz</cdn:NamespaceName>
-    </cdn:Metadata>
-    <List cdn:List=""true"">
+<Configuration xmlns:mx=""https://github.com/jamescourtney/mixable"">
+    <mx:Metadata>
+        <mx:NamespaceName>Foo.Bar.Baz</mx:NamespaceName>
+    </mx:Metadata>
+    <List mx:List=""true"">
         <Item>
             <A>6</A>
             <C>foobar</C>

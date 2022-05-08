@@ -1,8 +1,8 @@
-﻿<Configuration xmlns:cdn="http://configurator.net">
-    <cdn:Metadata>
-        <cdn:BaseFile>Base.cdn.xml</cdn:BaseFile>
-        <cdn:OutputXmlFile>Derived.xml</cdn:OutputXmlFile>
-    </cdn:Metadata>
+﻿<Configuration xmlns:mx="https://github.com/jamescourtney/mixable">
+    <mx:Metadata>
+        <mx:BaseFile>Base.cdn.xml</mx:BaseFile>
+        <mx:OutputXmlFile>Derived.xml</mx:OutputXmlFile>
+    </mx:Metadata>
 
     <Mapping>
         <A>10</A>
@@ -13,7 +13,7 @@
     <List>
         <Item>4</Item>
     </List>
-    <FancyList cdn:ListMerge="Concatenate">
+    <FancyList mx:ListMerge="Concatenate">
         <Item>
             <Value>12</Value>
         </Item>
