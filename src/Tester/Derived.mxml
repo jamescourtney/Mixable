@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Configuration xmlns:mx="https://github.com/jamescourtney/mixable">
   <mx:Metadata>
-    <mx:NamespaceName>Foo.Bar.Baz.Bat</mx:NamespaceName>
     <mx:BaseFile>Base.mxml</mx:BaseFile>
   </mx:Metadata>
   <Mapping>

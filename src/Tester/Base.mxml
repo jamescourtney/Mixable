@@ -20,7 +20,7 @@
         <mx:ListItemTemplate>
             <Item>
                 <Value mx:Type="int">0</Value>
-                <OtherValue mx:Type="int" mx:Optional="true">0</OtherValue>
+                <OtherValue mx:Type="int" mx:Flags="Optional">0</OtherValue>
             </Item>
         </mx:ListItemTemplate>
         
