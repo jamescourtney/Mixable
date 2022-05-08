@@ -6,9 +6,8 @@
 public class ListSchemaElement : SchemaElement
 {
     public ListSchemaElement(
-        SchemaElement? parent,
         XElement node,
-        SchemaElement templateChild) : base(parent, node)
+        SchemaElement templateChild) : base(node)
     {
         this.Template = templateChild;
     }

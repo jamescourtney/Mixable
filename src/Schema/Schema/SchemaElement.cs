@@ -11,17 +11,11 @@ public enum MatchKind
 /// </summary>
 public abstract class SchemaElement
 {
-    protected SchemaElement(SchemaElement? parent, XElement xElement)
+    protected SchemaElement(XElement xElement)
     {
-        this.Parent = parent;
         this.XmlElement = xElement;
         this.Optional = MetadataAttributes.Extract(xElement, null).Optional;
     }
-
-    /// <summary>
-    /// Reference to the parent.
-    /// </summary>
-    public SchemaElement? Parent { get; }
 
     /// <summary>
     /// The XML element associated with this schema element. Contents may change as merge operations

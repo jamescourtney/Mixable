@@ -6,11 +6,29 @@ public class ScalarSchemaElementParser : ISchemaElementParser
         XElement node,
         MetadataAttributes metadataAttributes)
     {
-        return !node.GetChildren().Any();
+        if (node.GetChildren().Any())
+        {
+            // We don't deal with children!
+            return false;
+        }
+
+        if (metadataAttributes.TypeName is not null
+         && !ScalarType.TryGetExplicitScalarType(metadataAttributes.TypeName, out _))
+        {
+            // Type specified but we don't know about it => we can't parse it.
+            return false;
+        }
+
+        // Empty lists can look like scalars.
+        if (metadataAttributes.List == true)
+        {
+            return false;
+        }
+
+        return true;
     }
 
     public SchemaElement Parse(
-        SchemaElement? parent,
         XElement node,
         IAttributeValidator attributeValidator,
         IErrorCollector errorCollector,
@@ -36,7 +54,7 @@ public class ScalarSchemaElementParser : ISchemaElementParser
             if (!scalarType.Parser.CanParse(node.Value))
             {
                 errorCollector.Error(
-                    $"Unable to find parse '{node.Value}' as a '{scalarType.TypeName}'.",
+                    $"Unable to parse '{node.Value}' as a '{scalarType.TypeName}'.",
                     node.GetDocumentPath());
             }
         }
@@ -45,7 +63,6 @@ public class ScalarSchemaElementParser : ISchemaElementParser
         // and more errors to be collected.
         return new ScalarSchemaElement(
             scalarType ?? ScalarType.String,
-            parent,
             node);
     }
 }

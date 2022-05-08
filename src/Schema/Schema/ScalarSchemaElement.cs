@@ -7,9 +7,8 @@ public class ScalarSchemaElement : SchemaElement
 {
     public ScalarSchemaElement(
         ScalarType scalarType,
-        SchemaElement? parent,
         XElement element)
-        : base(parent, element)
+        : base(element)
     {
         this.ScalarType = scalarType;
     }

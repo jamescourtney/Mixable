@@ -47,7 +47,7 @@ public class SchemaParser
             return false;
         }
 
-        root = this.Parse(null, document.Root);
+        root = this.Parse(document.Root);
 
         if (this.ErrorCollector.HasErrors)
         {
@@ -58,9 +58,7 @@ public class SchemaParser
         return true;
     }
 
-    internal SchemaElement Parse(
-        SchemaElement? parent,
-        XElement xElement)
+    internal SchemaElement Parse(XElement xElement)
     {
         ISchemaElementParser? firstParser = null;
         MetadataAttributes attributes = this.AttributeValidator.Validate(xElement, this.ErrorCollector);
@@ -83,11 +81,11 @@ public class SchemaParser
         if (firstParser is null)
         {
             this.ErrorCollector.Error("No ISchemaElementParser was able to parse the given node.", xElement.GetDocumentPath());
-            return new MapSchemaElement(parent, xElement); // no children though.
+            return new MapSchemaElement(xElement); // no children though.
         }
         else
         {
-            return firstParser.Parse(parent, xElement, this.AttributeValidator, this.ErrorCollector, this.Parse);
+            return firstParser.Parse(xElement, this.AttributeValidator, this.ErrorCollector, this.Parse);
         }
     }
 }

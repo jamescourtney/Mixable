@@ -9,55 +9,53 @@ public class ListSchemaElementParser : ISchemaElementParser
         XElement node,
         MetadataAttributes metadataAttributes)
     {
-        bool looksLikeList = false;
-
-        if (metadataAttributes.List == true)
+        // User said it's a list OR there's a list template child.
+        if (metadataAttributes.List == true ||
+            node.GetChildren(Constants.Tags.ListTemplateTagName).Any())
         {
-            // User told us it's a list. Trust them.
-            looksLikeList = true;
-        }
-        else if (node.GetChildren(Constants.Tags.ListTemplateTagName).Any())
-        {
-            // Had a template tag.
-            looksLikeList = true;
-        }
-        else
-        {
-            List<XElement> children = node.GetFilteredChildren().ToList();
-            int distinctTagNames = children.Select(x => x.Name).Distinct().Count();
-
-            // A single tag name and at least two children means a list.
-            looksLikeList = distinctTagNames == 1 && children.Count > 1;
+            return true;
         }
 
-        // If it looks like a list so far, go to the trouble of making sure we can extract the template.
-        if (looksLikeList)
+        List<XElement> children = node.GetFilteredChildren().ToList();
+        int distinctTagNames = children.Select(x => x.Name).Distinct().Count();
+
+        // A single tag name and at least two children means a list.
+        if (distinctTagNames == 1 && children.Count > 1)
         {
             NoOpErrorCollector ec = new();
-            if (this.GetTemplateNode(node, ec) is null || ec.HasErrors)
-            {
-                looksLikeList = false;
-            }
+            return this.GetTemplateNode(node, ec) is not null && !ec.HasErrors;
         }
 
-        return looksLikeList;
+        return false;
     }
 
     public SchemaElement Parse(
-        SchemaElement? parent,
         XElement node,
         IAttributeValidator attributeValidator,
         IErrorCollector errorCollector,
         ParseCallback parseChild)
     {
         // Grab the template.
-        XElement templateElement = this.GetTemplateNode(node, errorCollector)!; // Not null since we check up above.
+        XElement? templateElement = this.GetTemplateNode(node, errorCollector)!; // Not null since we check up above.
 
-        // Parse the template for structure.
-        SchemaElement template = parseChild(parent, templateElement);
+        SchemaElement template;
+        if (templateElement is not null)
+        {
+            // Parse the template for structure.
+            template = parseChild(templateElement);
+        }
+        else
+        {
+            errorCollector.Error(
+                "Couldn't determine type of list item. Lists must include at least one represenative node or a Template element.",
+                node.GetDocumentPath());
+
+            // Treat as map for the moment.
+            template = new MapSchemaElement(node);
+        }
 
         // Make a new list based on the template.
-        ListSchemaElement listElement = new(parent, node, template);
+        ListSchemaElement listElement = new(node, template);
 
         // Ensure all the current children match the schema.
         listElement.MatchesSchema(node, MatchKind.Strict, attributeValidator, errorCollector);
@@ -77,7 +75,7 @@ public class ListSchemaElementParser : ISchemaElementParser
             {
                 errorCollector.Error(
                     "Lists may only have a single template node.",
-                    firstTemplate.GetDocumentPath());
+                    node.GetDocumentPath());
             }
 
             var templateChildren  = firstTemplate.GetFilteredChildren();
@@ -87,7 +85,7 @@ public class ListSchemaElementParser : ISchemaElementParser
             {
                 errorCollector.Error(
                     "List templates must have exactly one child element.",
-                    firstTemplate.GetDocumentPath());
+                    node.GetDocumentPath());
             }
 
             return templateChildren.FirstOrDefault();

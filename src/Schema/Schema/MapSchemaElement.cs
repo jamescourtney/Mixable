@@ -7,12 +7,12 @@ public class MapSchemaElement : SchemaElement
 {
     private readonly Dictionary<XName, SchemaElement> children = new();
 
-    public MapSchemaElement(SchemaElement? parent, XElement node) 
-        : base(parent, node)
+    public MapSchemaElement(XElement node) 
+        : base(node)
     {
     }
 
-    public IEnumerable<KeyValuePair<XName, SchemaElement>> Children => this.children;
+    public IReadOnlyDictionary<XName, SchemaElement> Children => this.children;
 
     public override T Accept<T>(ISchemaVisitor<T> visitor)
     {
