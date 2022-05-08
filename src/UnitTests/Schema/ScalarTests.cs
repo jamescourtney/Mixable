@@ -58,6 +58,22 @@ public class ScalarTests
         Assert.Equal(expectedType, parsed.ScalarType.TypeName);
     }
 
+    [Fact]
+    public void Merge_AddChildToScalar()
+    {
+        XDocument @base = CreateXml("string", null);
+
+        SchemaParser parser = new();
+        Assert.True(parser.TryParse(@base, out var root));
+
+        XDocument @override = XDocument.Parse($@"<Configuration><Scalar><Foo>4</Foo></Scalar></Configuration>");
+
+        TestErrorCollector tec = new();
+        Assert.False(root.MergeWith(@override.Root, tec));
+
+        Assert.Single(tec.Errors, ("Override schemas may not introduce children to scalar nodes.", "/Configuration/Scalar"));
+    }
+
     private static XDocument CreateXml(string value, string? explicitType)
     {
         string explicitTypeAttribute = string.Empty;
