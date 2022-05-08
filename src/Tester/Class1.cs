@@ -23,10 +23,3 @@ namespace Tester
         }
     }
 }
-
-namespace Foo.Bar.Baz.Bat
-{
-    public partial class Configuration
-    {
-    }
-}

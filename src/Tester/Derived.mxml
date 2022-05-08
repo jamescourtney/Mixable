@@ -2,7 +2,7 @@
 <Configuration xmlns:mx="https://github.com/jamescourtney/mixable">
   <mx:Metadata>
     <mx:NamespaceName>Foo.Bar.Baz.Bat</mx:NamespaceName>
-    <mx:GenerateCSharp>true</mx:GenerateCSharp>
+    <mx:BaseFile>Base.mxml</mx:BaseFile>
   </mx:Metadata>
   <Mapping>
     <A>10</A>
