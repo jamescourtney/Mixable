@@ -1,6 +1,6 @@
 ﻿<Configuration xmlns:mx="https://github.com/jamescourtney/mixable">
     <mx:Metadata>
-        <mx:BaseFile>Derived.cdn.xml</mx:BaseFile>
+        <mx:BaseFile>Derived.mxml</mx:BaseFile>
         <mx:OutputXmlFile>Derived2.xml</mx:OutputXmlFile>
     </mx:Metadata>
 
