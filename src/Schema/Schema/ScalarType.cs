@@ -8,25 +8,25 @@ public class ScalarType
     public static ScalarType Int { get; } = new()
     {
         Parser = new IntScalarParser(),
-        TypeName = "int",
+        Type = WellKnownType.Int,
     };
 
     public static ScalarType Double { get; } = new()
     {
         Parser = new DoubleScalarParser(),
-        TypeName = "double",
+        Type = WellKnownType.Double,
     };
 
     public static ScalarType Bool { get; } = new()
     {
         Parser = new BoolScalarParser(),
-        TypeName = "bool",
+        Type = WellKnownType.Bool,
     };
 
     public static ScalarType String { get; } = new()
     {
         Parser = new StringScalarParser(),
-        TypeName = "string",
+        Type = WellKnownType.String,
     };
 
     private static ScalarType[] PriorityOrder = new[] { Bool, Int, Double, String };
@@ -34,20 +34,17 @@ public class ScalarType
     private ScalarType()
     {
         this.Parser = null!;
-        this.TypeName = null!;
     }
 
     public IScalarParser Parser { get; private init; }
 
-    public string TypeName { get; private init; }
+    public WellKnownType Type { get; private init; }
 
-    public static bool TryGetExplicitScalarType(string explicitType, [NotNullWhen(true)] out ScalarType? type)
+    public static bool TryGetExplicitScalarType(WellKnownType wellKnownType, [NotNullWhen(true)] out ScalarType? type)
     {
-        explicitType = explicitType.ToLowerInvariant().Trim();
-
         foreach (var item in PriorityOrder)
         {
-            if (item.TypeName == explicitType)
+            if (wellKnownType == item.Type)
             {
                 type = item;
                 return true;

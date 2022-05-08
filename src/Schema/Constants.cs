@@ -25,8 +25,6 @@ internal static class Constants
 
         public static readonly XName Type = XName.Get("Type", XMLNamespace);
 
-        public static readonly XName List = XName.Get("List", XMLNamespace);
-
         public static readonly XName ListMerge = XName.Get("ListMerge", XMLNamespace);
     }
 }

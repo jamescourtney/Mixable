@@ -43,7 +43,7 @@ public class ScalarSchemaElement : SchemaElement
         if (!this.ScalarType.Parser.CanParse(element.Value))
         {
             errorCollector.Error(
-                $"Failed to parse '{element.Value}' as a type of '{this.ScalarType.TypeName}'.",
+                $"Failed to parse '{element.Value}' as a type of '{this.ScalarType.Type}'.",
                 this.XmlElement.GetDocumentPath());
 
             returnValue = false;

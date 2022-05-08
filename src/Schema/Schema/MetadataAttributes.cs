@@ -1,12 +1,33 @@
 ﻿namespace Mixable.Schema;
 
+public enum WellKnownType
+{
+    List = 0,
+    Int = 1,
+    String = 2,
+    Double = 3,
+    Bool = 4,
+    Map = 5,
+}
+
 public record struct MetadataAttributes
 {
-    public string? TypeName { get; init; }
+    public string? RawTypeName { get; init; }
+
+    public WellKnownType? WellKnownType
+    {
+        get
+        {
+            if (Enum.TryParse<WellKnownType>(this.RawTypeName, ignoreCase: true, out var result))
+            {
+                return result;
+            }
+
+            return null;
+        }
+    }
 
     public ListMergePolicy? ListMergePolicy { get; init; }
-
-    public bool? List { get; init; }
 
     public bool Optional { get; init; }
 
@@ -29,17 +50,8 @@ public record struct MetadataAttributes
 
         return new MetadataAttributes
         {
-            TypeName = element.Attribute(Constants.Attributes.Type)?.Value,
-
-            List = element.Attribute(Constants.Attributes.List)?.Value?.ToLowerInvariant() switch
-            {
-                "true" => true,
-                "false" => false,
-                _ => null,
-            },
-
+            RawTypeName = element.Attribute(Constants.Attributes.Type)?.Value,
             ListMergePolicy = listMerge,
-
             Optional = element.Attribute(Constants.Attributes.Optional)?.Value?.ToLowerInvariant() == "true",
         };
     }

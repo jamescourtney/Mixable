@@ -2,6 +2,13 @@
 
 public class MapSchemaElementParser : ISchemaElementParser
 {
+    public bool SupportsUnparsableWellKnownTypes => false;
+
+    public bool SupportsType(WellKnownType type)
+    {
+        return type == WellKnownType.Map;
+    }
+
     public bool CanParse(
         XElement node,
         MetadataAttributes metadataAttributes)

@@ -2,6 +2,13 @@
 
 public class ScalarSchemaElementParser : ISchemaElementParser
 {
+    public bool SupportsUnparsableWellKnownTypes => false;
+
+    public bool SupportsType(WellKnownType type)
+    {
+        return ScalarType.TryGetExplicitScalarType(type, out _);
+    }
+
     public bool CanParse(
         XElement node,
         MetadataAttributes metadataAttributes)
@@ -12,19 +19,15 @@ public class ScalarSchemaElementParser : ISchemaElementParser
             return false;
         }
 
-        if (metadataAttributes.TypeName is not null
-         && !ScalarType.TryGetExplicitScalarType(metadataAttributes.TypeName, out _))
+        if (metadataAttributes.WellKnownType is not null)
         {
-            // Type specified but we don't know about it => we can't parse it.
-            return false;
+            // If the type is specified, make sure it's a scalar before we commit
+            // to it.
+            return ScalarType.TryGetExplicitScalarType(metadataAttributes.WellKnownType.Value, out _);
         }
 
-        // Empty lists can look like scalars.
-        if (metadataAttributes.List == true)
-        {
-            return false;
-        }
-
+        // Otherwise, it's a node without children or an explicit type.
+        // it's a good bet that it's a a scalar.
         return true;
     }
 
@@ -38,14 +41,15 @@ public class ScalarSchemaElementParser : ISchemaElementParser
         MetadataAttributes metadataAttributes = attributeValidator.Validate(node, errorCollector);
 
         ScalarType? scalarType;
-        if (metadataAttributes.TypeName is null)
+
+        if (metadataAttributes.WellKnownType is null)
         {
             scalarType = ScalarType.GetInferredScalarType(node.Value);
         }
-        else if (!ScalarType.TryGetExplicitScalarType(metadataAttributes.TypeName, out scalarType))
+        else if (!ScalarType.TryGetExplicitScalarType(metadataAttributes.WellKnownType.Value, out scalarType))
         {
             errorCollector.Error(
-                $"Unable to find explicit scalar type '{metadataAttributes.TypeName}'.",
+                $"Unable to find explicit scalar type '{metadataAttributes.WellKnownType}'.",
                 node.GetDocumentPath());
         }
 
@@ -54,7 +58,7 @@ public class ScalarSchemaElementParser : ISchemaElementParser
             if (!scalarType.Parser.CanParse(node.Value))
             {
                 errorCollector.Error(
-                    $"Unable to parse '{node.Value}' as a '{scalarType.TypeName}'.",
+                    $"Unable to parse '{node.Value}' as a '{metadataAttributes.WellKnownType}'.",
                     node.GetDocumentPath());
             }
         }

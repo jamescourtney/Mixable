@@ -5,12 +5,19 @@
 /// </summary>
 public class ListSchemaElementParser : ISchemaElementParser
 {
+    public bool SupportsUnparsableWellKnownTypes => false;
+
+    public bool SupportsType(WellKnownType type)
+    {
+        return type == WellKnownType.List;
+    }
+
     public bool CanParse(
         XElement node,
         MetadataAttributes metadataAttributes)
     {
         // User said it's a list OR there's a list template child.
-        if (metadataAttributes.List == true ||
+        if (metadataAttributes.WellKnownType == WellKnownType.List ||
             node.GetChildren(Constants.Tags.ListTemplateTagName).Any())
         {
             return true;
