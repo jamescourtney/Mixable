@@ -115,7 +115,7 @@ public class MergeTests
         MergeHelpers.MergeInvalidSchema(
             BaseXml,
             overrideSchema,
-            "Failed to parse 'some string' as a type of 'int'.",
+            "Failed to parse 'some string' as a type of 'Int'.",
             "/Configuration/Mapping/A");
     }
 
@@ -151,7 +151,7 @@ public class MergeTests
         MergeHelpers.MergeInvalidSchema(
             BaseXml,
             overrideSchema,
-            "Failed to parse '3.1' as a type of 'int'.",
+            "Failed to parse '3.1' as a type of 'Int'.",
             "/Configuration/List/Item");
     }
 

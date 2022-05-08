@@ -42,7 +42,7 @@ public class MapTests
         SchemaParser wholeParser = new(tec);
 
         Assert.False(wholeParser.TryParse(XDocument.Parse(xml), out _));
-        Assert.Single(tec.Errors, ("No ISchemaElementParser was able to parse the given node.", "/Configuration"));
+        Assert.Single(tec.Errors, ("Mixable was unable to build a schema for the XML. Consider adding the Mixable 'Type' attribute to tell Mixable how to interpet the schema. Suggestions are: List, Int, String, Double, Bool, Map", "/Configuration"));
     }
 
     [Fact]

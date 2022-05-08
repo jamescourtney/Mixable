@@ -110,7 +110,7 @@ public class SchemaVisitor : ISchemaVisitor<TypeContext>
     {
         return new TypeContext
         {
-            TypeName = scalar.ScalarType.TypeName
+            TypeName = scalar.ScalarType.Type.ToString().ToLowerInvariant(),
         };
     }
 

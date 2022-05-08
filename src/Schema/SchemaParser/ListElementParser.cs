@@ -5,12 +5,23 @@
 /// </summary>
 public class ListSchemaElementParser : ISchemaElementParser
 {
+    public bool SupportsUnparsableWellKnownTypes => false;
+
+    public bool SupportsType(WellKnownType type)
+    {
+        return type == WellKnownType.List;
+    }
+
     public bool CanParse(
         XElement node,
         MetadataAttributes metadataAttributes)
     {
+        MixableInternal.Assert(
+            metadataAttributes.WellKnownType is null or WellKnownType.List,
+            "Expecting null or list");
+
         // User said it's a list OR there's a list template child.
-        if (metadataAttributes.List == true ||
+        if (metadataAttributes.WellKnownType == WellKnownType.List ||
             node.GetChildren(Constants.Tags.ListTemplateTagName).Any())
         {
             return true;
@@ -35,6 +46,12 @@ public class ListSchemaElementParser : ISchemaElementParser
         IErrorCollector errorCollector,
         ParseCallback parseChild)
     {
+        var metadataAttributes = attributeValidator.Validate(node, errorCollector);
+
+        MixableInternal.Assert(
+            metadataAttributes.WellKnownType is null or WellKnownType.List,
+            "Expecting null or list");
+
         // Grab the template.
         XElement? templateElement = this.GetTemplateNode(node, errorCollector)!; // Not null since we check up above.
 

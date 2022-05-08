@@ -65,6 +65,23 @@ public class SchemaParser
 
         foreach (var parser in this.elementParsers)
         {
+            if (attributes.WellKnownType is not null)
+            {
+                if (!parser.SupportsType(attributes.WellKnownType.Value))
+                {
+                    // Can't handle the known type.
+                    continue;
+                }
+            }
+            else if (attributes.RawTypeName is not null)
+            {
+                // Type specified, but didn't parse out to a handler.
+                if (!parser.SupportsUnparsableWellKnownTypes)
+                {
+                    continue;
+                }
+            }
+
             if (parser.CanParse(xElement, attributes))
             {
                 if (firstParser is null)
@@ -80,7 +97,19 @@ public class SchemaParser
 
         if (firstParser is null)
         {
-            this.ErrorCollector.Error("No ISchemaElementParser was able to parse the given node.", xElement.GetDocumentPath());
+            if (attributes.RawTypeName is not null)
+            {
+                this.ErrorCollector.Error(
+                    $"Mixable was unable to build a schema for the XML. This may be because the Mixable 'Type' attribute is set to '{attributes.RawTypeName}' and there is no handler registered for this type.",
+                    xElement.GetDocumentPath());
+            }
+            else
+            {
+                this.ErrorCollector.Error(
+                    $"Mixable was unable to build a schema for the XML. Consider adding the Mixable 'Type' attribute to tell Mixable how to interpet the schema. Suggestions are: {string.Join(", ", Enum.GetNames(typeof(WellKnownType)))}",
+                    xElement.GetDocumentPath());
+            }
+            
             return new MapSchemaElement(xElement); // no children though.
         }
         else

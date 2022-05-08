@@ -2,10 +2,21 @@
 
 public class MapSchemaElementParser : ISchemaElementParser
 {
+    public bool SupportsUnparsableWellKnownTypes => false;
+
+    public bool SupportsType(WellKnownType type)
+    {
+        return type == WellKnownType.Map;
+    }
+
     public bool CanParse(
         XElement node,
         MetadataAttributes metadataAttributes)
     {
+        MixableInternal.Assert(
+            metadataAttributes.WellKnownType is null or WellKnownType.Map,
+            "Expecting null or map");
+
         IEnumerable<XElement> children = node.GetFilteredChildren();
 
         if (!children.Any())
@@ -26,6 +37,12 @@ public class MapSchemaElementParser : ISchemaElementParser
         IErrorCollector errorCollector,
         ParseCallback parseChild)
     {
+        var metadataAttributes = attributeValidator.Validate(node, errorCollector);
+
+        MixableInternal.Assert(
+            metadataAttributes.WellKnownType is null or WellKnownType.Map,
+            "Expecting null or map");
+
         MapSchemaElement mapElement = new(node);
 
         foreach (var child in node.GetFilteredChildren())

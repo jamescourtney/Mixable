@@ -55,7 +55,7 @@ public class ListTests
         SchemaParser wholeParser = new(tec);
 
         Assert.False(wholeParser.TryParse(XDocument.Parse(xml), out _));
-        Assert.Single(tec.Errors, ("No ISchemaElementParser was able to parse the given node.", "/Configuration/List"));
+        Assert.Single(tec.Errors, ("Mixable was unable to build a schema for the XML. Consider adding the Mixable 'Type' attribute to tell Mixable how to interpet the schema. Suggestions are: List, Int, String, Double, Bool, Map", "/Configuration/List"));
     }
 
     [Fact]
@@ -66,7 +66,7 @@ public class ListTests
 <Configuration xmlns:mx=""https://github.com/jamescourtney/mixable"">
     <mx:Metadata />
 
-    <List mx:ListMerge=""Replace"" mx:List=""true"">
+    <List mx:ListMerge=""Replace"" mx:Type=""List"">
         <Item>4</Item>
     </List>
 </Configuration>
@@ -186,13 +186,13 @@ public class ListTests
         string overrideSchema =
 @"
 <Configuration xmlns:mx=""https://github.com/jamescourtney/mixable"">
-    <List mx:List=""true"" />
+    <List mx:Type=""List"" />
 </Configuration>
 ";
         MergeHelpers.MergeInvalidSchema(
             BaseXml,
             overrideSchema,
-            $"Derived schemas may not have the {Constants.Attributes.List.LocalName} attribute defined.",
+            $"Derived schemas may not have the {Constants.Attributes.Type.LocalName} attribute defined.",
             "/Configuration/List");
     }
 
@@ -226,7 +226,7 @@ public class ListTests
     <mx:Metadata>
         <mx:NamespaceName>Foo.Bar.Baz</mx:NamespaceName>
     </mx:Metadata>
-    <List mx:List=""true"" />
+    <List mx:Type=""List"" />
 </Configuration>
 ";
 
@@ -253,7 +253,7 @@ public class ListTests
     <mx:Metadata>
         <mx:NamespaceName>Foo.Bar.Baz</mx:NamespaceName>
     </mx:Metadata>
-    <List mx:List=""true"">
+    <List mx:Type=""List"">
         <Item>
             <A>6</A>
             <C>foobar</C>
