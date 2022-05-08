@@ -46,27 +46,22 @@ public class ScalarSchemaElementParser : ISchemaElementParser
         {
             scalarType = ScalarType.GetInferredScalarType(node.Value);
         }
-        else if (!ScalarType.TryGetExplicitScalarType(metadataAttributes.WellKnownType.Value, out scalarType))
+        else
+        {
+            MixableInternal.Assert(
+                 ScalarType.TryGetExplicitScalarType(metadataAttributes.WellKnownType.Value, out scalarType),
+                 "Couldn't find scalar type for: " + metadataAttributes.WellKnownType);
+        }
+
+        if (!scalarType.Parser.CanParse(node.Value))
         {
             errorCollector.Error(
-                $"Unable to find explicit scalar type '{metadataAttributes.WellKnownType}'.",
+                $"Unable to parse '{node.Value}' as a '{metadataAttributes.WellKnownType}'.",
                 node.GetDocumentPath());
         }
 
-        if (scalarType is not null)
-        {
-            if (!scalarType.Parser.CanParse(node.Value))
-            {
-                errorCollector.Error(
-                    $"Unable to parse '{node.Value}' as a '{metadataAttributes.WellKnownType}'.",
-                    node.GetDocumentPath());
-            }
-        }
-
-        // use string if we hit an error inferring the type. This allows everything to succeed
-        // and more errors to be collected.
         return new ScalarSchemaElement(
-            scalarType ?? ScalarType.String,
+            scalarType,
             node);
     }
 }
