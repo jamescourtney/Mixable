@@ -181,6 +181,22 @@ public class ListTests
     }
 
     [Fact]
+    public void Merge_List_WithOverrideListAttribute()
+    {
+        string overrideSchema =
+@"
+<Configuration xmlns:mx=""https://github.com/jamescourtney/mixable"">
+    <List mx:List=""true"" />
+</Configuration>
+";
+        MergeHelpers.MergeInvalidSchema(
+            BaseXml,
+            overrideSchema,
+            $"Derived schemas may not have the {Constants.Attributes.List.LocalName} attribute defined.",
+            "/Configuration/List");
+    }
+
+    [Fact]
     public void Merge_List_Child_Missing_Required_Field()
     {
         string overrideSchema =
