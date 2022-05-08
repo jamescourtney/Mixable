@@ -49,15 +49,42 @@ public class ListTests
 
         Assert.False(parser.CanParse(root, default));
         parser.Parse(root, new BaseSchemaAttributeValidator(), tec, n => new ScalarSchemaElement(ScalarType.String, n));
-        Assert.Single(tec.Errors);
-        Assert.Equal(("Expected tag name: 'Item1'. Got: 'Item2'.", "/Configuration/List/Item2"), tec.Errors[0]);
+        Assert.Single(tec.Errors, ("Expected tag name: 'Item1'. Got: 'Item2'.", "/Configuration/List/Item2"));
 
         tec.Reset();
         SchemaParser wholeParser = new(tec);
 
         Assert.False(wholeParser.TryParse(XDocument.Parse(xml), out _));
-        Assert.Single(tec.Errors);
-        Assert.Equal(("No ISchemaElementParser was able to parse the given node.", "/Configuration/List"), tec.Errors[0]);
+        Assert.Single(tec.Errors, ("No ISchemaElementParser was able to parse the given node.", "/Configuration/List"));
+    }
+
+    [Fact]
+    public void Parse_InvalidListSchema_TemplateWithListMergePolicy()
+    {
+        string xml =
+@"
+<Configuration xmlns:mx=""https://github.com/jamescourtney/mixable"">
+    <mx:Metadata />
+
+    <List mx:ListMerge=""Replace"" mx:List=""true"">
+        <Item>4</Item>
+    </List>
+</Configuration>
+";
+        TestErrorCollector tec = new();
+
+        ListSchemaElementParser parser = new ListSchemaElementParser();
+
+        var root = XDocument.Parse(xml).XPathSelectElement("/Configuration/List");
+
+        Assert.True(parser.CanParse(root, MetadataAttributes.Extract(root, null)));
+        parser.Parse(root, new BaseSchemaAttributeValidator(), tec, n => new ScalarSchemaElement(ScalarType.String, n));
+        Assert.Single(tec.Errors, ("Base schemas may not have a ListMerge policy defined.", "/Configuration/List"));
+
+        tec.Reset();
+        SchemaParser wholeParser = new(tec);
+        Assert.False(wholeParser.TryParse(XDocument.Parse(xml), out _));
+        Assert.Single(tec.Errors, ("Base schemas may not have a ListMerge policy defined.", "/Configuration/List"));
     }
 
     [Fact]
@@ -150,6 +177,22 @@ public class ListTests
             BaseXml,
             overrideSchema,
             "Unable to parse 'Invalid' as a list merge value. Valid values are: Concatenate,Replace.",
+            "/Configuration/List");
+    }
+
+    [Fact]
+    public void Merge_List_WithOverrideListAttribute()
+    {
+        string overrideSchema =
+@"
+<Configuration xmlns:mx=""https://github.com/jamescourtney/mixable"">
+    <List mx:List=""true"" />
+</Configuration>
+";
+        MergeHelpers.MergeInvalidSchema(
+            BaseXml,
+            overrideSchema,
+            $"Derived schemas may not have the {Constants.Attributes.List.LocalName} attribute defined.",
             "/Configuration/List");
     }
 
