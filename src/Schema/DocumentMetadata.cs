@@ -84,12 +84,12 @@ public class DocumentMetadata
         {
             if (string.IsNullOrEmpty(this.NamespaceName))
             {
-                errorCollector.Warning("Namespace must be specified when 'GenerateCSharp' is true.");
+                errorCollector.Error("Namespace must be specified when 'GenerateCSharp' is true.");
             }
 
             if (!string.IsNullOrEmpty(this.BaseFileName))
             {
-                errorCollector.Warning("BaseFileName should not be specified when GenerateCSharp is true.");
+                errorCollector.Error("BaseFileName should not be specified when GenerateCSharp is true.");
             }
         }
         else
