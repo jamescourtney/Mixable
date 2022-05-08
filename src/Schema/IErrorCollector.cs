@@ -1,4 +1,4 @@
-﻿namespace ConfiguratorDotNet.Schema;
+﻿namespace Mixable.Schema;
 
 /// <summary>
 /// Collects errors while traversing a schema.

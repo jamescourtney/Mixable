@@ -1,4 +1,4 @@
-﻿namespace ConfiguratorDotNet.Schema;
+﻿namespace Mixable.Schema;
 
 /// <summary>
 /// Enumerates and defines known scalar types.

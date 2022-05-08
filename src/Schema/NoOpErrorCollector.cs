@@ -1,4 +1,4 @@
-﻿namespace ConfiguratorDotNet.Schema;
+﻿namespace Mixable.Schema;
 
 /// <summary>
 /// A correct (but useless) implementation of IErrorCollector.

@@ -1,11 +1,11 @@
 ﻿using System.IO;
 using Microsoft.CodeAnalysis;
-using ConfiguratorDotNet.Schema;
+using Mixable.Schema;
 
-namespace SourceGenerator;
+namespace Mixable.SourceGenerator;
 
 [Generator]
-public class ConfiguratorDotNetCSharpSourceGenerator : ISourceGenerator
+public class MixableCSharpGenerator : ISourceGenerator
 {
     public void Execute(GeneratorExecutionContext context)
     {

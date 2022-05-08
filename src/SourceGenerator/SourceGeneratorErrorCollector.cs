@@ -1,7 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
-using ConfiguratorDotNet.Schema;
+using Mixable.Schema;
 
-namespace SourceGenerator;
+namespace Mixable.SourceGenerator;
 
 internal record SourceGeneratorErrorCollector : IErrorCollector
 {
