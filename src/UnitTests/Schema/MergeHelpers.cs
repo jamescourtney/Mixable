@@ -1,8 +1,3 @@
-using ConfiguratorDotNet.Schema;
-using System.Xml.Linq;
-using Xunit;
-using System.Collections.Generic;
-
 namespace UnitTests;
 
 public class MergeHelpers
