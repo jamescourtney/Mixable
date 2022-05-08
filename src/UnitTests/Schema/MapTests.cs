@@ -51,6 +51,7 @@ public class MapTests
         string overrideSchema =
 @"
 <Configuration xmlns:mx=""https://github.com/jamescourtney/mixable"">
+    <mx:Metadata />
     <SomethingElse>Foo</SomethingElse>
 </Configuration>
 ";
@@ -67,6 +68,7 @@ public class MapTests
         string overrideSchema =
 @"
 <Configuration xmlns:mx=""https://github.com/jamescourtney/mixable"">
+    <mx:Metadata />
     <A>3</A>
     <A>5</A>
 </Configuration>

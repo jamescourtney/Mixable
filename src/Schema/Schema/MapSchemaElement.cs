@@ -82,7 +82,7 @@ public class MapSchemaElement : SchemaElement
             // However, we now need to do the reverse and validate that the element is a complete
             // subset. We can do this with a simple count, but that produces an error message that is
             // not helpful.
-            HashSet<XName> childNames = new(this.children.Where(x => !x.Value.Optional).Select(x => x.Key));
+            HashSet<XName> childNames = new(this.children.Where(x => x.Value.Modifier != NodeModifier.Optional).Select(x => x.Key));
 
             // childNames now contains things that we expect but are not present in the proposed element.
             childNames.ExceptWith(map.Keys);

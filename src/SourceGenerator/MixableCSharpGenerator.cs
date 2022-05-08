@@ -25,6 +25,7 @@ public class MixableCSharpGenerator : ISourceGenerator
                         additionalFile.Path,
                         errorCollector,
                         new(),
+                        0,
                         out string rootNamespace);
 
                     if (!string.IsNullOrEmpty(metadata.OutputXmlFileName))
@@ -76,6 +77,7 @@ public class MixableCSharpGenerator : ISourceGenerator
         string path,
         IErrorCollector errorCollector,
         HashSet<string> visitedPaths,
+        uint depth,
         out string rootNamespace)
     {
         // 1) Load the document, bailing if necessary.
@@ -115,13 +117,19 @@ public class MixableCSharpGenerator : ISourceGenerator
                 ? metadata.BaseFileName
                 : Path.Combine(Path.GetDirectoryName(path), metadata.BaseFileName);
 
-            (baseSchema, _) = this.ProcessFile(baseFilePath, errorCollector, visitedPaths, out rootNamespace);
+            (baseSchema, _) = this.ProcessFile(baseFilePath, errorCollector, visitedPaths, depth + 1, out rootNamespace);
         }
 
         if (baseSchema is not null)
         {
+            IAttributeValidator validator = depth switch
+            {
+                  0 => new LeafSchemaAttributeValidator(),
+                > 0 => new IntermediateSchemaAttributeValidator(),
+            };
+
             // Merge the contents here on top of the base.
-            if (!baseSchema.MergeWith(document.Root, errorCollector))
+            if (!baseSchema.MergeWith(document.Root, errorCollector, validator))
             {
                 throw new BailOutException();
             }

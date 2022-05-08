@@ -14,7 +14,7 @@ public abstract class SchemaElement
     protected SchemaElement(XElement xElement)
     {
         this.XmlElement = xElement;
-        this.Optional = MetadataAttributes.Extract(xElement, null).Optional;
+        this.Modifier = MetadataAttributes.Extract(xElement, null).Modifier;
     }
 
     /// <summary>
@@ -26,22 +26,24 @@ public abstract class SchemaElement
     /// <summary>
     /// Indicates if this element has the Optional attribute.
     /// </summary>
-    public bool Optional { get; }
+    public NodeModifier? Modifier { get; private set; }
 
     /// <summary>
     /// Merges the given element with the schema, assuming it passes validation.
     /// </summary>
-    public bool MergeWith(XElement element, IErrorCollector? collector)
+    public bool MergeWith(
+        XElement element,
+        IErrorCollector? collector,
+        IAttributeValidator attributeValidator)
     {
         collector ??= new NoOpErrorCollector();
 
-        IAttributeValidator validator = new DerivedSchemaAttributeValidator();
-        if (!this.MatchesSchema(element, MatchKind.Subset, validator, collector))
+        if (!this.MatchesSchema(element, MatchKind.Subset, attributeValidator, collector))
         {
             return false;
         }
 
-        this.MergeWithProtected(element, validator, collector);
+        this.MergeWithProtected(element, attributeValidator, collector);
         return !collector.HasErrors;
     }
 

@@ -14,7 +14,7 @@ public class ListTests
             <Item>
                 <A>5</A>
                 <B>false</B>
-                <C mx:Optional=""true"">string</C>
+                <C mx:Flags=""Optional"">string</C>
             </Item>
         </mx:ListItemTemplate>
         
@@ -170,13 +170,14 @@ public class ListTests
         string overrideSchema =
 @"
 <Configuration xmlns:mx=""https://github.com/jamescourtney/mixable"">
+    <mx:Metadata />
     <List mx:ListMerge=""Invalid"" />
 </Configuration>
 ";
         MergeHelpers.MergeInvalidSchema(
             BaseXml,
             overrideSchema,
-            "Unable to parse 'Invalid' as a list merge value. Valid values are: Concatenate,Replace.",
+            "Unable to parse 'Invalid' as a 'ListMergePolicy' value. Valid values are: Concatenate,Replace.",
             "/Configuration/List");
     }
 
@@ -186,6 +187,7 @@ public class ListTests
         string overrideSchema =
 @"
 <Configuration xmlns:mx=""https://github.com/jamescourtney/mixable"">
+    <mx:Metadata />
     <List mx:Type=""List"" />
 </Configuration>
 ";
@@ -202,6 +204,7 @@ public class ListTests
         string overrideSchema =
 @"
 <Configuration xmlns:mx=""https://github.com/jamescourtney/mixable"">
+    <mx:Metadata />
     <List>
         <Item>
             <A>6</A>

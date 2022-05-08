@@ -21,7 +21,7 @@ internal static class Constants
 
     public static class Attributes
     {
-        public static readonly XName Optional = XName.Get("Optional", XMLNamespace);
+        public static readonly XName Flags = XName.Get("Flags", XMLNamespace);
 
         public static readonly XName Type = XName.Get("Type", XMLNamespace);
 

@@ -25,7 +25,7 @@ public class MergeTests
         <mx:ListItemTemplate>
             <Item>
                 <Value mx:Type=""double"">0</Value>
-                <SomethingElse mx:Optional=""true"">0</SomethingElse>
+                <SomethingElse mx:Flags=""Optional"">0</SomethingElse>
             </Item>
         </mx:ListItemTemplate>
         <Item>
@@ -107,6 +107,7 @@ public class MergeTests
         string overrideSchema =
 @"
 <Configuration xmlns:mx=""https://github.com/jamescourtney/mixable"">
+    <mx:Metadata />
     <Mapping>
         <A>some string</A>
     </Mapping>
@@ -125,6 +126,7 @@ public class MergeTests
         string overrideSchema =
 @"
 <Configuration xmlns:mx=""https://github.com/jamescourtney/mixable"">
+    <mx:Metadata />
     <Mapping>
         <A mx:Type=""bool"">true</A>
     </Mapping>
@@ -143,6 +145,7 @@ public class MergeTests
         string overrideSchema =
 @"
 <Configuration xmlns:mx=""https://github.com/jamescourtney/mixable"">
+    <mx:Metadata />
     <List>
         <Item>3.1</Item>
     </List>
@@ -162,6 +165,7 @@ public class MergeTests
         string overrideSchema =
 @"
 <Configuration xmlns:mx=""https://github.com/jamescourtney/mixable"">
+    <mx:Metadata />
     <List>
         <NewItem>3.1</NewItem>
     </List>

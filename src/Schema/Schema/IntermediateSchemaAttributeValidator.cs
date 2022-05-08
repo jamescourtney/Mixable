@@ -1,6 +1,6 @@
 ﻿namespace Mixable.Schema;
 
-internal class DerivedSchemaAttributeValidator : IAttributeValidator
+internal class IntermediateSchemaAttributeValidator : IAttributeValidator
 {
     public MetadataAttributes Validate(XElement element, IErrorCollector errorCollector)
     {
@@ -12,6 +12,17 @@ internal class DerivedSchemaAttributeValidator : IAttributeValidator
             errorCollector.Error(
                 $"Derived schemas may not have the {Constants.Attributes.Type.LocalName} attribute defined.",
                 path);
+        }
+
+
+        if (attrs.Modifier is not null)
+        {
+            if (attrs.Modifier != NodeModifier.Abstract)
+            {
+                errorCollector.Error(
+                    $"Intermediate schemas may only use the {Constants.Attributes.Flags} attribute to set a node to {nameof(NodeModifier.Abstract)}",
+                    path);
+            }
         }
 
         return attrs;
