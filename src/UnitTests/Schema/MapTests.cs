@@ -16,6 +16,7 @@ public class MapTests
     </C>
     <D>true</D>
     <E mx:Type=""string"">false</E>
+    <F mx:Flags=""Final"">string</F>
 </Configuration>
 ";
 
@@ -78,5 +79,23 @@ public class MapTests
             overrideSchema,
             "Duplicate tag detected in map element",
             "/Configuration/A");
+    }
+
+
+    [Fact]
+    public void Merge_Cannot_Override_Final()
+    {
+        string overrideSchema =
+@"
+<Configuration xmlns:mx=""https://github.com/jamescourtney/mixable"">
+    <mx:Metadata />
+    <F>blah</F>
+</Configuration>
+";
+        MergeHelpers.MergeInvalidSchema(
+            BaseXml,
+            overrideSchema,
+            $"Cannot override element with the '{NodeModifier.Final}' option",
+            "/Configuration/F");
     }
 }

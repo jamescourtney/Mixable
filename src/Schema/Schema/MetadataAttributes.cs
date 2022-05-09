@@ -12,9 +12,20 @@ public enum WellKnownType
 
 public enum NodeModifier
 {
-    Required = 0,
-    Optional = 1,
-    Abstract = 2,
+    /// <summary>
+    /// The node is optional.
+    /// </summary>
+    Optional = 0,
+
+    /// <summary>
+    /// The node is abstract (must be overridden).
+    /// </summary>
+    Abstract = 1,
+
+    /// <summary>
+    /// The node is final (cannot be overridden).
+    /// </summary>
+    Final = 2,
 }
 
 public record struct MetadataAttributes

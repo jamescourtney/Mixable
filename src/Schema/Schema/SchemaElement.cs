@@ -26,7 +26,7 @@ public abstract class SchemaElement
     /// <summary>
     /// Indicates if this element has the Optional attribute.
     /// </summary>
-    public NodeModifier? Modifier { get; private set; }
+    public NodeModifier? Modifier { get; protected set; }
 
     /// <summary>
     /// Merges the given element with the schema, assuming it passes validation.

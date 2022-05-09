@@ -57,6 +57,29 @@ public class ScalarSchemaElement : SchemaElement
         IAttributeValidator validator,
         IErrorCollector collector)
     {
+        MetadataAttributes attrs = validator.Validate(element, collector);
+
+        switch ((this.Modifier, attrs.Modifier))
+        {
+            case (NodeModifier.Final, _):
+                collector.Error(
+                    $"Cannot override element with the '{nameof(NodeModifier.Final)}' option",
+                    element.GetDocumentPath());
+
+                break;
+
+            case (_, null):
+                break;
+
+            case (NodeModifier.Abstract, _):
+                this.Modifier = attrs.Modifier;
+                break;
+
+            default:
+                MixableInternal.Assert(false, "Unexpected combination: " + (this.Modifier, attrs.Modifier));
+                break;
+        }
+
         this.XmlElement.Value = element.Value;
     }
 }
