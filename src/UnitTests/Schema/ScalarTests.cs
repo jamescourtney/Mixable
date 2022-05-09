@@ -71,11 +71,11 @@ public class ScalarTests
         XDocument @override = XDocument.Parse($@"<Configuration xmlns:mx=""https://github.com/jamescourtney/mixable""><mx:Metadata /><Scalar><Foo>4</Foo></Scalar></Configuration>");
 
         TestErrorCollector tec = new();
-        Assert.False(root.MergeWith(@override.Root, tec, new IntermediateSchemaAttributeValidator()));
+        Assert.False(root.MergeWith(@override.Root, true, tec, new IntermediateSchemaAttributeValidator()));
         Assert.Single(tec.Errors, ("Override schemas may not introduce children to scalar nodes.", "/Configuration/Scalar"));
 
         tec.Reset();
-        Assert.False(root.MergeWith(@override.Root, tec, new LeafSchemaAttributeValidator()));
+        Assert.False(root.MergeWith(@override.Root, false, tec, new LeafSchemaAttributeValidator()));
         Assert.Single(tec.Errors, ("Override schemas may not introduce children to scalar nodes.", "/Configuration/Scalar"));
     }
 

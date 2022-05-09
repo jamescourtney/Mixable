@@ -17,6 +17,7 @@ public class MapTests
     <D>true</D>
     <E mx:Type=""string"">false</E>
     <F mx:Flags=""Final"">string</F>
+    <G mx:Flags=""Abstract"">string</G>
 </Configuration>
 ";
 
@@ -81,7 +82,6 @@ public class MapTests
             "/Configuration/A");
     }
 
-
     [Fact]
     public void Merge_Cannot_Override_Final()
     {
@@ -97,5 +97,44 @@ public class MapTests
             overrideSchema,
             $"Cannot override element with the '{NodeModifier.Final}' option",
             "/Configuration/F");
+    }
+
+    [Fact]
+    public void Merge_Must_Override_Abstract()
+    {
+        string overrideSchema =
+@"
+<Configuration xmlns:mx=""https://github.com/jamescourtney/mixable"">
+    <mx:Metadata />
+</Configuration>
+";
+        MergeHelpers.MergeInvalidSchema(
+            BaseXml,
+            overrideSchema,
+            "Abstract nodes are not permitted to remain after the final merge.",
+            "/Configuration/G",
+            isLeafDocument: true);
+    }
+
+    [Fact]
+    public void Merge_Must_Override_Abstract_OK()
+    {
+        string overrideSchema =
+@"
+<Configuration xmlns:mx=""https://github.com/jamescourtney/mixable"">
+    <mx:Metadata />
+    <G>foobar</G>
+</Configuration>
+";
+        XDocument mergedDoc = MergeHelpers.Merge(
+            BaseXml,
+            overrideSchema,
+            expectedXml: null,
+            isLeafDocument: true);
+
+        XElement element = mergedDoc.XPathSelectElement("/Configuration/G");
+        Assert.NotNull(element);
+        Assert.Equal("foobar", element.Value);
+        Assert.Equal("None", element.Attribute(Constants.Attributes.Flags).Value);
     }
 }

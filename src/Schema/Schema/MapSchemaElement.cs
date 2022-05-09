@@ -105,6 +105,7 @@ public class MapSchemaElement : SchemaElement
         IAttributeValidator validator,
         IErrorCollector collector)
     {
+        base.MergeWithProtected(element, validator, collector);
         Dictionary<XName, XElement> map = element.GetFilteredChildren().ToDictionary(x => x.Name, x => x);
 
         foreach (var kvp in map)

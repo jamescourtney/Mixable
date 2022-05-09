@@ -129,7 +129,7 @@ public class MixableCSharpGenerator : ISourceGenerator
             };
 
             // Merge the contents here on top of the base.
-            if (!baseSchema.MergeWith(document.Root, errorCollector, validator))
+            if (!baseSchema.MergeWith(document.Root, allowAbstract: depth > 0, errorCollector, validator))
             {
                 throw new BailOutException();
             }

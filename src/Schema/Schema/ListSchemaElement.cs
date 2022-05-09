@@ -53,6 +53,7 @@ public class ListSchemaElement : SchemaElement
         IAttributeValidator validator,
         IErrorCollector collector)
     {
+        base.MergeWithProtected(element, validator, collector);
         MetadataAttributes attrs = validator.Validate(element, collector);
 
         if (attrs.ListMergePolicy == ListMergePolicy.Replace)

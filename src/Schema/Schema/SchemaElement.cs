@@ -1,4 +1,7 @@
-﻿namespace Mixable.Schema;
+﻿using System.Xml;
+using System.Xml.XPath;
+
+namespace Mixable.Schema;
 
 public enum MatchKind
 {
@@ -26,13 +29,14 @@ public abstract class SchemaElement
     /// <summary>
     /// Indicates if this element has the Optional attribute.
     /// </summary>
-    public NodeModifier? Modifier { get; protected set; }
+    public NodeModifier Modifier { get; private set; }
 
     /// <summary>
     /// Merges the given element with the schema, assuming it passes validation.
     /// </summary>
     public bool MergeWith(
         XElement element,
+        bool allowAbstract,
         IErrorCollector? collector,
         IAttributeValidator attributeValidator)
     {
@@ -44,18 +48,48 @@ public abstract class SchemaElement
         }
 
         this.MergeWithProtected(element, attributeValidator, collector);
+
+        if (!allowAbstract)
+        {
+            foreach (var child in this.XmlElement.Descendants())
+            {
+                if (MetadataAttributes.Extract(child, null).Modifier == NodeModifier.Abstract)
+                {
+                    collector.Error(
+                        "Abstract nodes are not permitted to remain after the final merge.",
+                        child);
+                }
+            }
+        }
+
         return !collector.HasErrors;
     }
 
     /// <summary>
     /// Recursively merges the given element into this one. Assumes that 
-    /// <see cref="MatchesSchema(XElement, IAttributeValidator, out string, out string)"/>
+    /// <see cref="MatchesSchema(XElement, MatchKind, IAttributeValidator, IErrorCollector)"/>
     /// has been invoked.
     /// </summary>
-    protected internal abstract void MergeWithProtected(
+    protected internal virtual void MergeWithProtected(
         XElement element,
         IAttributeValidator validator,
-        IErrorCollector errorCollector);
+        IErrorCollector errorCollector)
+    {
+        if (this.Modifier == NodeModifier.Final)
+        {
+            errorCollector.Error(
+                $"Cannot override element with the '{nameof(NodeModifier.Final)}' option",
+                element);
+        }
+        else if (this.Modifier == NodeModifier.Abstract)
+        {
+            MetadataAttributes attributes = validator.Validate(element, errorCollector);
+            this.Modifier = attributes.Modifier;
+            this.XmlElement.Attribute(Constants.Attributes.Flags)!.Value = attributes.Modifier.ToString();
+        }
+
+        // no special handling for optional.
+    }
 
     /// <summary>
     /// Recursively tests whether the given element matches the current schema.

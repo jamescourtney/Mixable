@@ -7,9 +7,11 @@ public class MergeHelpers
         string overrideXml,
         string expectedError,
         string expectedPath,
-        IAttributeValidator? validator = null)
+        bool isLeafDocument = false)
     {
-        validator ??= new IntermediateSchemaAttributeValidator();
+        IAttributeValidator validator = isLeafDocument
+            ? new LeafSchemaAttributeValidator()
+            : new IntermediateSchemaAttributeValidator();
 
         TestErrorCollector tec = new();
 
@@ -17,19 +19,21 @@ public class MergeHelpers
         Assert.True(parser.TryParse(XDocument.Parse(baseXml), out var result));
 
         XElement @override = XDocument.Parse(overrideXml).Root!;
-        Assert.NotNull(@override);
-        Assert.False(result.MergeWith(@override, tec, validator));
 
+        Assert.NotNull(@override);
+        Assert.False(result.MergeWith(@override, allowAbstract: !isLeafDocument, tec, validator));
         Assert.Contains(tec.Errors, x => x.path == expectedPath && x.msg == expectedError);
     }
 
-    public static void Merge(
+    public static XDocument Merge(
         string baseXml,
         string overrideXml,
-        string expectedXml,
-        IAttributeValidator? validator = null)
+        string? expectedXml,
+        bool isLeafDocument = false)
     {
-        validator ??= new IntermediateSchemaAttributeValidator();
+        IAttributeValidator validator = isLeafDocument
+            ? new LeafSchemaAttributeValidator()
+            : new IntermediateSchemaAttributeValidator();
 
         var tec = new TestErrorCollector();
 
@@ -37,11 +41,17 @@ public class MergeHelpers
         Assert.True(parser.TryParse(XDocument.Parse(baseXml), out var result));
 
         XElement @override = XDocument.Parse(overrideXml).Root!;
-        result!.MergeWith(@override, tec, validator);
+        result.MergeWith(@override, allowAbstract: !isLeafDocument, tec, validator);
 
         string merged = result.XmlElement.ToString();
 
-        Assert.Equal(expectedXml, merged);
+        if (expectedXml is not null)
+        {
+            Assert.Equal(expectedXml, merged);
+        }
+
         Assert.False(tec.HasErrors);
+
+        return XDocument.Parse(merged);
     }
 }
