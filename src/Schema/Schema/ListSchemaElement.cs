@@ -26,7 +26,11 @@ public class ListSchemaElement : SchemaElement
         IErrorCollector errorCollector)
     {
         bool returnValue = true;
-        validator.Validate(element, errorCollector);
+
+        if (validator.Validate(element, errorCollector).Modifier != NodeModifier.None)
+        {
+            errorCollector.Error($"List elements in override schemas may not specify the '{Constants.Attributes.Flags.LocalName}' attribute.", element);
+        }
 
         foreach (XElement child in element.GetFilteredChildren())
         {
@@ -65,11 +69,5 @@ public class ListSchemaElement : SchemaElement
         {
             this.XmlElement.Add(child);
         }
-    }
-
-    protected override void OnSetAbstract()
-    {
-        // Setting to abstract => clearing out child nodes.
-        this.XmlElement.RemoveNodes();
     }
 }

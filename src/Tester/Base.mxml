@@ -6,7 +6,7 @@
     
     <Mapping>
         <A>4</A>
-        <B mx:Flags="Abstract">string</B>
+        <B mx:Flags="Abstract" mx:Type="string" />
         <C>
             <C>2.0</C>
         </C>

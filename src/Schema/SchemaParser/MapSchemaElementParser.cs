@@ -38,6 +38,7 @@ public class MapSchemaElementParser : ISchemaElementParser
         ParseCallback parseChild)
     {
         var metadataAttributes = attributeValidator.Validate(node, errorCollector);
+        metadataAttributes.EnsureNotAbstractOrFinal(errorCollector, "Map");
 
         MixableInternal.Assert(
             metadataAttributes.WellKnownType is null or WellKnownType.Map,

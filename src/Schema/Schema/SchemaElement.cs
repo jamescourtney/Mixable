@@ -1,4 +1,6 @@
-﻿namespace Mixable.Schema;
+﻿using System.Threading;
+
+namespace Mixable.Schema;
 
 public enum MatchKind
 {
@@ -11,6 +13,8 @@ public enum MatchKind
 /// </summary>
 public abstract class SchemaElement
 {
+    private static readonly ThreadLocal<int> MergeWithDepth = new ThreadLocal<int>();
+
     protected SchemaElement(XElement xElement)
     {
         this.XmlElement = xElement;
@@ -26,7 +30,7 @@ public abstract class SchemaElement
     /// <summary>
     /// Indicates if this element has the Optional attribute.
     /// </summary>
-    public NodeModifier Modifier { get; private set; }
+    public NodeModifier Modifier { get; protected set; }
 
     /// <summary>
     /// Merges the given element with the schema, assuming it passes validation.
@@ -37,53 +41,40 @@ public abstract class SchemaElement
         IErrorCollector? collector,
         IAttributeValidator attributeValidator)
     {
-        collector = new DeduplicatingErrorCollector(collector);
+        MergeWithDepth.Value++;
 
-        if (this.Modifier is NodeModifier.Final)
+        try
         {
-            collector.Error(
-                $"Cannot override element with the '{nameof(NodeModifier.Final)}' option",
-                element);
+            collector = new DeduplicatingErrorCollector(collector);
 
-            return false;
-        }
+            if (!this.MatchesSchema(element, MatchKind.Subset, attributeValidator, collector))
+            {
+                return false;
+            }
 
-        if (!this.MatchesSchema(element, MatchKind.Subset, attributeValidator, collector))
-        {
-            return false;
-        }
-
-        var attributes = attributeValidator.Validate(element, collector);
-        this.SetModifier(attributes.Modifier);
-
-        if (this.Modifier != NodeModifier.Abstract)
-        {
             this.MergeWithProtected(element, allowAbstract, attributeValidator, collector);
         }
-
-        // Finally, search for any abstract elements.
-        if (!allowAbstract)
+        finally
         {
-            MarkAbstractDescendants(this, collector);
+            MergeWithDepth.Value--;
         }
-        
+
+        if (!allowAbstract && MergeWithDepth.Value == 0)
+        {
+            MixableInternal.Assert(this.XmlElement.Document is not null, "Document was null");
+
+            foreach (var node in this.XmlElement.Document.Descendants())
+            {
+                if (MetadataAttributes.Extract(node, null).Modifier == NodeModifier.Abstract)
+                {
+                    collector.Error(
+                        "Abstract nodes are not permitted to remain after the final merge.",
+                        node);
+                }
+            }
+        }
+
         return !collector.HasErrors;
-    }
-
-    public void SetModifier(NodeModifier newModifier)
-    {
-        MixableInternal.Assert(
-            this.Modifier is not NodeModifier.Final,
-            "Can't change final modidifer");
-
-        this.XmlElement.SetAttributeValue(Constants.Attributes.Flags, newModifier.ToString());
-        this.Modifier = newModifier;
-
-        if (newModifier == NodeModifier.Abstract)
-        {
-            this.OnSetAbstract();
-            this.XmlElement.RemoveNodes();
-        }
     }
 
     /// <summary>
@@ -106,29 +97,5 @@ public abstract class SchemaElement
         IAttributeValidator validator,
         IErrorCollector errorCollector);
 
-    protected abstract void OnSetAbstract();
-
     public abstract T Accept<T>(ISchemaVisitor<T> visitor);
-
-    public virtual IEnumerable<SchemaElement> GetEnumerator()
-    {
-        yield break;
-    }
-
-    private static void MarkAbstractDescendants(
-        SchemaElement element,
-        IErrorCollector errorCollector)
-    {
-        if (element.Modifier == NodeModifier.Abstract)
-        {
-            errorCollector.Error(
-                "Abstract nodes are not permitted to remain after the final merge.",
-                element.XmlElement);
-        }
-
-        foreach (SchemaElement item in element.GetEnumerator())
-        {
-            MarkAbstractDescendants(item, errorCollector);
-        }
-    }
 }

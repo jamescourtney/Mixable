@@ -5,6 +5,9 @@
         <!--<mx:Debug>true</mx:Debug>-->
     </mx:Metadata>
 
+    <Mapping>
+    </Mapping>
+
     <List mx:ListMerge="Replace" />
     <FancyList mx:ListMerge="Replace">
         <Item>
@@ -16,7 +19,7 @@
         </Item>
     </FancyList>
 
-    <AbstractList>
+    <AbstractList mx:ListMerge="Replace">
         <Item>4</Item>
         <Item>4</Item>
         <Item>4</Item>

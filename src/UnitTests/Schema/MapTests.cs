@@ -95,7 +95,7 @@ public class MapTests
         MergeHelpers.MergeInvalidSchema(
             BaseXml,
             overrideSchema,
-            $"Cannot override element with the '{NodeModifier.Final}' option",
+            "Nodes marked as 'Final' may not be overridden.",
             "/Configuration/F");
     }
 

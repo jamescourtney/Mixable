@@ -58,6 +58,16 @@ public record struct MetadataAttributes
         };
     }
 
+    internal void EnsureNotAbstractOrFinal(IErrorCollector errorCollector, string nodeType)
+    {
+        if (this.Modifier is NodeModifier.Abstract or NodeModifier.Final)
+        {
+            errorCollector.Error(
+                $"{nodeType} nodes cannot have the '{this.Modifier}' value of the '{Constants.Attributes.Flags.LocalName}' attribute.",
+                this.SourceElement);
+        }
+    }
+
     private static T? ParseEnum<T>(
         string? value,
         XElement node,

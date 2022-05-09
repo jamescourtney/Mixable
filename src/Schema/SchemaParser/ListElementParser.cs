@@ -47,6 +47,7 @@ public class ListSchemaElementParser : ISchemaElementParser
         ParseCallback parseChild)
     {
         var metadataAttributes = attributeValidator.Validate(node, errorCollector);
+        metadataAttributes.EnsureNotAbstractOrFinal(errorCollector, "List");
 
         MixableInternal.Assert(
             metadataAttributes.WellKnownType is null or WellKnownType.List,
@@ -77,12 +78,6 @@ public class ListSchemaElementParser : ISchemaElementParser
         // Ensure all the current children match the schema.
         listElement.MatchesSchema(node, MatchKind.Strict, attributeValidator, errorCollector);
 
-        // If we are abstract, remove all the children.
-        if (metadataAttributes.Modifier == NodeModifier.Abstract)
-        {
-            listElement.XmlElement.RemoveNodes();
-        }
-
         return listElement;
     }
 
@@ -97,7 +92,7 @@ public class ListSchemaElementParser : ISchemaElementParser
                 {
                     case NodeModifier.Abstract:
                     case NodeModifier.Final:
-                        errorCollector.Error($"Items within a list template may not be marked as '{attributes.Modifier}'.", attributes.SourceElement);
+                        errorCollector.Error($"Items within a list may not be marked as '{attributes.Modifier}'.", attributes.SourceElement);
                         break;
                 }
 

@@ -106,6 +106,11 @@ public class MapSchemaElement : SchemaElement
         IAttributeValidator validator,
         IErrorCollector collector)
     {
+        if (validator.Validate(element, collector).Modifier != NodeModifier.None)
+        {
+            collector.Error($"Map elements in override schemas may not specify the '{Constants.Attributes.Flags.LocalName}' attribute.", element);
+        }
+
         Dictionary<XName, XElement> map = element.GetFilteredChildren().ToDictionary(x => x.Name, x => x);
 
         foreach (var kvp in map)
@@ -113,18 +118,5 @@ public class MapSchemaElement : SchemaElement
             SchemaElement value = this.children[kvp.Key];
             value.MergeWith(kvp.Value, allowAbstract, collector, validator);
         }
-    }
-
-    protected override void OnSetAbstract()
-    {
-        foreach (var child in this.children.Values)
-        {
-            child.SetModifier(NodeModifier.Abstract);
-        }
-    }
-
-    public override IEnumerable<SchemaElement> GetEnumerator()
-    {
-        return this.children.Values;
     }
 }

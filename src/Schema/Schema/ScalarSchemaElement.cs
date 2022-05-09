@@ -62,10 +62,28 @@ public class ScalarSchemaElement : SchemaElement
         IAttributeValidator validator,
         IErrorCollector collector)
     {
-        this.XmlElement.Value = element.Value;
-    }
+        MetadataAttributes attributes = validator.Validate(element, collector);
 
-    protected override void OnSetAbstract()
-    {
+        if (this.Modifier == NodeModifier.Final)
+        {
+            collector.Error(
+                $"Nodes marked as '{NodeModifier.Final}' may not be overridden.",
+                this.XmlElement);
+        }
+
+        if (this.Modifier != attributes.Modifier)
+        {
+            this.Modifier = attributes.Modifier;
+            this.XmlElement.SetAttributeValue(Constants.Attributes.Flags, this.Modifier.ToString());
+        }
+
+        if (this.Modifier == NodeModifier.Abstract)
+        {
+            this.XmlElement.RemoveNodes();
+        }
+        else
+        {
+            this.XmlElement.Value = element.Value;
+        }
     }
 }

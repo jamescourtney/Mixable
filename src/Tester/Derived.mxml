@@ -4,8 +4,8 @@
     <mx:BaseFile>Base.mxml</mx:BaseFile>
   </mx:Metadata>
 
-    <Mapping mx:Flags="Abstract">
-        <A mx:Flags="Final">3</A>
+    <Mapping>
+        <A mx:Flags="Final">182</A>
     </Mapping>
 
     <List mx:ListMerge="Replace" />
@@ -18,6 +18,4 @@
             <OtherValue>105</OtherValue>
         </Item>
     </FancyList>
-
-    <AbstractList mx:Flags="Abstract" />
 </Configuration>
