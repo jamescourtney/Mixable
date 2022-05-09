@@ -56,14 +56,17 @@ public class ListSchemaElement : SchemaElement
         base.MergeWithProtected(element, validator, collector);
         MetadataAttributes attrs = validator.Validate(element, collector);
 
-        if (attrs.ListMergePolicy == ListMergePolicy.Replace)
+        if (attrs.ListMergePolicy == ListMergePolicy.Replace || this.Modifier == NodeModifier.Abstract)
         {
             this.XmlElement.RemoveNodes();
         }
-        
-        foreach (var child in element.GetFilteredChildren())
+
+        if (this.Modifier != NodeModifier.Abstract)
         {
-            this.XmlElement.Add(child);
+            foreach (var child in element.GetFilteredChildren())
+            {
+                this.XmlElement.Add(child);
+            }
         }
     }
 }

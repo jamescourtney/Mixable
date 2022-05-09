@@ -75,17 +75,17 @@ public abstract class SchemaElement
         IAttributeValidator validator,
         IErrorCollector errorCollector)
     {
+        MetadataAttributes attributes = validator.Validate(element, errorCollector);
         if (this.Modifier == NodeModifier.Final)
         {
             errorCollector.Error(
                 $"Cannot override element with the '{nameof(NodeModifier.Final)}' option",
                 element);
         }
-        else if (this.Modifier == NodeModifier.Abstract)
+        else if (this.Modifier != attributes.Modifier)
         {
-            MetadataAttributes attributes = validator.Validate(element, errorCollector);
             this.Modifier = attributes.Modifier;
-            this.XmlElement.Attribute(Constants.Attributes.Flags)!.Value = attributes.Modifier.ToString();
+            this.XmlElement.SetAttributeValue(Constants.Attributes.Flags, attributes.Modifier.ToString());
         }
 
         // no special handling for optional.

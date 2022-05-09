@@ -5,10 +5,10 @@
     <mx:GenerateCSharp>true</mx:GenerateCSharp>
   </mx:Metadata>
   <Mapping>
-    <A>10</A>
-    <B>string</B>
+    <A>4</A>
+    <B mx:Flags="Final">intermediate</B>
     <C>
-      <C>2.2</C>
+      <C mx:Flags="None">4.2</C>
     </C>
   </Mapping>
   <List />
@@ -21,4 +21,9 @@
       <OtherValue>105</OtherValue>
     </Item>
   </FancyList>
+  <AbstractList mx:Type="List" mx:Flags="None">
+    <Item>4</Item>
+    <Item>4</Item>
+    <Item>4</Item>
+  </AbstractList>
 </Configuration>

@@ -2,11 +2,12 @@
     <mx:Metadata>
         <mx:BaseFile>Derived.mxml</mx:BaseFile>
         <mx:OutputXmlFile>Derived2.xml</mx:OutputXmlFile>
+        <!--<mx:Debug>true</mx:Debug>-->
     </mx:Metadata>
 
     <Mapping>
         <C>
-            <C>2.2</C>
+            <C>4.2</C>
         </C>
     </Mapping>
 
@@ -20,5 +21,10 @@
             <OtherValue>105</OtherValue>
         </Item>
     </FancyList>
-    
+
+    <AbstractList>
+        <Item>4</Item>
+        <Item>4</Item>
+        <Item>4</Item>
+    </AbstractList>
 </Configuration>

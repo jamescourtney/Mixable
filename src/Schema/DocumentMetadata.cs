@@ -1,4 +1,6 @@
-﻿namespace Mixable.Schema;
+﻿using System.Diagnostics;
+
+namespace Mixable.Schema;
 
 /// <summary>
 /// Describes metadata about a document and how Mixable should process it.
@@ -17,6 +19,11 @@ public class DocumentMetadata
         children.TryGetValue(Constants.Tags.NamespaceTagName, out this.namespaceName);
         children.TryGetValue(Constants.Tags.OutputXmlFileTagName, out this.outputXmlName);
         children.TryGetValue(Constants.Tags.BaseFileName, out this.baseFileName);
+
+        if (children.TryGetValue(Constants.Tags.DebugBreak, out _))
+        {
+            Debugger.Launch();
+        }
 
         if (children.TryGetValue(Constants.Tags.GenerateCSharptagName, out string? generateCSharp))
         {

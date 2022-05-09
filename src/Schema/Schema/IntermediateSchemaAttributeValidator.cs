@@ -10,11 +10,19 @@ internal class IntermediateSchemaAttributeValidator : IAttributeValidator
 
         ValidateNoRawTypeName(attrs, errorCollector, element);
 
-        if (attrs.Modifier != NodeModifier.None && attrs.Modifier != NodeModifier.Abstract)
+        switch (attrs.Modifier)
         {
-            errorCollector.Error(
-                $"Intermediate schemas may only use the {Constants.Attributes.Flags} attribute to set a node to {nameof(NodeModifier.Abstract)}",
-                element.GetDocumentPath());
+            case NodeModifier.None:
+            case NodeModifier.Abstract:
+            case NodeModifier.Final:
+                break;
+
+            default:
+                errorCollector.Error(
+                    $"Intermediate schemas may not use the {Constants.Attributes.Flags} attribute to set a node to {attrs.Modifier}.",
+                    element.GetDocumentPath());
+                break;
+
         }
 
         return attrs;

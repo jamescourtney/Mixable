@@ -77,6 +77,12 @@ public class ListSchemaElementParser : ISchemaElementParser
         // Ensure all the current children match the schema.
         listElement.MatchesSchema(node, MatchKind.Strict, attributeValidator, errorCollector);
 
+        // If we are abstract, remove all the children.
+        if (metadataAttributes.Modifier == NodeModifier.Abstract)
+        {
+            listElement.XmlElement.RemoveNodes();
+        }
+
         return listElement;
     }
 
