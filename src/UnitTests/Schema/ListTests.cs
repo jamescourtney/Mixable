@@ -48,7 +48,7 @@ public class ListTests
         var root = XDocument.Parse(xml).XPathSelectElement("/Configuration/List");
 
         Assert.False(parser.CanParse(root, default));
-        parser.Parse(root, new BaseSchemaAttributeValidator(), tec, n => new ScalarSchemaElement(ScalarType.String, n));
+        parser.Parse(root, new BaseSchemaAttributeValidator(), tec, (n, av) => new ScalarSchemaElement(ScalarType.String, n));
         Assert.Single(tec.Errors, ("Expected tag name: 'Item1'. Got: 'Item2'.", "/Configuration/List/Item2"));
 
         tec.Reset();
@@ -78,7 +78,7 @@ public class ListTests
         var root = XDocument.Parse(xml).XPathSelectElement("/Configuration/List");
 
         Assert.True(parser.CanParse(root, MetadataAttributes.Extract(root, null)));
-        parser.Parse(root, new BaseSchemaAttributeValidator(), tec, n => new ScalarSchemaElement(ScalarType.String, n));
+        parser.Parse(root, new BaseSchemaAttributeValidator(), tec, (n, av) => new ScalarSchemaElement(ScalarType.String, n));
         Assert.Single(tec.Errors, ("Base schemas may not have a ListMerge policy defined.", "/Configuration/List"));
 
         tec.Reset();
@@ -112,7 +112,7 @@ public class ListTests
         var root = XDocument.Parse(xml).XPathSelectElement("/Configuration/List");
 
         Assert.True(parser.CanParse(root, default));
-        parser.Parse(root, new BaseSchemaAttributeValidator(), tec, n => new ScalarSchemaElement(ScalarType.String, n));
+        parser.Parse(root, new BaseSchemaAttributeValidator(), tec, (n, av) => new ScalarSchemaElement(ScalarType.String, n));
         Assert.Single(tec.Errors, ("Lists may only have a single template node.", "/Configuration/List"));
 
         tec.Reset();

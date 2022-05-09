@@ -12,20 +12,22 @@ public enum WellKnownType
 
 public enum NodeModifier
 {
-    /// <summary>
-    /// The node is optional.
-    /// </summary>
-    Optional = 0,
+    None = 0,
 
     /// <summary>
-    /// The node is abstract (must be overridden).
+    /// The node is optional. Valid only inside template declarations.
     /// </summary>
-    Abstract = 1,
+    Optional = 1,
 
     /// <summary>
-    /// The node is final (cannot be overridden).
+    /// The node is abstract (must be overridden). Valid only in fully-rooted declarations.
     /// </summary>
-    Final = 2,
+    Abstract = 2,
+
+    /// <summary>
+    /// The node is final (cannot be overridden). Valid only in fully-rooted declarations.
+    /// </summary>
+    Final = 3,
 }
 
 public record struct MetadataAttributes
@@ -36,19 +38,22 @@ public record struct MetadataAttributes
 
     public ListMergePolicy? ListMergePolicy { get; init; }
 
-    public NodeModifier? Modifier { get; init; }
+    public NodeModifier Modifier { get; init; }
+
+    public XElement SourceElement { get; init; }
 
     internal static MetadataAttributes Extract(XElement element, IErrorCollector? errorCollector)
     {
         string? rawType = element.Attribute(Constants.Attributes.Type)?.Value;
         return new MetadataAttributes
         {
+            SourceElement = element,
             RawTypeName = rawType,
 
             // Pass in null error collector since we don't need to report parse failures.
             WellKnownType = ParseEnum<WellKnownType>(rawType, element, errorCollector: null),
 
-            Modifier = ParseEnum<NodeModifier>(element.Attribute(Constants.Attributes.Flags)?.Value, element, errorCollector),
+            Modifier = ParseEnum<NodeModifier>(element.Attribute(Constants.Attributes.Flags)?.Value, element, errorCollector) ?? NodeModifier.None,
             ListMergePolicy = ParseEnum<ListMergePolicy>(element.Attribute(Constants.Attributes.ListMerge)?.Value, element, errorCollector),
         };
     }

@@ -64,11 +64,11 @@ public class ScalarSchemaElement : SchemaElement
             case (NodeModifier.Final, _):
                 collector.Error(
                     $"Cannot override element with the '{nameof(NodeModifier.Final)}' option",
-                    element.GetDocumentPath());
+                    element);
 
                 break;
 
-            case (_, null):
+            case (_, NodeModifier.None):
                 break;
 
             case (NodeModifier.Abstract, _):

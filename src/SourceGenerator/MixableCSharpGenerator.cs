@@ -140,10 +140,7 @@ public class MixableCSharpGenerator : ISourceGenerator
             // structure.
             rootNamespace = metadata.NamespaceName ?? "Mixable.Generated";
 
-            SchemaParser parser = new SchemaParser
-            {
-                ErrorCollector = errorCollector
-            };
+            SchemaParser parser = new SchemaParser(errorCollector);
 
             if (!parser.TryParse(document, out baseSchema))
             {

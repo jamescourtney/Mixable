@@ -2,20 +2,19 @@
 
 internal class IntermediateSchemaAttributeValidator : IAttributeValidator
 {
+    public IAttributeValidator RootValidator => this;
+
     public MetadataAttributes Validate(XElement element, IErrorCollector errorCollector)
     {
         var attrs = MetadataAttributes.Extract(element, errorCollector);
 
         ValidateNoRawTypeName(attrs, errorCollector, element);
 
-        if (attrs.Modifier is not null)
+        if (attrs.Modifier != NodeModifier.None && attrs.Modifier != NodeModifier.Abstract)
         {
-            if (attrs.Modifier != NodeModifier.Abstract)
-            {
-                errorCollector.Error(
-                    $"Intermediate schemas may only use the {Constants.Attributes.Flags} attribute to set a node to {nameof(NodeModifier.Abstract)}",
-                    element.GetDocumentPath());
-            }
+            errorCollector.Error(
+                $"Intermediate schemas may only use the {Constants.Attributes.Flags} attribute to set a node to {nameof(NodeModifier.Abstract)}",
+                element.GetDocumentPath());
         }
 
         return attrs;

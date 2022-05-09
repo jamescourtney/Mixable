@@ -3,7 +3,7 @@
 /// <summary>
 /// A callback to parse an XElement.
 /// </summary>
-public delegate SchemaElement ParseCallback(XElement node);
+public delegate SchemaElement ParseCallback(XElement node, IAttributeValidator attributeValidator);
 
 /// <summary>
 /// Parser implementation for a single type of Schema Element.

@@ -44,14 +44,28 @@ public class MapSchemaElementParser : ISchemaElementParser
             "Expecting null or map");
 
         MapSchemaElement mapElement = new(node);
+        var childValidator = GetMapAttributeValidator(attributeValidator);
 
         foreach (var child in node.GetFilteredChildren())
         {
             mapElement.AddChild(
-                parseChild(child),
+                parseChild(child, childValidator),
                 errorCollector);
         }
 
         return mapElement;
+    }
+
+    internal static IAttributeValidator GetMapAttributeValidator(IAttributeValidator validator)
+    {
+        return validator.DecorateWith((attrs, errorCollector) =>
+        {
+            if (attrs.Modifier == NodeModifier.Optional)
+            {
+                errorCollector.Error($"Map elements may not use the {NodeModifier.Optional} modifier.", attrs.SourceElement);
+            }
+
+            return true; // continue processing later rules.
+        });
     }
 }

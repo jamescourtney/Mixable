@@ -36,7 +36,7 @@ public abstract class SchemaElement
         IErrorCollector? collector,
         IAttributeValidator attributeValidator)
     {
-        collector ??= new NoOpErrorCollector();
+        collector = new DeduplicatingErrorCollector(collector);
 
         if (!this.MatchesSchema(element, MatchKind.Subset, attributeValidator, collector))
         {

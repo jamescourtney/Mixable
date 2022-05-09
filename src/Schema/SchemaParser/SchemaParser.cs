@@ -17,21 +17,27 @@ public class SchemaParser
             new MapSchemaElementParser(),
         };
 
-        this.ErrorCollector = errorCollector;
+        this.ErrorCollector = new DeduplicatingErrorCollector(errorCollector);
     }
 
     public SchemaParser(IEnumerable<ISchemaElementParser> elementParsers, IErrorCollector errorCollector)
     {
         this.elementParsers = elementParsers.ToArray();
-        this.ErrorCollector = errorCollector;
+        this.ErrorCollector = new DeduplicatingErrorCollector(errorCollector);
     }
 
-    public IErrorCollector ErrorCollector { get; init; } = new NoOpErrorCollector();
-
-    public IAttributeValidator AttributeValidator { get; init; } = new BaseSchemaAttributeValidator();
+    public IErrorCollector ErrorCollector { get; }
 
     public bool TryParse(
         XDocument document,
+        [NotNullWhen(true)] out SchemaElement? root)
+    {
+        return this.TryParse(document, new BaseSchemaAttributeValidator(), out root);
+    }
+
+    public bool TryParse(
+        XDocument document,
+        IAttributeValidator attributeValidator,
         [NotNullWhen(true)] out SchemaElement? root)
     {
         root = null;
@@ -47,7 +53,7 @@ public class SchemaParser
             return false;
         }
 
-        root = this.Parse(document.Root);
+        root = this.Parse(document.Root, attributeValidator);
 
         if (this.ErrorCollector.HasErrors)
         {
@@ -58,10 +64,10 @@ public class SchemaParser
         return true;
     }
 
-    internal SchemaElement Parse(XElement xElement)
+    internal SchemaElement Parse(XElement xElement, IAttributeValidator attributeValidator)
     {
         ISchemaElementParser? firstParser = null;
-        MetadataAttributes attributes = this.AttributeValidator.Validate(xElement, this.ErrorCollector);
+        MetadataAttributes attributes = attributeValidator.Validate(xElement, this.ErrorCollector);
 
         foreach (var parser in this.elementParsers)
         {
@@ -90,7 +96,7 @@ public class SchemaParser
                 }
                 else
                 {
-                    this.ErrorCollector.Warning("Two ISchemaElementParsers reported cability to parse a node.", xElement.GetDocumentPath());
+                    this.ErrorCollector.Warning("More than one ISchemaElementParser reported cability to parse a node.", xElement.GetDocumentPath());
                 }
             }
         }
@@ -114,7 +120,7 @@ public class SchemaParser
         }
         else
         {
-            return firstParser.Parse(xElement, this.AttributeValidator, this.ErrorCollector, this.Parse);
+            return firstParser.Parse(xElement, attributeValidator, this.ErrorCollector, this.Parse);
         }
     }
 }

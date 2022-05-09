@@ -37,7 +37,6 @@ public class ScalarSchemaElementParser : ISchemaElementParser
         IErrorCollector errorCollector,
         ParseCallback parseChild)
     {
-        List<XElement> children = node.GetChildren().ToList();
         MetadataAttributes metadataAttributes = attributeValidator.Validate(node, errorCollector);
 
         ScalarType? scalarType;
@@ -57,7 +56,7 @@ public class ScalarSchemaElementParser : ISchemaElementParser
         {
             errorCollector.Error(
                 $"Unable to parse '{node.Value}' as a '{metadataAttributes.WellKnownType}'.",
-                node.GetDocumentPath());
+                node);
         }
 
         return new ScalarSchemaElement(
