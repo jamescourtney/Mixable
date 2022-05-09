@@ -5,12 +5,6 @@
         <!--<mx:Debug>true</mx:Debug>-->
     </mx:Metadata>
 
-    <Mapping>
-        <C>
-            <C>4.2</C>
-        </C>
-    </Mapping>
-
     <List mx:ListMerge="Replace" />
     <FancyList mx:ListMerge="Replace">
         <Item>

@@ -4,11 +4,8 @@
     <mx:BaseFile>Base.mxml</mx:BaseFile>
   </mx:Metadata>
 
-    <Mapping>
-        <C>
-            <C mx:Flags="Abstract">0</C>
-        </C>
-        <B mx:Flags="Final">intermediate</B>
+    <Mapping mx:Flags="Abstract">
+        <A mx:Flags="Final">3</A>
     </Mapping>
 
     <List mx:ListMerge="Replace" />

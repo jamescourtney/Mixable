@@ -1,18 +1,17 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Configuration xmlns:mx="https://github.com/jamescourtney/mixable">
+<Configuration xmlns:mx="https://github.com/jamescourtney/mixable" mx:Flags="None">
   <mx:Metadata>
     <mx:NamespaceName>Foo.Bar.Baz.Bat</mx:NamespaceName>
     <mx:GenerateCSharp>true</mx:GenerateCSharp>
   </mx:Metadata>
-  <Mapping>
-    <A>4</A>
-    <B mx:Flags="Final">intermediate</B>
-    <C>
+  <Mapping mx:Flags="None">
+    <A mx:Flags="None">1</A>
+    <B mx:Flags="None">string</B>
+    <C mx:Flags="None">
       <C mx:Flags="None">4.2</C>
     </C>
   </Mapping>
-  <List />
-  <FancyList>
+  <List mx:Flags="None" />
+  <FancyList mx:Flags="None">
     <Item>
       <Value>100</Value>
     </Item>

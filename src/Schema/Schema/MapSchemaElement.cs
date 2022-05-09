@@ -100,18 +100,31 @@ public class MapSchemaElement : SchemaElement
         return returnValue;
     }
 
-    protected internal override void MergeWithProtected(
+    protected override void MergeWithProtected(
         XElement element,
+        bool allowAbstract,
         IAttributeValidator validator,
         IErrorCollector collector)
     {
-        base.MergeWithProtected(element, validator, collector);
         Dictionary<XName, XElement> map = element.GetFilteredChildren().ToDictionary(x => x.Name, x => x);
 
         foreach (var kvp in map)
         {
             SchemaElement value = this.children[kvp.Key];
-            value.MergeWithProtected(kvp.Value, validator, collector);
+            value.MergeWith(kvp.Value, allowAbstract, collector, validator);
         }
+    }
+
+    protected override void OnSetAbstract()
+    {
+        foreach (var child in this.children.Values)
+        {
+            child.SetModifier(NodeModifier.Abstract);
+        }
+    }
+
+    public override IEnumerable<SchemaElement> GetEnumerator()
+    {
+        return this.children.Values;
     }
 }

@@ -48,7 +48,8 @@ public class MixableCSharpGenerator : ISourceGenerator
                             Path.GetDirectoryName(additionalFile.Path),
                             metadata.OutputXmlFileName);
 
-                        element.XmlElement.Save(relativePath);
+                        string text = element.XmlElement.ToString();
+                        File.WriteAllText(relativePath, text);
                     }
 
                     if (emitCSharp)

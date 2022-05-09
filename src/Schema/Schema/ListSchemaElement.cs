@@ -48,25 +48,28 @@ public class ListSchemaElement : SchemaElement
         return returnValue;
     }
 
-    protected internal override void MergeWithProtected(
+    protected override void MergeWithProtected(
         XElement element,
+        bool allowAbstract,
         IAttributeValidator validator,
         IErrorCollector collector)
     {
-        base.MergeWithProtected(element, validator, collector);
         MetadataAttributes attrs = validator.Validate(element, collector);
 
-        if (attrs.ListMergePolicy == ListMergePolicy.Replace || this.Modifier == NodeModifier.Abstract)
+        if (attrs.ListMergePolicy == ListMergePolicy.Replace)
         {
             this.XmlElement.RemoveNodes();
         }
 
-        if (this.Modifier != NodeModifier.Abstract)
+        foreach (var child in element.GetFilteredChildren())
         {
-            foreach (var child in element.GetFilteredChildren())
-            {
-                this.XmlElement.Add(child);
-            }
+            this.XmlElement.Add(child);
         }
+    }
+
+    protected override void OnSetAbstract()
+    {
+        // Setting to abstract => clearing out child nodes.
+        this.XmlElement.RemoveNodes();
     }
 }

@@ -1,7 +1,4 @@
-﻿using System.Xml;
-using System.Xml.XPath;
-
-namespace Mixable.Schema;
+﻿namespace Mixable.Schema;
 
 public enum MatchKind
 {
@@ -42,54 +39,63 @@ public abstract class SchemaElement
     {
         collector = new DeduplicatingErrorCollector(collector);
 
+        if (this.Modifier is NodeModifier.Final)
+        {
+            collector.Error(
+                $"Cannot override element with the '{nameof(NodeModifier.Final)}' option",
+                element);
+
+            return false;
+        }
+
         if (!this.MatchesSchema(element, MatchKind.Subset, attributeValidator, collector))
         {
             return false;
         }
 
-        this.MergeWithProtected(element, attributeValidator, collector);
+        var attributes = attributeValidator.Validate(element, collector);
+        this.SetModifier(attributes.Modifier);
 
-        if (!allowAbstract)
+        if (this.Modifier != NodeModifier.Abstract)
         {
-            foreach (var child in this.XmlElement.Descendants())
-            {
-                if (MetadataAttributes.Extract(child, null).Modifier == NodeModifier.Abstract)
-                {
-                    collector.Error(
-                        "Abstract nodes are not permitted to remain after the final merge.",
-                        child);
-                }
-            }
+            this.MergeWithProtected(element, allowAbstract, attributeValidator, collector);
         }
 
+        // Finally, search for any abstract elements.
+        if (!allowAbstract)
+        {
+            MarkAbstractDescendants(this, collector);
+        }
+        
         return !collector.HasErrors;
+    }
+
+    public void SetModifier(NodeModifier newModifier)
+    {
+        MixableInternal.Assert(
+            this.Modifier is not NodeModifier.Final,
+            "Can't change final modidifer");
+
+        this.XmlElement.SetAttributeValue(Constants.Attributes.Flags, newModifier.ToString());
+        this.Modifier = newModifier;
+
+        if (newModifier == NodeModifier.Abstract)
+        {
+            this.OnSetAbstract();
+            this.XmlElement.RemoveNodes();
+        }
     }
 
     /// <summary>
     /// Recursively merges the given element into this one. Assumes that 
     /// <see cref="MatchesSchema(XElement, MatchKind, IAttributeValidator, IErrorCollector)"/>
-    /// has been invoked.
+    /// succeeded.
     /// </summary>
-    protected internal virtual void MergeWithProtected(
+    protected abstract void MergeWithProtected(
         XElement element,
+        bool allowAbstract,
         IAttributeValidator validator,
-        IErrorCollector errorCollector)
-    {
-        MetadataAttributes attributes = validator.Validate(element, errorCollector);
-        if (this.Modifier == NodeModifier.Final)
-        {
-            errorCollector.Error(
-                $"Cannot override element with the '{nameof(NodeModifier.Final)}' option",
-                element);
-        }
-        else if (this.Modifier != attributes.Modifier)
-        {
-            this.Modifier = attributes.Modifier;
-            this.XmlElement.SetAttributeValue(Constants.Attributes.Flags, attributes.Modifier.ToString());
-        }
-
-        // no special handling for optional.
-    }
+        IErrorCollector errorCollector);
 
     /// <summary>
     /// Recursively tests whether the given element matches the current schema.
@@ -100,5 +106,29 @@ public abstract class SchemaElement
         IAttributeValidator validator,
         IErrorCollector errorCollector);
 
+    protected abstract void OnSetAbstract();
+
     public abstract T Accept<T>(ISchemaVisitor<T> visitor);
+
+    public virtual IEnumerable<SchemaElement> GetEnumerator()
+    {
+        yield break;
+    }
+
+    private static void MarkAbstractDescendants(
+        SchemaElement element,
+        IErrorCollector errorCollector)
+    {
+        if (element.Modifier == NodeModifier.Abstract)
+        {
+            errorCollector.Error(
+                "Abstract nodes are not permitted to remain after the final merge.",
+                element.XmlElement);
+        }
+
+        foreach (SchemaElement item in element.GetEnumerator())
+        {
+            MarkAbstractDescendants(item, errorCollector);
+        }
+    }
 }
