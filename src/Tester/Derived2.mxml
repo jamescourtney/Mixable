@@ -6,6 +6,7 @@
     </mx:Metadata>
 
     <Mapping>
+        <B>foo</B>
     </Mapping>
 
     <List mx:ListMerge="Replace" />
