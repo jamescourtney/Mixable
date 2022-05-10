@@ -47,6 +47,7 @@ public class ListSchemaElementParser : ISchemaElementParser
         ParseCallback parseChild)
     {
         var metadataAttributes = attributeValidator.Validate(node, errorCollector);
+        metadataAttributes.EnsureNotAbstractOrFinal(errorCollector, "List");
 
         MixableInternal.Assert(
             metadataAttributes.WellKnownType is null or WellKnownType.List,
@@ -59,7 +60,7 @@ public class ListSchemaElementParser : ISchemaElementParser
         if (templateElement is not null)
         {
             // Parse the template for structure.
-            template = parseChild(templateElement);
+            template = parseChild(templateElement, GetListTemplateAttributeValidator(attributeValidator));
         }
         else
         {
@@ -78,6 +79,25 @@ public class ListSchemaElementParser : ISchemaElementParser
         listElement.MatchesSchema(node, MatchKind.Strict, attributeValidator, errorCollector);
 
         return listElement;
+    }
+
+    internal static IAttributeValidator GetListTemplateAttributeValidator(IAttributeValidator validator)
+    {
+        // Use root validator as we want only "list" rules to apply for parsing our template. 
+        // otherwise, other decorators may detect incorrect errors, such as use of "Optional".
+        return validator.RootValidator.DecorateWith(
+            (attributes, errorCollector) =>
+            {
+                switch (attributes.Modifier)
+                {
+                    case NodeModifier.Abstract:
+                    case NodeModifier.Final:
+                        errorCollector.Error($"Items within a list may not be marked as '{attributes.Modifier}'.", attributes.SourceElement);
+                        break;
+                }
+
+                return false; // stop processing additional rules.
+            });
     }
 
     private XElement? GetTemplateNode(XElement node, IErrorCollector errorCollector)

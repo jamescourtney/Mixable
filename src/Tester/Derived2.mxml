@@ -2,12 +2,11 @@
     <mx:Metadata>
         <mx:BaseFile>Derived.mxml</mx:BaseFile>
         <mx:OutputXmlFile>Derived2.xml</mx:OutputXmlFile>
+        <!--<mx:Debug>true</mx:Debug>-->
     </mx:Metadata>
 
     <Mapping>
-        <C>
-            <C>2.2</C>
-        </C>
+        <B>foo</B>
     </Mapping>
 
     <List mx:ListMerge="Replace" />
@@ -20,5 +19,10 @@
             <OtherValue>105</OtherValue>
         </Item>
     </FancyList>
-    
+
+    <AbstractList mx:ListMerge="Replace">
+        <Item>4</Item>
+        <Item>4</Item>
+        <Item>4</Item>
+    </AbstractList>
 </Configuration>

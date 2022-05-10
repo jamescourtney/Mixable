@@ -2,6 +2,8 @@
 
 internal class BaseSchemaAttributeValidator : IAttributeValidator
 {
+    public IAttributeValidator RootValidator => this;
+
     public MetadataAttributes Validate(XElement element, IErrorCollector errorCollector)
     {
         var attrs = MetadataAttributes.Extract(element, errorCollector);

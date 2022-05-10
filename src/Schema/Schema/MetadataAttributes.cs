@@ -10,49 +10,84 @@ public enum WellKnownType
     Map = 5,
 }
 
+public enum NodeModifier
+{
+    None = 0,
+
+    /// <summary>
+    /// The node is optional. Valid only inside template declarations.
+    /// </summary>
+    Optional = 1,
+
+    /// <summary>
+    /// The node is abstract (must be overridden). Valid only in fully-rooted declarations.
+    /// </summary>
+    Abstract = 2,
+
+    /// <summary>
+    /// The node is final (cannot be overridden). Valid only in fully-rooted declarations.
+    /// </summary>
+    Final = 3,
+}
+
 public record struct MetadataAttributes
 {
     public string? RawTypeName { get; init; }
 
-    public WellKnownType? WellKnownType
-    {
-        get
-        {
-            if (Enum.TryParse<WellKnownType>(this.RawTypeName, ignoreCase: true, out var result))
-            {
-                return result;
-            }
-
-            return null;
-        }
-    }
+    public WellKnownType? WellKnownType { get; private set; }
 
     public ListMergePolicy? ListMergePolicy { get; init; }
 
-    public bool Optional { get; init; }
+    public NodeModifier Modifier { get; init; }
+
+    public XElement SourceElement { get; init; }
 
     internal static MetadataAttributes Extract(XElement element, IErrorCollector? errorCollector)
     {
-        ListMergePolicy? listMerge = null;
-        if (element.Attribute(Constants.Attributes.ListMerge)?.Value is string value)
+        string? rawType = element.Attribute(Constants.Attributes.Type)?.Value;
+        return new MetadataAttributes
         {
-            if (Enum.TryParse<ListMergePolicy>(value, ignoreCase: true, out var listMergeValue))
+            SourceElement = element,
+            RawTypeName = rawType,
+
+            // Pass in null error collector since we don't need to report parse failures.
+            WellKnownType = ParseEnum<WellKnownType>(rawType, element, errorCollector: null),
+
+            Modifier = ParseEnum<NodeModifier>(element.Attribute(Constants.Attributes.Flags)?.Value, element, errorCollector) ?? NodeModifier.None,
+            ListMergePolicy = ParseEnum<ListMergePolicy>(element.Attribute(Constants.Attributes.ListMerge)?.Value, element, errorCollector),
+        };
+    }
+
+    internal void EnsureNotAbstractOrFinal(IErrorCollector errorCollector, string nodeType)
+    {
+        if (this.Modifier is NodeModifier.Abstract or NodeModifier.Final)
+        {
+            errorCollector.InvalidAttributeUsage(
+                nodeType,
+                Constants.Attributes.Flags,
+                this.SourceElement);
+        }
+    }
+
+    private static T? ParseEnum<T>(
+        string? value,
+        XElement node,
+        IErrorCollector? errorCollector) where T : struct, Enum
+    {
+        if (value is not null)
+        {
+            if (Enum.TryParse(value, ignoreCase: true, out T result))
             {
-                listMerge = listMergeValue;
+                return result;
             }
             else
             {
                 errorCollector?.Error(
-                    $"Unable to parse '{value}' as a list merge value. Valid values are: {string.Join(",", Enum.GetNames(typeof(ListMergePolicy)))}.",
-                    element.GetDocumentPath());
+                    $"Unable to parse '{value}' as a '{typeof(T).Name}' value. Valid values are: {string.Join(",", Enum.GetNames(typeof(T)))}.",
+                    node.GetDocumentPath());
             }
         }
 
-        return new MetadataAttributes
-        {
-            RawTypeName = element.Attribute(Constants.Attributes.Type)?.Value,
-            ListMergePolicy = listMerge,
-            Optional = element.Attribute(Constants.Attributes.Optional)?.Value?.ToLowerInvariant() == "true",
-        };
+        return null;
     }
 }

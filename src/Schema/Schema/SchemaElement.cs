@@ -1,4 +1,6 @@
-﻿namespace Mixable.Schema;
+﻿using System.Threading;
+
+namespace Mixable.Schema;
 
 public enum MatchKind
 {
@@ -11,10 +13,12 @@ public enum MatchKind
 /// </summary>
 public abstract class SchemaElement
 {
+    private static readonly ThreadLocal<int> MergeWithDepth = new ThreadLocal<int>();
+
     protected SchemaElement(XElement xElement)
     {
         this.XmlElement = xElement;
-        this.Optional = MetadataAttributes.Extract(xElement, null).Optional;
+        this.Modifier = MetadataAttributes.Extract(xElement, null).Modifier;
     }
 
     /// <summary>
@@ -26,32 +30,61 @@ public abstract class SchemaElement
     /// <summary>
     /// Indicates if this element has the Optional attribute.
     /// </summary>
-    public bool Optional { get; }
+    public NodeModifier Modifier { get; protected set; }
 
     /// <summary>
     /// Merges the given element with the schema, assuming it passes validation.
     /// </summary>
-    public bool MergeWith(XElement element, IErrorCollector? collector)
+    public bool MergeWith(
+        XElement element,
+        bool allowAbstract,
+        IErrorCollector? collector,
+        IAttributeValidator attributeValidator)
     {
-        collector ??= new NoOpErrorCollector();
+        MergeWithDepth.Value++;
 
-        IAttributeValidator validator = new DerivedSchemaAttributeValidator();
-        if (!this.MatchesSchema(element, MatchKind.Subset, validator, collector))
+        try
         {
-            return false;
+            collector = new DeduplicatingErrorCollector(collector);
+
+            if (!this.MatchesSchema(element, MatchKind.Subset, attributeValidator, collector))
+            {
+                return false;
+            }
+
+            this.MergeWithProtected(element, allowAbstract, attributeValidator, collector);
+        }
+        finally
+        {
+            MergeWithDepth.Value--;
         }
 
-        this.MergeWithProtected(element, validator, collector);
+        if (!allowAbstract && MergeWithDepth.Value == 0)
+        {
+            MixableInternal.Assert(this.XmlElement.Document is not null, "Document was null");
+
+            foreach (var node in this.XmlElement.Document.Descendants())
+            {
+                if (MetadataAttributes.Extract(node, null).Modifier == NodeModifier.Abstract)
+                {
+                    collector.Error(
+                        "Abstract nodes are not permitted to remain after the final merge.",
+                        node);
+                }
+            }
+        }
+
         return !collector.HasErrors;
     }
 
     /// <summary>
     /// Recursively merges the given element into this one. Assumes that 
-    /// <see cref="MatchesSchema(XElement, IAttributeValidator, out string, out string)"/>
-    /// has been invoked.
+    /// <see cref="MatchesSchema(XElement, MatchKind, IAttributeValidator, IErrorCollector)"/>
+    /// succeeded.
     /// </summary>
-    protected internal abstract void MergeWithProtected(
+    protected abstract void MergeWithProtected(
         XElement element,
+        bool allowAbstract,
         IAttributeValidator validator,
         IErrorCollector errorCollector);
 

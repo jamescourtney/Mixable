@@ -1,4 +1,6 @@
-﻿namespace Mixable.Schema;
+﻿using System.Diagnostics;
+
+namespace Mixable.Schema;
 
 /// <summary>
 /// Describes metadata about a document and how Mixable should process it.
@@ -14,6 +16,7 @@ public class DocumentMetadata
     {
         Dictionary<XName, string> children = metadataElement.GetChildren().ToDictionary(x => x.Name, x => x.Value);
 
+        BreakIfDebug(children);
         children.TryGetValue(Constants.Tags.NamespaceTagName, out this.namespaceName);
         children.TryGetValue(Constants.Tags.OutputXmlFileTagName, out this.outputXmlName);
         children.TryGetValue(Constants.Tags.BaseFileName, out this.baseFileName);
@@ -26,6 +29,15 @@ public class DocumentMetadata
                 "false" => false,
                 _ => null,
             };
+        }
+    }
+
+    [ExcludeFromCodeCoverage]
+    private static void BreakIfDebug(Dictionary<XName, string> children)
+    {
+        if (children.TryGetValue(Constants.Tags.DebugBreak, out _))
+        {
+            Debugger.Launch();
         }
     }
 

@@ -26,7 +26,11 @@ public class ListSchemaElement : SchemaElement
         IErrorCollector errorCollector)
     {
         bool returnValue = true;
-        validator.Validate(element, errorCollector);
+
+        if (validator.Validate(element, errorCollector).Modifier != NodeModifier.None)
+        {
+            errorCollector.Error($"List elements in override schemas may not specify the '{Constants.Attributes.Flags.LocalName}' attribute.", element);
+        }
 
         foreach (XElement child in element.GetFilteredChildren())
         {
@@ -48,8 +52,9 @@ public class ListSchemaElement : SchemaElement
         return returnValue;
     }
 
-    protected internal override void MergeWithProtected(
+    protected override void MergeWithProtected(
         XElement element,
+        bool allowAbstract,
         IAttributeValidator validator,
         IErrorCollector collector)
     {
@@ -59,7 +64,7 @@ public class ListSchemaElement : SchemaElement
         {
             this.XmlElement.RemoveNodes();
         }
-        
+
         foreach (var child in element.GetFilteredChildren())
         {
             this.XmlElement.Add(child);

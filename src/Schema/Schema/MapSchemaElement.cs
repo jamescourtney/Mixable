@@ -82,7 +82,7 @@ public class MapSchemaElement : SchemaElement
             // However, we now need to do the reverse and validate that the element is a complete
             // subset. We can do this with a simple count, but that produces an error message that is
             // not helpful.
-            HashSet<XName> childNames = new(this.children.Where(x => !x.Value.Optional).Select(x => x.Key));
+            HashSet<XName> childNames = new(this.children.Where(x => x.Value.Modifier != NodeModifier.Optional).Select(x => x.Key));
 
             // childNames now contains things that we expect but are not present in the proposed element.
             childNames.ExceptWith(map.Keys);
@@ -100,17 +100,23 @@ public class MapSchemaElement : SchemaElement
         return returnValue;
     }
 
-    protected internal override void MergeWithProtected(
+    protected override void MergeWithProtected(
         XElement element,
+        bool allowAbstract,
         IAttributeValidator validator,
         IErrorCollector collector)
     {
+        if (validator.Validate(element, collector).Modifier != NodeModifier.None)
+        {
+            collector.Error($"Map elements in override schemas may not specify the '{Constants.Attributes.Flags.LocalName}' attribute.", element);
+        }
+
         Dictionary<XName, XElement> map = element.GetFilteredChildren().ToDictionary(x => x.Name, x => x);
 
         foreach (var kvp in map)
         {
             SchemaElement value = this.children[kvp.Key];
-            value.MergeWithProtected(kvp.Value, validator, collector);
+            value.MergeWith(kvp.Value, allowAbstract, collector, validator);
         }
     }
 }

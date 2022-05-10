@@ -6,7 +6,7 @@
     
     <Mapping>
         <A>4</A>
-        <B>string</B>
+        <B mx:Flags="Abstract" mx:Type="string" />
         <C>
             <C>2.0</C>
         </C>
@@ -20,7 +20,7 @@
         <mx:ListItemTemplate>
             <Item>
                 <Value mx:Type="int">0</Value>
-                <OtherValue mx:Type="int" mx:Optional="true">0</OtherValue>
+                <OtherValue mx:Type="int" mx:Flags="Optional">0</OtherValue>
             </Item>
         </mx:ListItemTemplate>
         
@@ -34,4 +34,8 @@
             <Value>3</Value>
         </Item>
     </FancyList>
+
+    <AbstractList mx:Type="List">
+        <Item>2</Item>
+    </AbstractList>
 </Configuration>

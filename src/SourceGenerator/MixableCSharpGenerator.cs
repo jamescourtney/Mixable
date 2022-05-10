@@ -17,41 +17,51 @@ public class MixableCSharpGenerator : ISourceGenerator
             {
                 if (additionalFile.Path.ToLowerInvariant().EndsWith(".mxml"))
                 {
-                    SourceGeneratorErrorCollector errorCollector = new SourceGeneratorErrorCollector(
-                        ref context,
-                        additionalFile.Path);
+                    IErrorCollector errorCollector = new DeduplicatingErrorCollector(
+                        new SourceGeneratorErrorCollector(ref context, additionalFile.Path));
 
-                    (SchemaElement element, DocumentMetadata metadata) = this.ProcessFile(
+                    (XDocument doc, DocumentMetadata metadata) = LoadMetadata(additionalFile.Path, errorCollector);
+
+                    bool emitXml = !string.IsNullOrEmpty(metadata.OutputXmlFileName);
+                    bool emitCSharp = metadata.GenerateCSharp == true;
+
+                    if (!emitXml && !emitCSharp)
+                    {
+                        continue;
+                    }
+
+                    SchemaElement element = this.ProcessFile(
                         additionalFile.Path,
                         errorCollector,
                         new(),
+                        0,
                         out string rootNamespace);
 
-                    if (!string.IsNullOrEmpty(metadata.OutputXmlFileName))
+                    if (errorCollector.HasErrors)
+                    {
+                        continue;
+                    }
+
+                    if (emitXml)
                     {
                         string relativePath = Path.Combine(
                             Path.GetDirectoryName(additionalFile.Path),
                             metadata.OutputXmlFileName);
 
-                        if (!errorCollector.HasErrors)
-                        {
-                            element.XmlElement.Save(relativePath);
-                        }
+                        string text = element.XmlElement.ToString();
+                        File.WriteAllText(relativePath, text);
                     }
 
-                    if (metadata.GenerateCSharp == true)
+                    if (emitCSharp)
                     {
                         var visitor = new SchemaVisitor(rootNamespace);
                         element.Accept(visitor);
                         visitor.Finish();
 
-                        if (!errorCollector.HasErrors)
-                        {
-                            string cSharp = visitor.StringBuilder.ToString();
-                            context.AddSource(
-                                Path.GetFileNameWithoutExtension(additionalFile.Path),
-                                cSharp);
-                        }
+                        string cSharp = visitor.StringBuilder.ToString();
+                        context.AddSource(
+                            Path.GetFileNameWithoutExtension(additionalFile.Path),
+                            cSharp);
                     }
                 }
             }
@@ -72,10 +82,32 @@ public class MixableCSharpGenerator : ISourceGenerator
         // No-op
     }
 
-    private (SchemaElement element, DocumentMetadata metadata) ProcessFile(
+    private static (XDocument doc, DocumentMetadata meta) LoadMetadata(string path, IErrorCollector errorCollector)
+    {
+        XDocument document;
+        try
+        {
+            document = XDocument.Parse(File.ReadAllText(path));
+        }
+        catch (Exception ex)
+        {
+            errorCollector.Error(ex.ToString(), path);
+            throw new BailOutException();
+        }
+
+        if (!DocumentMetadata.TryCreateFromXDocument(document, errorCollector, out DocumentMetadata? metadata))
+        {
+            throw new BailOutException();
+        }
+
+        return (document, metadata);
+    }
+
+    private SchemaElement ProcessFile(
         string path,
         IErrorCollector errorCollector,
         HashSet<string> visitedPaths,
+        uint depth,
         out string rootNamespace)
     {
         // 1) Load the document, bailing if necessary.
@@ -115,13 +147,19 @@ public class MixableCSharpGenerator : ISourceGenerator
                 ? metadata.BaseFileName
                 : Path.Combine(Path.GetDirectoryName(path), metadata.BaseFileName);
 
-            (baseSchema, _) = this.ProcessFile(baseFilePath, errorCollector, visitedPaths, out rootNamespace);
+            baseSchema = this.ProcessFile(baseFilePath, errorCollector, visitedPaths, depth + 1, out rootNamespace);
         }
 
         if (baseSchema is not null)
         {
+            IAttributeValidator validator = depth switch
+            {
+                  0 => new LeafSchemaAttributeValidator(),
+                > 0 => new IntermediateSchemaAttributeValidator(),
+            };
+
             // Merge the contents here on top of the base.
-            if (!baseSchema.MergeWith(document.Root, errorCollector))
+            if (!baseSchema.MergeWith(document.Root, allowAbstract: depth > 0, errorCollector, validator))
             {
                 throw new BailOutException();
             }
@@ -132,10 +170,7 @@ public class MixableCSharpGenerator : ISourceGenerator
             // structure.
             rootNamespace = metadata.NamespaceName ?? "Mixable.Generated";
 
-            SchemaParser parser = new SchemaParser
-            {
-                ErrorCollector = errorCollector
-            };
+            SchemaParser parser = new SchemaParser(errorCollector);
 
             if (!parser.TryParse(document, out baseSchema))
             {
@@ -143,7 +178,7 @@ public class MixableCSharpGenerator : ISourceGenerator
             }
         }
 
-        return (baseSchema, metadata);
+        return baseSchema;
     }
 
 

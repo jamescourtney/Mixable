@@ -25,3 +25,27 @@ public interface IErrorCollector
     /// </summary>
     void Info(string message, string? path = null);
 }
+
+[ExcludeFromCodeCoverage]
+public static class IErrorCollectorExtensions
+{
+    public static void Error(this IErrorCollector ec, string message, XElement element) 
+        => ec.Error(message, element.GetDocumentPath());
+
+    public static void Warning(this IErrorCollector ec, string message, XElement element) 
+        => ec.Warning(message, element.GetDocumentPath());
+
+    public static void Info(this IErrorCollector ec, string message, XElement element) 
+        => ec.Info(message, element.GetDocumentPath());
+
+    public static void InvalidAttributeUsage(
+        this IErrorCollector ec,
+        string itemType,
+        XName attributeName,
+        XElement element)
+    {
+        string? value = element.Attribute(attributeName)?.Value;
+
+        ec.Error($"The {attributeName.LocalName} attribute value '{value}' is not valid on {itemType} nodes", element);
+    }
+}

@@ -10,6 +10,8 @@ internal static class Constants
 
         public static readonly XName BaseFileName = XName.Get("BaseFile", XMLNamespace);
 
+        public static readonly XName DebugBreak = XName.Get("Debug", XMLNamespace);
+
         public static readonly XName OutputXmlFileTagName = XName.Get("OutputXmlFile", XMLNamespace);
 
         public static readonly XName GenerateCSharptagName = XName.Get("GenerateCSharp", XMLNamespace);
@@ -21,7 +23,7 @@ internal static class Constants
 
     public static class Attributes
     {
-        public static readonly XName Optional = XName.Get("Optional", XMLNamespace);
+        public static readonly XName Flags = XName.Get("Flags", XMLNamespace);
 
         public static readonly XName Type = XName.Get("Type", XMLNamespace);
 

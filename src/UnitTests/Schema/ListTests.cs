@@ -14,7 +14,7 @@ public class ListTests
             <Item>
                 <A>5</A>
                 <B>false</B>
-                <C mx:Optional=""true"">string</C>
+                <C mx:Flags=""Optional"">string</C>
             </Item>
         </mx:ListItemTemplate>
         
@@ -48,7 +48,7 @@ public class ListTests
         var root = XDocument.Parse(xml).XPathSelectElement("/Configuration/List");
 
         Assert.False(parser.CanParse(root, default));
-        parser.Parse(root, new BaseSchemaAttributeValidator(), tec, n => new ScalarSchemaElement(ScalarType.String, n));
+        parser.Parse(root, new BaseSchemaAttributeValidator(), tec, (n, av) => new ScalarSchemaElement(ScalarType.String, n));
         Assert.Single(tec.Errors, ("Expected tag name: 'Item1'. Got: 'Item2'.", "/Configuration/List/Item2"));
 
         tec.Reset();
@@ -78,7 +78,7 @@ public class ListTests
         var root = XDocument.Parse(xml).XPathSelectElement("/Configuration/List");
 
         Assert.True(parser.CanParse(root, MetadataAttributes.Extract(root, null)));
-        parser.Parse(root, new BaseSchemaAttributeValidator(), tec, n => new ScalarSchemaElement(ScalarType.String, n));
+        parser.Parse(root, new BaseSchemaAttributeValidator(), tec, (n, av) => new ScalarSchemaElement(ScalarType.String, n));
         Assert.Single(tec.Errors, ("Base schemas may not have a ListMerge policy defined.", "/Configuration/List"));
 
         tec.Reset();
@@ -112,7 +112,7 @@ public class ListTests
         var root = XDocument.Parse(xml).XPathSelectElement("/Configuration/List");
 
         Assert.True(parser.CanParse(root, default));
-        parser.Parse(root, new BaseSchemaAttributeValidator(), tec, n => new ScalarSchemaElement(ScalarType.String, n));
+        parser.Parse(root, new BaseSchemaAttributeValidator(), tec, (n, av) => new ScalarSchemaElement(ScalarType.String, n));
         Assert.Single(tec.Errors, ("Lists may only have a single template node.", "/Configuration/List"));
 
         tec.Reset();
@@ -170,13 +170,14 @@ public class ListTests
         string overrideSchema =
 @"
 <Configuration xmlns:mx=""https://github.com/jamescourtney/mixable"">
+    <mx:Metadata />
     <List mx:ListMerge=""Invalid"" />
 </Configuration>
 ";
         MergeHelpers.MergeInvalidSchema(
             BaseXml,
             overrideSchema,
-            "Unable to parse 'Invalid' as a list merge value. Valid values are: Concatenate,Replace.",
+            "Unable to parse 'Invalid' as a 'ListMergePolicy' value. Valid values are: Concatenate,Replace.",
             "/Configuration/List");
     }
 
@@ -186,6 +187,7 @@ public class ListTests
         string overrideSchema =
 @"
 <Configuration xmlns:mx=""https://github.com/jamescourtney/mixable"">
+    <mx:Metadata />
     <List mx:Type=""List"" />
 </Configuration>
 ";
@@ -202,6 +204,7 @@ public class ListTests
         string overrideSchema =
 @"
 <Configuration xmlns:mx=""https://github.com/jamescourtney/mixable"">
+    <mx:Metadata />
     <List>
         <Item>
             <A>6</A>
