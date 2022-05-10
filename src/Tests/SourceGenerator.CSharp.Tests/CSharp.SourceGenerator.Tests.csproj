@@ -28,6 +28,12 @@
     </ItemGroup>
 
     <ItemGroup>
+      <None Update="XML\Malformed\Base.mxml">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="XML\NoMetadata\Base.mxml">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
       <None Update="XML\CycleTest\Base.mxml">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>

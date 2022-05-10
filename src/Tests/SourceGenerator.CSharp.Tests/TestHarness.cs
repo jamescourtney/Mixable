@@ -14,7 +14,7 @@ namespace CSharp.SourceGenerator.Tests;
 
 public static class TestHarness
 {
-    public static void RunAndCompileAsync(
+    public static bool RunAndCompileAsync(
         string[] sourceFiles,
         out ImmutableArray<Diagnostic> diagnostics,
         out Compilation outputCompilation,
@@ -35,9 +35,9 @@ public static class TestHarness
             out outputCompilation,
             out diagnostics);
 
-        if (!diagnostics.IsEmpty)
+        if (diagnostics.Any(x => x.Severity is DiagnosticSeverity.Warning or DiagnosticSeverity.Error))
         {
-            return;
+            return false;
         }
         
         // Our generated file compiles!
@@ -48,6 +48,7 @@ public static class TestHarness
         Assert.True(compilationResult.Success);
 
         assembly = Assembly.LoadFile(tempfilePath);
+        return true;
     }
 
     private class CustomAdditionalText : AdditionalText

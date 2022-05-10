@@ -8,14 +8,13 @@ public class CSharpGeneratorTest
     [Fact]
     public void GeneralTest()
     {
-        RunAndCompileAsync(
+        Assert.True(RunAndCompileAsync(
             new[] { "XML/GeneralTest/Base.mxml", "XML/GeneralTest/Derived.mxml", "XML/GeneralTest/Derived2.mxml" },
             out var diagnostics,
             out var compilation,
             out var compilationResult,
-            out var assembly);
+            out var assembly));
 
-        Assert.Empty(diagnostics);
         Assert.True(compilationResult.Success);
         Assert.NotNull(assembly);
 
@@ -59,5 +58,45 @@ public class CSharpGeneratorTest
             diagnostics,
             d => d.Severity == DiagnosticSeverity.Error
               && d.GetMessage().Contains("Cycle detected in include files."));
+    }
+
+    [Fact]
+    public void NoMetadata()
+    {
+        RunAndCompileAsync(
+            new[] { "XML/NoMetadata/Base.mxml" },
+            out var diagnostics,
+            out var compilation,
+            out var compilationResult,
+            out var assembly);
+
+        Assert.NotEmpty(diagnostics);
+        Assert.Null(assembly);
+        Assert.Null(compilationResult);
+
+        Assert.Contains(
+            diagnostics,
+            d => d.Severity == DiagnosticSeverity.Error
+              && d.GetMessage().Contains("Unable to find Mixable metadata node. The metadata node is required."));
+    }
+
+    [Fact]
+    public void Malformed()
+    {
+        RunAndCompileAsync(
+            new[] { "XML/Malformed/Base.mxml" },
+            out var diagnostics,
+            out var compilation,
+            out var compilationResult,
+            out var assembly);
+
+        Assert.NotEmpty(diagnostics);
+        Assert.Null(assembly);
+        Assert.Null(compilationResult);
+
+        Assert.Contains(
+            diagnostics,
+            d => d.Severity == DiagnosticSeverity.Error
+              && d.GetMessage().Contains("The 'List' start tag on line 3 position 6 does not match the end tag of 'Configuration'"));
     }
 }

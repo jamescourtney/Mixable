@@ -27,6 +27,7 @@ public class MixableCSharpGenerator : ISourceGenerator
 
                     if (!emitXml && !emitCSharp)
                     {
+                        errorCollector.Info("Mixable mxml file does not include a code or xml output; skipping.", additionalFile.Path);
                         continue;
                     }
 
@@ -85,7 +86,7 @@ public class MixableCSharpGenerator : ISourceGenerator
         }
         catch (Exception ex)
         {
-            errorCollector.Error(ex.ToString(), path);
+            errorCollector.Error(ex.Message, path);
             throw new BailOutException();
         }
 
@@ -104,19 +105,9 @@ public class MixableCSharpGenerator : ISourceGenerator
         uint depth,
         out string rootNamespace)
     {
-        // 1) Load the document, bailing if necessary.
-        XDocument document;
-        try
-        {
-            document = XDocument.Parse(File.ReadAllText(path));
-        }
-        catch (Exception ex)
-        {
-            errorCollector.Error(ex.ToString(), path);
-            throw new BailOutException();
-        }
+        (XDocument document, DocumentMetadata metadata) = LoadMetadata(path, errorCollector);
 
-        // 2) Check for cycles.
+        // Check for cycles.
         // TODO: Use hash or something more deterministic? Symlinks and whatnot
         // may be problematic if we're just using the literal path.
         if (!visitedPaths.Add(path))
@@ -127,12 +118,6 @@ public class MixableCSharpGenerator : ISourceGenerator
 
         rootNamespace = string.Empty;
         SchemaElement? baseSchema = null;
-
-        // Load metadata -- bail if we fail.
-        if (!DocumentMetadata.TryCreateFromXDocument(document, errorCollector, out DocumentMetadata? metadata))
-        {
-            throw new BailOutException();
-        }
 
         // If this XML file inherits from a base file, load that one next.
         if (!string.IsNullOrEmpty(metadata.BaseFileName))
