@@ -45,3 +45,7 @@ jobs:
     - name: Upload
       working-directory: src/UnitTests
       run: codecov -f coverage.net6.0.xml
+      
+    - name: Upload
+      working-directory: src/SourceGenerator.CSharp.Tests
+      run: codecov -f coverage.net6.0.xml
