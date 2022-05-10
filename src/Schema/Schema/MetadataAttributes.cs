@@ -62,8 +62,9 @@ public record struct MetadataAttributes
     {
         if (this.Modifier is NodeModifier.Abstract or NodeModifier.Final)
         {
-            errorCollector.Error(
-                $"{nodeType} nodes cannot have the '{this.Modifier}' value of the '{Constants.Attributes.Flags.LocalName}' attribute.",
+            errorCollector.InvalidAttributeUsage(
+                nodeType,
+                Constants.Attributes.Flags,
                 this.SourceElement);
         }
     }

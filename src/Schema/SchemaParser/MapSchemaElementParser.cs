@@ -63,7 +63,10 @@ public class MapSchemaElementParser : ISchemaElementParser
         {
             if (attrs.Modifier == NodeModifier.Optional)
             {
-                errorCollector.Error($"Map elements may not use the {NodeModifier.Optional} modifier.", attrs.SourceElement);
+                errorCollector.InvalidAttributeUsage(
+                    "Map",
+                    Constants.Attributes.Flags,
+                    attrs.SourceElement);
             }
 
             return true; // continue processing later rules.

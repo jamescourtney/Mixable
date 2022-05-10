@@ -137,4 +137,73 @@ public class MapTests
         Assert.Equal("foobar", element.Value);
         Assert.Equal("None", element.Attribute(Constants.Attributes.Flags).Value);
     }
+
+    [Theory]
+    [InlineData(NodeModifier.Final)]
+    [InlineData(NodeModifier.Abstract)]
+    [InlineData(NodeModifier.Optional)]
+    public void Merge_Add_Modifier_To_Map_Leaf_NotAllowed(NodeModifier modifier)
+    {
+        string overrideSchema =
+$@"
+<Configuration xmlns:mx=""https://github.com/jamescourtney/mixable"">
+    <mx:Metadata />
+    <D mx:Flags=""{modifier}"">false</D>
+    <G>foobar</G>
+</Configuration>
+";
+        MergeHelpers.MergeInvalidSchema(
+            BaseXml,
+            overrideSchema,
+            $"Leaf schemas may not use the Mixable 'Flags' attribute.",
+            "/Configuration/D",
+            isLeafDocument: true);
+    }
+
+
+    [Theory]
+    [InlineData(NodeModifier.Optional)]
+    [InlineData((NodeModifier)255)]
+    public void Merge_Add_Modifier_To_Map_Intermediate_NotAllowed(NodeModifier modifier)
+    {
+        string overrideSchema =
+$@"
+<Configuration xmlns:mx=""https://github.com/jamescourtney/mixable"">
+    <mx:Metadata />
+    <D mx:Flags=""{modifier}"">false</D>
+    <G>foobar</G>
+</Configuration>
+";
+        MergeHelpers.MergeInvalidSchema(
+            BaseXml,
+            overrideSchema,
+            $"Intermediate schemas may not use the Flags attribute to set a node to {modifier}.",
+            "/Configuration/D",
+            isLeafDocument: false);
+    }
+
+    [Theory]
+    [InlineData(NodeModifier.Abstract)]
+    [InlineData(NodeModifier.Final)]
+    [InlineData(NodeModifier.Optional)]
+    public void Map_Template_Invalid_Flags(NodeModifier modifier)
+    {
+        string xml =
+$@"
+<Configuration xmlns:mx=""https://github.com/jamescourtney/mixable"">
+    <mx:Metadata>
+        <mx:NamespaceName>Foo.Bar.Baz</mx:NamespaceName>
+    </mx:Metadata>
+    <C mx:Flags=""{modifier}"">
+        <C>2.0</C>
+    </C>
+</Configuration>
+";
+
+        TestErrorCollector tec = new();
+        SchemaParser p = new(tec);
+        Assert.False(p.TryParse(XDocument.Parse(xml), out var root));
+
+        Assert.Contains(($"The Flags attribute value '{modifier}' is not valid on Map nodes", "/Configuration/C"), tec.Errors);
+    }
 }

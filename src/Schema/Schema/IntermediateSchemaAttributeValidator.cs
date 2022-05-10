@@ -19,7 +19,7 @@ internal class IntermediateSchemaAttributeValidator : IAttributeValidator
 
             default:
                 errorCollector.Error(
-                    $"Intermediate schemas may not use the {Constants.Attributes.Flags} attribute to set a node to {attrs.Modifier}.",
+                    $"Intermediate schemas may not use the {Constants.Attributes.Flags.LocalName} attribute to set a node to {attrs.Modifier}.",
                     element.GetDocumentPath());
                 break;
 

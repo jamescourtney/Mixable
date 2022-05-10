@@ -12,7 +12,7 @@ internal class LeafSchemaAttributeValidator : IAttributeValidator
         if (attrs.Modifier != NodeModifier.None)
         {
             errorCollector.Error(
-                $"Leaf schemas may not use the Mixable {Constants.Attributes.Flags.LocalName} attribute.",
+                $"Leaf schemas may not use the Mixable '{Constants.Attributes.Flags.LocalName}' attribute.",
                 element.GetDocumentPath());
         }
 
