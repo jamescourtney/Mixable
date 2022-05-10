@@ -56,4 +56,17 @@ public class DocumentMetadataTests
         Assert.True(DocumentMetadata.TryCreateFromXml(xml, tec, out _));
         Assert.Single(tec.Errors, ("BaseFileName should not be specified when GenerateCSharp is true.", (string)null));
     }
+
+    [Fact]
+    public void Metadata_FromString_InvalidXml()
+    {
+        string xml = @$"
+<Settings xmlns:mx=""{Constants.XMLNamespace}"">
+    <mx:Metadata>
+</Settings>";
+
+        TestErrorCollector tec = new();
+        Assert.False(DocumentMetadata.TryCreateFromXml(xml, tec, out _));
+        Assert.Single(tec.Errors, ("Unable to parse XML document", (string)null));
+    }
 }

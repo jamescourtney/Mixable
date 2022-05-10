@@ -206,4 +206,28 @@ $@"
 
         Assert.Contains(($"The Flags attribute value '{modifier}' is not valid on Map nodes", "/Configuration/C"), tec.Errors);
     }
+
+    [Theory]
+    [InlineData(NodeModifier.Abstract)]
+    [InlineData(NodeModifier.Final)]
+    [InlineData(NodeModifier.Optional)]
+    public void Map_Derived_Invalid_Flags(NodeModifier modifier)
+    {
+        string xml =
+$@"
+<Configuration xmlns:mx=""https://github.com/jamescourtney/mixable"">
+    <mx:Metadata />
+    <C mx:Flags=""{modifier}"">
+        <C>2.0</C>
+    </C>
+</Configuration>
+";
+
+        TestErrorCollector tec = new();
+        SchemaParser p = new(tec);
+        Assert.True(p.TryParse(XDocument.Parse(BaseXml), out var root));
+        Assert.False(root.MergeWith(XDocument.Parse(xml).Root, allowAbstract: true, tec, new IntermediateSchemaAttributeValidator()));
+
+        Assert.Contains(("Map elements in override schemas may not specify the 'Flags' attribute.", "/Configuration/C"), tec.Errors);
+    }
 }

@@ -288,4 +288,26 @@ public class ListTests
             Assert.IsType<ScalarSchemaElement>(template.Children[XName.Get("C")]).ScalarType,
             ScalarType.String);
     }
+
+    [Theory]
+    [InlineData(NodeModifier.Abstract)]
+    [InlineData(NodeModifier.Final)]
+    [InlineData(NodeModifier.Optional)]
+    public void List_Derived_Invalid_Flags(NodeModifier modifier)
+    {
+        string xml =
+$@"
+<Configuration xmlns:mx=""https://github.com/jamescourtney/mixable"">
+    <mx:Metadata />
+    <List mx:Flags=""{modifier}"" />
+</Configuration>
+";
+
+        TestErrorCollector tec = new();
+        SchemaParser p = new(tec);
+        Assert.True(p.TryParse(XDocument.Parse(BaseXml), out var root));
+        Assert.False(root.MergeWith(XDocument.Parse(xml).Root, allowAbstract: true, tec, new IntermediateSchemaAttributeValidator()));
+
+        Assert.Contains(("List elements in override schemas may not specify the 'Flags' attribute.", "/Configuration/List"), tec.Errors);
+    }
 }
