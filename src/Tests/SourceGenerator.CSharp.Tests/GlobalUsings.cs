@@ -6,3 +6,5 @@ global using System.Linq;
 global using Xunit;
 global using Mixable.Schema;
 global using System.Xml.XPath;
+
+global using static CSharp.SourceGenerator.Tests.TestHarness;

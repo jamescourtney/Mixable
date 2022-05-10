@@ -22,6 +22,7 @@ global using NotNullIfNotNullAttribute = Mixable.Polyfills.NotNullIfNotNullAttri
 
 namespace Mixable.Polyfills
 {
+    [ExcludeFromCodeCoverage]
     [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false, Inherited = true)]
     internal class NotNullWhenAttribute : Attribute
     {
@@ -30,6 +31,7 @@ namespace Mixable.Polyfills
         }
     }
 
+    [ExcludeFromCodeCoverage]
     [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false, Inherited = true)]
     internal class DoesNotReturnIfAttribute : Attribute
     {
@@ -38,7 +40,7 @@ namespace Mixable.Polyfills
         }
     }
 
-
+    [ExcludeFromCodeCoverage]
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Parameter | AttributeTargets.ReturnValue, AllowMultiple = true, Inherited = false)]
     internal class NotNullIfNotNullAttribute : Attribute
     {
@@ -53,6 +55,7 @@ namespace Mixable.Polyfills
 
 namespace System.Runtime.CompilerServices
 {
+    [ExcludeFromCodeCoverage]
     internal static class IsExternalInit { }
 }
 

@@ -3,6 +3,7 @@ using Mixable.Schema;
 
 namespace Mixable.SourceGenerator;
 
+[ExcludeFromCodeCoverage]
 internal record SourceGeneratorErrorCollector : IErrorCollector
 {
     private readonly GeneratorExecutionContext context;

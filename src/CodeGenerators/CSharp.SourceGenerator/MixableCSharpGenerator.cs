@@ -68,12 +68,6 @@ public class MixableCSharpGenerator : ISourceGenerator
             catch (BailOutException)
             {
             }
-#if DEBUG
-            catch
-            {
-                // Debugger.Launch();
-            }
-#endif
         }
     }
 

@@ -28,13 +28,16 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="XML\Base.mxml">
+      <None Update="XML\CycleTest\Base.mxml">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
-      <None Update="XML\Derived.mxml">
+      <None Update="XML\GeneralTest\Base.mxml">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
-      <None Update="XML\Derived2.mxml">
+      <None Update="XML\GeneralTest\Derived.mxml">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="XML\GeneralTest\Derived2.mxml">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
     </ItemGroup>
