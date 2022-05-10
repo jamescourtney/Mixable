@@ -42,7 +42,7 @@ public class MergeTests
 </Configuration>
 ";
 
-    // [Fact]
+    [Fact]
     public void ValidMerge()
     {
         string overrideSchema =

@@ -26,6 +26,7 @@ public interface IErrorCollector
     void Info(string message, string? path = null);
 }
 
+[ExcludeFromCodeCoverage]
 public static class IErrorCollectorExtensions
 {
     public static void Error(this IErrorCollector ec, string message, XElement element) 
