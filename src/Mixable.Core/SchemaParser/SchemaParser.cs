@@ -2,6 +2,13 @@
 
 public class SchemaParser
 {
+    private static readonly ISchemaElementParser[] DefaultParsers = new ISchemaElementParser[]
+    {
+        new ScalarSchemaElementParser(),
+        new ListSchemaElementParser(),
+        new MapSchemaElementParser(),
+    };
+
     private readonly ISchemaElementParser[] elementParsers;
 
     public SchemaParser() : this(new NoOpErrorCollector())
@@ -9,15 +16,8 @@ public class SchemaParser
     }
 
     public SchemaParser(IErrorCollector errorCollector)
+        : this(DefaultParsers, errorCollector)
     {
-        this.elementParsers = new ISchemaElementParser[]
-        {
-            new ScalarSchemaElementParser(),
-            new ListSchemaElementParser(),
-            new MapSchemaElementParser(),
-        };
-
-        this.ErrorCollector = new DeduplicatingErrorCollector(errorCollector);
     }
 
     public SchemaParser(IEnumerable<ISchemaElementParser> elementParsers, IErrorCollector errorCollector)
