@@ -1,0 +1,42 @@
+﻿<Configuration xmlns:mx="https://github.com/jamescourtney/mixable">
+    <mx:Metadata>
+        <mx:NamespaceName>Foo.Bar.Baz.Bat</mx:NamespaceName>
+        <mx:GenerateCSharp>true</mx:GenerateCSharp>
+    </mx:Metadata>
+    
+    <Mapping>
+        <A mx:Flags="Final">4</A>
+        <B mx:Flags="Abstract" mx:Type="string" />
+        <C>
+            <C>2.0</C>
+        </C>
+    </Mapping>
+    <List>
+        <Item>1</Item>
+        <Item>2</Item>
+        <Item>3</Item>
+    </List>
+    <FancyList>
+        <mx:ListItemTemplate>
+            <Item>
+                <Value mx:Type="int">0</Value>
+                <OtherValue mx:Type="int" mx:Flags="Optional">0</OtherValue>
+            </Item>
+        </mx:ListItemTemplate>
+        
+        <Item>
+            <Value>1</Value>
+        </Item>
+        <Item>
+            <Value>2</Value>
+        </Item>
+        <Item>
+            <Value>3</Value>
+            <OtherValue>4</OtherValue>
+        </Item>
+    </FancyList>
+
+    <AbstractList mx:Type="List">
+        <Item>1</Item>
+    </AbstractList>
+</Configuration>

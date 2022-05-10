@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Configuration xmlns:mx="https://github.com/jamescourtney/mixable">
+  <mx:Metadata>
+    <mx:BaseFile>Base.mxml</mx:BaseFile>
+  </mx:Metadata>
+
+    <Mapping>
+        <C>
+            <C mx:Flags="Final">3.14159</C>
+        </C>
+    </Mapping>
+
+    <FancyList>
+        <Item>
+            <Value>100</Value>
+        </Item>
+        <Item>
+            <Value>101</Value>
+            <OtherValue>105</OtherValue>
+        </Item>
+    </FancyList>
+
+    <AbstractList />
+    
+</Configuration>
