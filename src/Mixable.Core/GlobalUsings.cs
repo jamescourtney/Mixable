@@ -6,4 +6,4 @@ global using System.Linq;
 
 using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("UnitTests")]
+[assembly: InternalsVisibleTo("Mixable.Core.UnitTests")]

@@ -1,5 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="../common.props" />
+  <Import Project="../../common.props" />
   
   <PropertyGroup>
     <TargetFrameworks>net6.0</TargetFrameworks>
@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Schema\Schema.csproj" />
+    <ProjectReference Include="..\..\Mixable.Core\Mixable.Core.csproj" />
   </ItemGroup>
 
 </Project>

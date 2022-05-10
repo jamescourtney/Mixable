@@ -2,7 +2,7 @@ codecov:
   require_ci_to_pass: yes
   
 ignore:
-  - "src/*Test*/**/*
+  - "src/Tests/**/*
 
 coverage:
   precision: 2

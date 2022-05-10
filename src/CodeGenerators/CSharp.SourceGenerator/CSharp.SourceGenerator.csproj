@@ -6,11 +6,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="..\Schema\*.cs">
-            <LinkBase>Schema</LinkBase>
+        <Compile Include="..\..\Mixable.Core\*.cs">
+            <LinkBase>Mixable.Core</LinkBase>
         </Compile>
-        <Compile Include="..\Schema\*\*.cs">
-            <LinkBase>Schema</LinkBase>
+        <Compile Include="..\..\Mixable.Core\*\*.cs">
+            <LinkBase>Mixable.Core</LinkBase>
         </Compile>
     </ItemGroup>
 
