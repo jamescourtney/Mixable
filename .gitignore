@@ -348,4 +348,4 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
-/src/UnitTests/coverage.net6.0.xml
+coverage.*.xml
