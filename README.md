@@ -50,13 +50,6 @@ Mixable input files end in the `.mxml` file extension. The first step is to defi
     <TlsCert>myfancydomain.com</TlsCert>
     <RequireAuthentication>true</RequireAuthentication>
   </HttpListener>
-  
-  <!-- A list of strings -->
-  <BlockedUsers>
-    <UserId mx:Type="string">1234</UserId>
-    <UserId>5678</UserId>
-  </BlockedUsers>
-</Settings>
 ```
 
 Then define overrides per environment:
@@ -64,16 +57,31 @@ Then define overrides per environment:
 <Settings xmlns:mx="https://github.com/jamescourtney/mixable">
   <mx:Metadata>
     <mx:BaseFile>Template.mxml</mx:BaseFile>
-    <mx:OutputXmlFile>TestConfig.xml</mx:OutputXmlFile>
+    <mx:OutputXmlFile>LocalHostConfig.xml</mx:OutputXmlFile>
   </mx:Metadata>
   
   <HttpListener>
     <TlsCert>localhost</TlsCert>
     <RequireAuthentication>false</RequireAuthentication>
   </HttpListener>
-  
-  <!-- Remove blocked users in test -->
-  <BlockedUsers mx:ListMerge="Replace" />
 </Settings>
 ```
-###
+### Other stuff!
+Mixable supports some other useful concepts as well:
+- `Final` modifier: downstream XML files cannot override the given value
+- `Abstract` modidifer: Must be overridden before a merged XML file can be produced
+- Lists: with full `concatenate` and `replace` semenatics at override time.
+
+### FAQ
+
+#### Project Status
+Mixable is quite new, and in active development. Things might change a lot in a hurry or not at all. The existing tests are quite robust and everything *should* work, but breaking changes might happen without warning.
+
+#### What's Planned?
+Support for other languages beyond C# (please help!), a command-line tool, possibly fancier merge semantics like making whole chunks of a document `abstract` or `final`.
+
+#### All the cool kids use YAML/JSON
+Mixable needs metadata to work. YAML and JSON simply do not have the expressiveness necessary to properly merge complex documents.
+
+### License
+Mixable is licensed under the Apache 2 license.
