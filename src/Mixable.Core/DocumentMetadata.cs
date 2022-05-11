@@ -125,4 +125,10 @@ public class DocumentMetadata
     public string? OutputXmlFileName => this.outputXmlName;
 
     public bool? GenerateCSharp => this.generateCSharp;
+
+    /// <summary>
+    /// Indicates if this MXML file is a no-op (ie, nothing to do).
+    /// </summary>
+    public bool IsNoOp => string.IsNullOrEmpty(this.outputXmlName) &&
+                          this.generateCSharp != true;
 }

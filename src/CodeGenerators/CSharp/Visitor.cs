@@ -1,30 +1,32 @@
 ﻿using Mixable.Schema;
+using System.Collections.Generic;
 using System.Text;
+using System.Xml.Linq;
 
-namespace Mixable.SourceGenerator;
+namespace Mixable.CSharp;
 
 public class TypeContext
 {
     public List<string> Attributes { get; } = new();
 
-    public string TypeName { get; init; }
+    public string? TypeName { get; init; }
 }
 
 public class SchemaVisitor : ISchemaVisitor<TypeContext>
 {
     public StringBuilder StringBuilder { get; } = new();
 
-    public SchemaVisitor(string @namespace)
-    {
-        this.StringBuilder.AppendLine($"namespace {@namespace}");
-        this.StringBuilder.AppendLine("{");
-        this.StringBuilder.AppendLine("using System.Collections.Generic;");
-        this.StringBuilder.AppendLine("using System.Xml.Serialization;");
-    }
-
     public void Finish()
     {
         this.StringBuilder.Append("}");
+    }
+
+    public void Initialize(DocumentMetadata metadata)
+    {
+        this.StringBuilder.AppendLine($"namespace {metadata.NamespaceName}");
+        this.StringBuilder.AppendLine("{");
+        this.StringBuilder.AppendLine("using System.Collections.Generic;");
+        this.StringBuilder.AppendLine("using System.Xml.Serialization;");
     }
 
     public TypeContext Accept(ListSchemaElement list)

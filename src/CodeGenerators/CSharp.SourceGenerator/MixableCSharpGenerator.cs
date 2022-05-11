@@ -9,162 +9,36 @@ public class MixableCSharpGenerator : ISourceGenerator
 {
     public void Execute(GeneratorExecutionContext context)
     {
-        // Debugger.Launch();
+        MxmlFileProcessor processor = new();
 
-        foreach (var additionalFile in context.AdditionalFiles)
+        foreach (var item in context.AdditionalFiles)
         {
-            try
+            if (Path.GetExtension(item.Path).ToLowerInvariant() == ".mxml")
             {
-                if (additionalFile.Path.ToLowerInvariant().EndsWith(".mxml"))
+                var visitor = new CSharp.SchemaVisitor();
+
+                if (!processor.TryProcessFile(
+                    item.Path,
+                    visitor,
+                    new SourceGeneratorErrorCollector(ref context, item.Path),
+                    out var metadata))
                 {
-                    IErrorCollector errorCollector = new DeduplicatingErrorCollector(
-                        new SourceGeneratorErrorCollector(ref context, additionalFile.Path));
-
-                    (XDocument doc, DocumentMetadata metadata) = LoadMetadata(additionalFile.Path, errorCollector);
-
-                    bool emitXml = !string.IsNullOrEmpty(metadata.OutputXmlFileName);
-                    bool emitCSharp = metadata.GenerateCSharp == true;
-
-                    if (!emitXml && !emitCSharp)
-                    {
-                        errorCollector.Info("Mixable mxml file does not include a code or xml output; skipping.", additionalFile.Path);
-                        continue;
-                    }
-
-                    SchemaElement element = this.ProcessFile(
-                        additionalFile.Path,
-                        errorCollector,
-                        new(),
-                        0,
-                        out string rootNamespace);
-
-                    if (errorCollector.HasErrors)
-                    {
-                        continue;
-                    }
-
-                    if (emitXml)
-                    {
-                        string relativePath = Path.Combine(
-                            Path.GetDirectoryName(additionalFile.Path),
-                            metadata.OutputXmlFileName);
-
-                        string text = element.XmlElement.ToString();
-                        File.WriteAllText(relativePath, text);
-                    }
-
-                    if (emitCSharp)
-                    {
-                        var visitor = new SchemaVisitor(rootNamespace);
-                        element.Accept(visitor);
-                        visitor.Finish();
-
-                        string cSharp = visitor.StringBuilder.ToString();
-                        context.AddSource(
-                            Path.GetFileNameWithoutExtension(additionalFile.Path),
-                            cSharp);
-                    }
+                    // Nothing was done.
+                    continue;
                 }
-            }
-            catch (BailOutException)
-            {
+
+                visitor.Finish();
+
+                if (metadata.GenerateCSharp == true)
+                {
+                    context.AddSource(Path.GetFileName(item.Path), visitor.StringBuilder.ToString());
+                }
             }
         }
     }
 
     public void Initialize(GeneratorInitializationContext context)
-    {
-        // No-op
-    }
-
-    private static (XDocument doc, DocumentMetadata meta) LoadMetadata(string path, IErrorCollector errorCollector)
-    {
-        XDocument document;
-        try
-        {
-            document = XDocument.Parse(File.ReadAllText(path));
-        }
-        catch (Exception ex)
-        {
-            errorCollector.Error(ex.Message, path);
-            throw new BailOutException();
-        }
-
-        if (!DocumentMetadata.TryCreateFromXDocument(document, errorCollector, out DocumentMetadata? metadata))
-        {
-            throw new BailOutException();
-        }
-
-        return (document, metadata);
-    }
-
-    private SchemaElement ProcessFile(
-        string path,
-        IErrorCollector errorCollector,
-        HashSet<string> visitedPaths,
-        uint depth,
-        out string rootNamespace)
-    {
-        (XDocument document, DocumentMetadata metadata) = LoadMetadata(path, errorCollector);
-
-        // Check for cycles.
-        // TODO: Use hash or something more deterministic? Symlinks and whatnot
-        // may be problematic if we're just using the literal path.
-        if (!visitedPaths.Add(path))
-        {
-            errorCollector.Error("Cycle detected in include files.", path);
-            throw new BailOutException();
-        }
-
-        rootNamespace = string.Empty;
-        SchemaElement? baseSchema = null;
-
-        // If this XML file inherits from a base file, load that one next.
-        if (!string.IsNullOrEmpty(metadata.BaseFileName))
-        {
-            string baseFilePath = Path.IsPathRooted(metadata.BaseFileName)
-                ? metadata.BaseFileName
-                : Path.Combine(Path.GetDirectoryName(path), metadata.BaseFileName);
-
-            baseSchema = this.ProcessFile(baseFilePath, errorCollector, visitedPaths, depth + 1, out rootNamespace);
-        }
-
-        if (baseSchema is not null)
-        {
-            IAttributeValidator validator = depth switch
-            {
-                  0 => new LeafSchemaAttributeValidator(),
-                > 0 => new IntermediateSchemaAttributeValidator(),
-            };
-
-            // Merge the contents here on top of the base.
-            if (!baseSchema.MergeWith(document.Root, allowAbstract: depth > 0, errorCollector, validator))
-            {
-                throw new BailOutException();
-            }
-        }
-        else
-        {
-            // This is the bottom of the stack -- parse the base schema to build a
-            // structure.
-            rootNamespace = metadata.NamespaceName ?? "Mixable.Generated";
-
-            SchemaParser parser = new SchemaParser(errorCollector);
-
-            if (!parser.TryParse(document, out baseSchema))
-            {
-                throw new BailOutException();
-            }
-        }
-
-        return baseSchema;
-    }
-
-
-    /// <summary>
-    /// Special exception to bail out after encountering an unrecoverable error.
-    /// </summary>
-    private class BailOutException : Exception
-    {
+    { 
+        // Nothing for us to do here.
     }
 }

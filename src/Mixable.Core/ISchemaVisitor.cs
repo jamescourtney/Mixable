@@ -6,6 +6,11 @@
 public interface ISchemaVisitor<T>
 {
     /// <summary>
+    /// Initializes the visitor based on the given metadata.
+    /// </summary>
+    void Initialize(DocumentMetadata metadata);
+
+    /// <summary>
     /// Visits a list element.
     /// </summary>
     T Accept(ListSchemaElement list);

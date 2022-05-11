@@ -1,6 +1,6 @@
 ﻿namespace Mixable.Schema;
 
-internal static class Constants
+public static class Constants
 {
     public const string XMLNamespace = "https://github.com/jamescourtney/mixable";
 
