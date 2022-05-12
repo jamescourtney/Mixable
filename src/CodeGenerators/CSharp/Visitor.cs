@@ -18,12 +18,14 @@ public class SchemaVisitor : ISchemaVisitor<TypeContext>
 
     public void Finish()
     {
-        this.StringBuilder.Append("}");
+        this.StringBuilder.Append('}');
     }
 
     public void Initialize(DocumentMetadata metadata)
     {
-        this.StringBuilder.AppendLine($"namespace {metadata.NamespaceName}");
+        MixableInternal.Assert(metadata.CSharp is not null, "CSharp metadata was null");
+
+        this.StringBuilder.AppendLine($"namespace {metadata.CSharp.NamespaceName}");
         this.StringBuilder.AppendLine("{");
         this.StringBuilder.AppendLine("using System.Collections.Generic;");
         this.StringBuilder.AppendLine("using System.Xml.Serialization;");

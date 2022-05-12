@@ -21,18 +21,14 @@ public class MixableCSharpGenerator : ISourceGenerator
                     item.Path,
                     visitor,
                     new SourceGeneratorErrorCollector(ref context, item.Path),
-                    out var metadata))
+                    md => md.CSharp?.Enabled == true))
                 {
                     // Nothing was done.
                     continue;
                 }
 
                 visitor.Finish();
-
-                if (metadata.GenerateCSharp == true)
-                {
-                    context.AddSource(Path.GetFileName(item.Path), visitor.StringBuilder.ToString());
-                }
+                context.AddSource(Path.GetFileName(item.Path), visitor.StringBuilder.ToString());
             }
         }
     }

@@ -17,7 +17,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LiveTester", "Tests\LiveTes
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mixable.Core.UnitTests", "Tests\Mixable.Core.UnitTests\Mixable.Core.UnitTests.csproj", "{0DC3D331-8B7F-4FA3-9559-A275D359E83E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharp", "CodeGenerators\CSharp\CSharp.csproj", "{F23F8328-F3C6-4694-9C61-81AC27006008}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CSharp", "CodeGenerators\CSharp\CSharp.csproj", "{F23F8328-F3C6-4694-9C61-81AC27006008}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Python", "CodeGenerators\Python\Python.csproj", "{FEABC4E8-ECE0-457D-B09C-1514D95771FA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mixable.Tool", "Mixable.Tool\Mixable.Tool.csproj", "{714091B3-0E88-4EA3-8EA0-06556596E529}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -49,6 +53,14 @@ Global
 		{F23F8328-F3C6-4694-9C61-81AC27006008}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F23F8328-F3C6-4694-9C61-81AC27006008}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F23F8328-F3C6-4694-9C61-81AC27006008}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FEABC4E8-ECE0-457D-B09C-1514D95771FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FEABC4E8-ECE0-457D-B09C-1514D95771FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FEABC4E8-ECE0-457D-B09C-1514D95771FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FEABC4E8-ECE0-457D-B09C-1514D95771FA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{714091B3-0E88-4EA3-8EA0-06556596E529}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{714091B3-0E88-4EA3-8EA0-06556596E529}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{714091B3-0E88-4EA3-8EA0-06556596E529}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{714091B3-0E88-4EA3-8EA0-06556596E529}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -59,6 +71,7 @@ Global
 		{6A308747-1A26-4E4C-B635-EACE10B1968C} = {987888DE-AE24-4D73-A2CD-3013B179336A}
 		{0DC3D331-8B7F-4FA3-9559-A275D359E83E} = {987888DE-AE24-4D73-A2CD-3013B179336A}
 		{F23F8328-F3C6-4694-9C61-81AC27006008} = {15828D24-A035-494E-85E7-D82851743680}
+		{FEABC4E8-ECE0-457D-B09C-1514D95771FA} = {15828D24-A035-494E-85E7-D82851743680}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {CD06C5FF-74FC-44C2-AE9A-F720E7416BD2}

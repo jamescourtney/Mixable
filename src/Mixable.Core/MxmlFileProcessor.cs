@@ -18,17 +18,17 @@ public class MxmlFileProcessor
         string filePath,
         ISchemaVisitor<T> visitor,
         IErrorCollector errorCollector,
-        [NotNullWhen(true)] out DocumentMetadata? metadata)
+        Func<DocumentMetadata, bool> shouldProcess)
     {
-        metadata = null;
-
         try
         {
             errorCollector = new DeduplicatingErrorCollector(errorCollector);
 
-            (_, metadata) = LoadMetadata(filePath, errorCollector);
+            (_, DocumentMetadata metadata) = LoadMetadata(filePath, errorCollector);
 
-            if (metadata.IsNoOp)
+            bool shouldProcessResult = shouldProcess(metadata);
+            if (!string.IsNullOrEmpty(metadata.MergedXmlFileName) && 
+                !shouldProcessResult)
             {
                 return false;
             }
@@ -44,34 +44,41 @@ public class MxmlFileProcessor
                 return false;
             }
 
-            if (!string.IsNullOrEmpty(metadata.OutputXmlFileName))
+            if (!string.IsNullOrEmpty(metadata.MergedXmlFileName))
             {
                 string relativePath = Path.Combine(
                     GetDirectoryName(filePath),
-                    metadata.OutputXmlFileName);
+                    metadata.MergedXmlFileName);
 
                 string text = element.XmlElement.ToString();
                 File.WriteAllText(relativePath, text);
             }
 
-            visitor.Initialize(metadata);
-            element.Accept(visitor);
-            return true;
+            if (shouldProcessResult)
+            {
+                visitor.Initialize(metadata);
+                element.Accept(visitor);
+                return true;
+            }
         }
         catch (BailOutException)
         {
-            return false;
         }
+
+        return false;
     }
 
     private static (XDocument doc, DocumentMetadata meta) LoadMetadata(
         string path,
         IErrorCollector errorCollector)
     {
+        string text;
         XDocument document;
+
         try
         {
-            document = XDocument.Parse(File.ReadAllText(path));
+            text = File.ReadAllText(path);
+            document = XDocument.Parse(text);
         }
         catch (Exception ex)
         {
@@ -79,7 +86,7 @@ public class MxmlFileProcessor
             throw new BailOutException();
         }
 
-        if (!DocumentMetadata.TryCreateFromXDocument(document, errorCollector, out DocumentMetadata? metadata))
+        if (!DocumentMetadata.TryCreateFromXml(text, errorCollector, out var metadata))
         {
             throw new BailOutException();
         }
