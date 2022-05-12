@@ -8,19 +8,12 @@
     <ItemGroup>
         <None Remove="Derived.mxml" />
         <None Remove="Derived2.mxml" />
-        <None Remove="Derived2.xml" />
     </ItemGroup>
 
     <ItemGroup>
         <AdditionalFiles Include="Derived2.mxml" />
         <AdditionalFiles Include="Derived.mxml" />
         <AdditionalFiles Include="Base.mxml" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <EmbeddedResource Include="Derived2.xml">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </EmbeddedResource>
     </ItemGroup>
 
     <ItemGroup>

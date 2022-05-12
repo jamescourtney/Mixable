@@ -1,5 +1,6 @@
 ﻿using Mixable.Schema;
 using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Xml.Linq;
 
@@ -64,22 +65,35 @@ public class SchemaVisitor : ISchemaVisitor<TypeContext>
 {
     public PythonCodeWriter CodeWriter { get; } = new();
 
-    public void Finish()
+    public bool ShouldProcess(DocumentMetadata metadata)
     {
+        return metadata.Python?.Enabled == true;
     }
 
-    public void Initialize(DocumentMetadata metadata)
+    public void Run(SchemaElement element, DocumentMetadata metadata, IErrorCollector errorCollector)
     {
+        if (!this.ShouldProcess(metadata))
+        {
+            return;
+        }
+
         this.CodeWriter.AppendLine("from defusedxml.ElementTree import parse");
         this.CodeWriter.AppendLine(string.Empty);
+
+        element.Accept(this, errorCollector);
+
+        if (!string.IsNullOrEmpty(metadata.Python?.OutputFile))
+        {
+            System.IO.File.WriteAllText(metadata.Python.OutputFile, this.CodeWriter.StringBuilder.ToString());
+        }
     }
 
-    public TypeContext Accept(ListSchemaElement list)
+    public TypeContext Accept(ListSchemaElement list, IErrorCollector errorCollector)
     {
-        TypeContext innerType = list.Template.Accept(this);
+        TypeContext innerType = list.Template.Accept(this, errorCollector);
 
-        string variable1 = Guid.NewGuid().ToString("n");
-        string variable2= Guid.NewGuid().ToString("n");
+        string variable1 = $"x{Guid.NewGuid():n}";
+        string variable2= $"x{Guid.NewGuid():n}";
 
         string create = innerType.CreateNew(variable1);
         string childTagName = list.Template.XmlElement.Name.LocalName;
@@ -88,9 +102,21 @@ public class SchemaVisitor : ISchemaVisitor<TypeContext>
             $"[ {create} for {variable1} in filter(lambda {variable2}: {variable2}.tag == '{childTagName}', {parent}.getchildren()) ]");
     }
 
-    public TypeContext Accept(MapSchemaElement map)
+    public TypeContext Accept(MapSchemaElement map, IErrorCollector errorCollector)
     {
         string className = GetClassName(map.XmlElement);
+
+        List<string> initializations = new();
+
+        foreach (var kvp in map.Children)
+        {
+            XName name = kvp.Key;
+            SchemaElement value = kvp.Value;
+            TypeContext valueType = value.Accept(this, errorCollector);
+
+            string create = valueType.CreateNew($"element.find('{name.LocalName}')");
+            initializations.Add($"self.{name.LocalName} = {create}");
+        }
 
         this.CodeWriter.AppendLine($"class {className}:");
         using (this.CodeWriter.WithBlock())
@@ -98,22 +124,17 @@ public class SchemaVisitor : ISchemaVisitor<TypeContext>
             this.CodeWriter.AppendLine("def __init__(self, element):");
             using (this.CodeWriter.WithBlock())
             {
-                foreach (var kvp in map.Children)
+                foreach (var init in initializations)
                 {
-                    XName name = kvp.Key;
-                    SchemaElement value = kvp.Value;
-                    TypeContext valueType = value.Accept(this);
-
-                    string create = valueType.CreateNew($"element.find('{name.LocalName}')");
-                    this.CodeWriter.AppendLine($"self.{name.LocalName} = {create}");
+                    this.CodeWriter.AppendLine(init);
                 }
             }
         }
 
-        return new TypeContext(x => $"{className}(x)");
+        return new TypeContext(x => $"{className}({x})");
     }
 
-    public TypeContext Accept(ScalarSchemaElement scalar)
+    public TypeContext Accept(ScalarSchemaElement scalar, IErrorCollector errorCollector)
     {
         switch (scalar.ScalarType.Type)
         {

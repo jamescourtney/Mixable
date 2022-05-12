@@ -14,9 +14,9 @@ public class MapSchemaElement : SchemaElement
 
     public IReadOnlyDictionary<XName, SchemaElement> Children => this.children;
 
-    public override T Accept<T>(ISchemaVisitor<T> visitor)
+    public override T Accept<T>(ISchemaVisitor<T> visitor, IErrorCollector errorCollector)
     {
-        return visitor.Accept(this);
+        return visitor.Accept(this, errorCollector);
     }
 
     public void AddChild(SchemaElement child, IErrorCollector errorCollector)

@@ -14,26 +14,45 @@ public class TypeContext
 
 public class SchemaVisitor : ISchemaVisitor<TypeContext>
 {
-    public StringBuilder StringBuilder { get; } = new();
+    private readonly bool enableFileOutput;
 
-    public void Finish()
+    public SchemaVisitor(bool enableFileOutput)
     {
-        this.StringBuilder.Append('}');
+        this.enableFileOutput = enableFileOutput;
     }
 
-    public void Initialize(DocumentMetadata metadata)
+    public StringBuilder StringBuilder { get; } = new();
+
+    public bool ShouldProcess(DocumentMetadata metadata)
     {
-        MixableInternal.Assert(metadata.CSharp is not null, "CSharp metadata was null");
+        return metadata.CSharp?.Enabled == true;
+    }
+
+    public void Run(SchemaElement element, DocumentMetadata metadata, IErrorCollector errorCollector)
+    {
+        if (!this.ShouldProcess(metadata) || metadata.CSharp is null)
+        {
+            return;
+        }
 
         this.StringBuilder.AppendLine($"namespace {metadata.CSharp.NamespaceName}");
         this.StringBuilder.AppendLine("{");
         this.StringBuilder.AppendLine("using System.Collections.Generic;");
         this.StringBuilder.AppendLine("using System.Xml.Serialization;");
+
+        element.Accept(this, errorCollector);
+
+        this.StringBuilder.AppendLine("}");
+
+        if (!string.IsNullOrEmpty(metadata.CSharp.OutputFilePath) && this.enableFileOutput)
+        {
+            System.IO.File.WriteAllText(metadata.CSharp.OutputFilePath, this.StringBuilder.ToString());
+        }
     }
 
-    public TypeContext Accept(ListSchemaElement list)
+    public TypeContext Accept(ListSchemaElement list, IErrorCollector errorCollector)
     {
-        TypeContext innerType = list.Template.Accept(this);
+        TypeContext innerType = list.Template.Accept(this, errorCollector);
 
         var context = new TypeContext
         {
@@ -46,7 +65,7 @@ public class SchemaVisitor : ISchemaVisitor<TypeContext>
         return context;
     }
 
-    public TypeContext Accept(MapSchemaElement map)
+    public TypeContext Accept(MapSchemaElement map, IErrorCollector errorCollector)
     {
         string className = GetClassName(map.XmlElement);
 
@@ -57,7 +76,7 @@ public class SchemaVisitor : ISchemaVisitor<TypeContext>
         {
             XName name = kvp.Key;
             SchemaElement value = kvp.Value;
-            TypeContext valueType = value.Accept(this);
+            TypeContext valueType = value.Accept(this, errorCollector);
 
             properties.AddRange(valueType.Attributes);
             properties.Add($"public {valueType.TypeName} {name} {{ get; set; }}");
@@ -110,7 +129,7 @@ public class SchemaVisitor : ISchemaVisitor<TypeContext>
         };
     }
 
-    public TypeContext Accept(ScalarSchemaElement scalar)
+    public TypeContext Accept(ScalarSchemaElement scalar, IErrorCollector errorCollector)
     {
         return new TypeContext
         {

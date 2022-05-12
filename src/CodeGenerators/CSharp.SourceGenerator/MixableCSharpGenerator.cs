@@ -9,26 +9,20 @@ public class MixableCSharpGenerator : ISourceGenerator
 {
     public void Execute(GeneratorExecutionContext context)
     {
-        MxmlFileProcessor processor = new();
-
         foreach (var item in context.AdditionalFiles)
         {
             if (Path.GetExtension(item.Path).ToLowerInvariant() == ".mxml")
             {
-                var visitor = new CSharp.SchemaVisitor();
+                MxmlFileProcessor processor = new MxmlFileProcessor(item.Path, new SourceGeneratorErrorCollector(ref context, item.Path));
 
-                if (!processor.TryProcessFile(
-                    item.Path,
-                    visitor,
-                    new SourceGeneratorErrorCollector(ref context, item.Path),
-                    md => md.CSharp?.Enabled == true))
+                var visitor = new CSharp.SchemaVisitor(enableFileOutput: false);
+
+                processor.MergeXml();
+
+                if (processor.TryApplyVisitors(new ISchemaVisitor[] { visitor }))
                 {
-                    // Nothing was done.
-                    continue;
+                    context.AddSource(Path.GetFileName(item.Path), visitor.StringBuilder.ToString());
                 }
-
-                visitor.Finish();
-                context.AddSource(Path.GetFileName(item.Path), visitor.StringBuilder.ToString());
             }
         }
     }

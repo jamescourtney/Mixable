@@ -31,13 +31,15 @@ public class DocumentMetadataTests
         string xml = @$"
 <Settings xmlns:mx=""{Constants.XMLNamespace}"">
     <mx:Metadata>
-        <mx:GenerateCSharp>true</mx:GenerateCSharp>
+        <CSharp>
+            <Enabled>true</Enabled>
+        </CSharp>
     </mx:Metadata>
 </Settings>";
 
         TestErrorCollector tec = new();
         Assert.True(DocumentMetadata.TryCreateFromXml(xml, tec, out _));
-        Assert.Single(tec.Errors, ("Namespace must be specified when 'GenerateCSharp' is true.", (string)null));
+        Assert.Single(tec.Errors, ("CSharp CodeGen must include the 'NamespaceName' value when 'Enabled' is true.", "/Settings/Metadata/CSharp"));
     }
 
     [Fact]
@@ -46,15 +48,17 @@ public class DocumentMetadataTests
         string xml = @$"
 <Settings xmlns:mx=""{Constants.XMLNamespace}"">
     <mx:Metadata>
-        <mx:GenerateCSharp>true</mx:GenerateCSharp>
-        <mx:NamespaceName>Foo.Bar</mx:NamespaceName>
-        <mx:BaseFile>Something.mxml</mx:BaseFile>
+        <BaseFile>Something.mxml</BaseFile>
+        <CSharp>
+            <NamespaceName>foo</NamespaceName>
+            <Enabled>true</Enabled>
+        </CSharp>
     </mx:Metadata>
 </Settings>";
 
         TestErrorCollector tec = new();
         Assert.True(DocumentMetadata.TryCreateFromXml(xml, tec, out _));
-        Assert.Single(tec.Errors, ("BaseFileName should not be specified when GenerateCSharp is true.", (string)null));
+        Assert.Single(tec.Errors, ("'BaseFile' metadata should not be specified when CodeGen is enabled.", "/Settings/Metadata"));
     }
 
     [Fact]

@@ -7,59 +7,83 @@ namespace Mixable.Schema;
 /// </summary>
 public class MxmlFileProcessor
 {
-    /// <summary>
-    /// Processes the given file.
-    /// </summary>
-    /// <param name="filePath">The absolute file path.</param>
-    /// <param name="visitor">The visitor to apply to the schema.</param>
-    /// <param name="errorCollector">The error collector for error aggregation.</param>
-    /// <returns>True if the visitor was invoked.</returns>
-    public bool TryProcessFile<T>(
-        string filePath,
-        ISchemaVisitor<T> visitor,
-        IErrorCollector errorCollector,
-        Func<DocumentMetadata, bool> shouldProcess)
+    private readonly IErrorCollector errorCollector;
+    private readonly string filePath;
+
+    public MxmlFileProcessor(string filePath, IErrorCollector collector)
+    {
+        this.errorCollector = new DeduplicatingErrorCollector(collector);
+        this.filePath = filePath;
+    }
+
+    public void MergeXml()
     {
         try
         {
-            errorCollector = new DeduplicatingErrorCollector(errorCollector);
+            (_, DocumentMetadata metadata) = LoadMetadata(this.filePath, errorCollector);
 
-            (_, DocumentMetadata metadata) = LoadMetadata(filePath, errorCollector);
-
-            bool shouldProcessResult = shouldProcess(metadata);
-            if (!string.IsNullOrEmpty(metadata.MergedXmlFileName) && 
-                !shouldProcessResult)
+            // Nothing to do.
+            if (string.IsNullOrEmpty(metadata.MergedXmlFileName))
             {
-                return false;
+                return;
             }
 
             SchemaElement element = this.ProcessFile(
-                filePath,
-                errorCollector,
+                this.filePath,
                 new(),
                 0);
 
             if (errorCollector.HasErrors)
             {
-                return false;
+                return;
             }
 
             if (!string.IsNullOrEmpty(metadata.MergedXmlFileName))
             {
-                string relativePath = Path.Combine(
-                    GetDirectoryName(filePath),
-                    metadata.MergedXmlFileName);
-
                 string text = element.XmlElement.ToString();
-                File.WriteAllText(relativePath, text);
+                File.WriteAllText(metadata.MergedXmlFileName, text);
+            }
+        }
+        catch (BailOutException)
+        {
+        }
+
+        return;
+    }
+
+    /// <summary>
+    /// Processes the visitors over the file in this processor.
+    /// </summary>
+    /// <param name="visitors">The visitors.</param>
+    /// <returns>True if any visitor was invoked.</returns>
+    public bool TryApplyVisitors(IEnumerable<ISchemaVisitor> visitors)
+    {
+        try
+        {
+            (_, DocumentMetadata metadata) = LoadMetadata(filePath, this.errorCollector);
+
+            visitors = visitors.Where(v => v.ShouldProcess(metadata));
+            if (!visitors.Any())
+            {
+                return false;
             }
 
-            if (shouldProcessResult)
+            SchemaElement element = this.ProcessFile(
+                this.filePath,
+                new(),
+                0);
+
+            if (this.errorCollector.HasErrors)
             {
-                visitor.Initialize(metadata);
-                element.Accept(visitor);
-                return true;
+                return false;
             }
+
+            foreach (var visitor in visitors)
+            {
+                visitor.Run(element, metadata, this.errorCollector);
+            }
+
+            return true;
         }
         catch (BailOutException)
         {
@@ -72,21 +96,7 @@ public class MxmlFileProcessor
         string path,
         IErrorCollector errorCollector)
     {
-        string text;
-        XDocument document;
-
-        try
-        {
-            text = File.ReadAllText(path);
-            document = XDocument.Parse(text);
-        }
-        catch (Exception ex)
-        {
-            errorCollector.Error(ex.Message, path);
-            throw new BailOutException();
-        }
-
-        if (!DocumentMetadata.TryCreateFromXml(text, errorCollector, out var metadata))
+        if (!DocumentMetadata.TryCreateFromFile(path, errorCollector, out var document, out var metadata))
         {
             throw new BailOutException();
         }
@@ -96,18 +106,17 @@ public class MxmlFileProcessor
 
     private SchemaElement ProcessFile(
         string path,
-        IErrorCollector errorCollector,
         HashSet<string> visitedPaths,
         uint depth)
     {
-        (XDocument document, DocumentMetadata metadata) = LoadMetadata(path, errorCollector);
+        (XDocument document, DocumentMetadata metadata) = LoadMetadata(path, this.errorCollector);
 
         // Check for cycles.
         // TODO: Use hash or something more deterministic? Symlinks and whatnot
         // may be problematic if we're just using the literal path.
         if (!visitedPaths.Add(path))
         {
-            errorCollector.Error("Cycle detected in include files.", path);
+            this.errorCollector.Error("Cycle detected in include files.", path);
             throw new BailOutException();
         }
 
@@ -116,11 +125,7 @@ public class MxmlFileProcessor
         // If this XML file inherits from a base file, load that one next.
         if (!string.IsNullOrEmpty(metadata.BaseFileName))
         {
-            string baseFilePath = Path.IsPathRooted(metadata.BaseFileName)
-                ? metadata.BaseFileName
-                : Path.Combine(GetDirectoryName(path), metadata.BaseFileName);
-
-            baseSchema = this.ProcessFile(baseFilePath, errorCollector, visitedPaths, depth + 1);
+            baseSchema = this.ProcessFile(metadata.BaseFileName, visitedPaths, depth + 1);
         }
 
         if (baseSchema is not null)
@@ -132,14 +137,14 @@ public class MxmlFileProcessor
             };
 
             // Merge the contents here on top of the base.
-            if (!baseSchema.MergeWith(document.Root!, allowAbstract: depth > 0, errorCollector, validator))
+            if (!baseSchema.MergeWith(document.Root!, allowAbstract: depth > 0, this.errorCollector, validator))
             {
                 throw new BailOutException();
             }
         }
         else
         {
-            SchemaParser parser = new SchemaParser(errorCollector);
+            SchemaParser parser = new SchemaParser(this.errorCollector);
 
             if (!parser.TryParse(document, out baseSchema))
             {

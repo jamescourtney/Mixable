@@ -97,5 +97,5 @@ public abstract class SchemaElement
         IAttributeValidator validator,
         IErrorCollector errorCollector);
 
-    public abstract T Accept<T>(ISchemaVisitor<T> visitor);
+    public abstract T Accept<T>(ISchemaVisitor<T> visitor, IErrorCollector errorCollector);
 }
