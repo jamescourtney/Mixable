@@ -6,13 +6,17 @@ namespace Mixable.Tool
     {
         static void Main(string[] args)
         {
-            string fileName = @"C:\git\Mixable\src\Tests\LiveTester\Base.mxml";
+            string fileName = args[0];
 
             MxmlFileProcessor processor = new MxmlFileProcessor(fileName, new ConsoleErrorCollector());
 
             processor.MergeXml();
 
-            ISchemaVisitor[] visitors = new ISchemaVisitor[] { new CSharp.SchemaVisitor(enableFileOutput: true), new Python.SchemaVisitor() };
+            ISchemaVisitor[] visitors = new ISchemaVisitor[] 
+            { 
+                new CSharp.SchemaVisitor(enableFileOutput: true),
+                new Python.SchemaVisitor()
+            };
 
             processor.TryApplyVisitors(visitors);
         }
