@@ -40,6 +40,8 @@ internal static class MetadataParseHelpers
 
     private static bool InterpretBool(string value, XElement element, string path, IErrorCollector errorCollector)
     {
+        string originalValue = value;
+
         value = value.Trim().ToLowerInvariant();
         if (value == "true")
         {
@@ -51,7 +53,7 @@ internal static class MetadataParseHelpers
         }
         else
         {
-            errorCollector.Error($"Unable to parse '{path}' as a boolean value.", element.GetLocalDocumentPath() + "/" + path);
+            errorCollector.Error($"Unable to parse '{originalValue}' as a boolean value.", element.GetLocalDocumentPath() + "/" + path);
             return false;
         }
     }

@@ -25,7 +25,7 @@ public class PythonMetadata
 
         if (md.Enabled && string.IsNullOrEmpty(md.OutputFile))
         {
-            errorCollector.Error("Python CodeGen must include the 'OutputFile' value when 'Enabled' is true.", element.GetDocumentPath());
+            errorCollector.Error("Python CodeGen must include the 'OutputFile' value when 'Enabled' is true.", element.GetLocalDocumentPath());
         }
 
         return md;
