@@ -1,15 +1,23 @@
-﻿using Mixable.Schema;
+﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Xml.Linq;
+
+using Mixable.Core;
+using Mixable.Schema;
 
 namespace Mixable.CSharp;
 
 public class TypeContext
 {
-    public List<string> Attributes { get; } = new();
+    public TypeContext(string typeName, Func<string, string> getAssignStatement)
+    {
+        this.TypeName = typeName;
+        this.GetAssignStatement = getAssignStatement;
+    }
 
-    public string? TypeName { get; init; }
+    public string TypeName { get; init; }
+
+    public Func<string, string> GetAssignStatement { get; init; }
 }
 
 public class SchemaVisitor : ISchemaVisitor<TypeContext>
@@ -21,7 +29,7 @@ public class SchemaVisitor : ISchemaVisitor<TypeContext>
         this.enableFileOutput = enableFileOutput;
     }
 
-    public StringBuilder StringBuilder { get; } = new();
+    public IndentedCodeWriter CodeWriter { get; } = new("{", "}", 4);
 
     public bool ShouldProcess(DocumentMetadata metadata)
     {
@@ -35,18 +43,23 @@ public class SchemaVisitor : ISchemaVisitor<TypeContext>
             return;
         }
 
-        this.StringBuilder.AppendLine($"namespace {metadata.CSharp.NamespaceName}");
-        this.StringBuilder.AppendLine("{");
-        this.StringBuilder.AppendLine("using System.Collections.Generic;");
-        this.StringBuilder.AppendLine("using System.Xml.Serialization;");
+        this.CodeWriter.AppendLine($"namespace {metadata.CSharp.NamespaceName}");
 
-        element.Accept(this, errorCollector);
+        using (this.CodeWriter.WithBlock())
+        {
+            this.CodeWriter.AppendLine("using System.Collections.Generic;");
+            this.CodeWriter.AppendLine("using System.Xml.Serialization;");
+            this.CodeWriter.AppendLine("using System.Xml.XPath;");
+            this.CodeWriter.AppendLine("using System.Xml.Linq;");
+            this.CodeWriter.AppendLine("using System.Linq;");
+            this.CodeWriter.AppendLine(string.Empty);
 
-        this.StringBuilder.AppendLine("}");
+            element.Accept(this, errorCollector);
+        }
 
         if (!string.IsNullOrEmpty(metadata.CSharp.OutputFilePath) && this.enableFileOutput)
         {
-            System.IO.File.WriteAllText(metadata.CSharp.OutputFilePath, this.StringBuilder.ToString());
+            System.IO.File.WriteAllText(metadata.CSharp.OutputFilePath, this.CodeWriter.StringBuilder.ToString());
         }
     }
 
@@ -54,13 +67,10 @@ public class SchemaVisitor : ISchemaVisitor<TypeContext>
     {
         TypeContext innerType = list.Template.Accept(this, errorCollector);
 
-        var context = new TypeContext
-        {
-            TypeName = $"List<{innerType.TypeName}>",
-        };
-        
-        context.Attributes.Add($"[XmlArray(ElementName = \"{list.XmlElement.Name}\")]");
-        context.Attributes.Add($"[XmlArrayItem(ElementName = \"{list.Template.XmlElement.Name}\")]");
+        string randomVariableName = GetVariableName();
+        var context = new TypeContext(
+            $"List<{innerType.TypeName}>",
+            x => $"{x}.XPathSelectElements(\"{list.Template.XmlElement.Name.LocalName}\").Select({randomVariableName} => {innerType.GetAssignStatement(randomVariableName)}).ToList()");
 
         return context;
     }
@@ -69,72 +79,72 @@ public class SchemaVisitor : ISchemaVisitor<TypeContext>
     {
         string className = GetClassName(map.XmlElement);
 
-        List<string> properties = new();
-        List<string> caseStatements = new();
+        List<(string name, TypeContext ctx)> childContexts = new();
 
         foreach (var kvp in map.Children)
         {
             XName name = kvp.Key;
             SchemaElement value = kvp.Value;
-            TypeContext valueType = value.Accept(this, errorCollector);
-
-            properties.AddRange(valueType.Attributes);
-            properties.Add($"public {valueType.TypeName} {name} {{ get; set; }}");
-
-            caseStatements.Add($"case \"{name}\": {{ child = this.{name}; return true; }}");
+            childContexts.Add((name.LocalName, value.Accept(this, errorCollector)));
         }
 
-        this.StringBuilder.AppendLine($"public partial class {className}");
-        this.StringBuilder.AppendLine("{");
+        this.CodeWriter.AppendLine($"public partial class {className}");
 
-        foreach (string property in properties)
+        using (this.CodeWriter.WithBlock())
         {
-            this.StringBuilder.AppendLine(property);
+            this.CodeWriter.AppendLine($"public {className}(XElement element)");
+            using (this.CodeWriter.WithBlock())
+            {
+                foreach (var (name, ctx) in childContexts)
+                {
+                    this.CodeWriter.AppendLine($"var temp{name} = element.XPathSelectElement(\"{name}\");");
+
+                    string initStatement = ctx.GetAssignStatement($"temp{name}");
+                    this.CodeWriter.AppendLine($"this.{name} = {initStatement};");
+                }
+            }
+
+            foreach (var (name, ctx) in childContexts)
+            {
+                this.CodeWriter.AppendLine($"public {ctx.TypeName} {name} {{ get; }}");
+            }
         }
 
-        this.StringBuilder.AppendLine(@$"
-    public bool TryGetChild(string name, out object child)
-    {{
-            child = null;
-            switch (name)
-            {{
-                {string.Join("\r\n", caseStatements)}
-            }}
-
-            return false;
-    }}");
-
-        this.StringBuilder.AppendLine($@"
-    public object this[string name]
-    {{
-        get
-        {{
-            object child;
-            if (this.TryGetChild(name, out child))
-            {{
-                return child;
-            }}
-
-            throw new KeyNotFoundException();
-        }}
-    }}
-
-    ");
-
-        this.StringBuilder.AppendLine("}");
-
-        return new()
-        {
-            TypeName = className,
-        };
+        return new(className, x => $"new {className}({x})");
     }
 
     public TypeContext Accept(ScalarSchemaElement scalar, IErrorCollector errorCollector)
     {
-        return new TypeContext
+        bool optional = scalar.Modifier == NodeModifier.Optional;
+
+        Func<string, string, string> formatOptional = (v, t) => $"({v} is not null ? {t}.Parse({v}.Value) : default({t}))";
+        Func<string, string, string> formatRequired = (v, t) => $"{t}.Parse({v}.Value)";
+
+        switch (scalar.ScalarType.Type)
         {
-            TypeName = scalar.ScalarType.Type.ToString().ToLowerInvariant(),
-        };
+            case WellKnownType.Bool:
+                return new TypeContext(
+                    "bool",
+                    x => optional ? formatOptional(x, "bool") : formatRequired(x, "bool"));
+
+            case WellKnownType.String:
+                return new TypeContext(
+                    "string",
+                    x => optional ? $"{x}?.Value" : $"{x}.Value");
+
+            case WellKnownType.Double:
+                return new TypeContext(
+                    "double",
+                    x => optional ? formatOptional(x, "double") : formatRequired(x, "double"));
+
+            case WellKnownType.Int:
+                return new TypeContext(
+                    "int",
+                    x => optional ? formatOptional(x, "int") : formatRequired(x, "int"));
+        }
+
+        MixableInternal.Assert(false, "Unknown well known type: " + scalar.ScalarType.Type);
+        return null!;
     }
 
     private static string GetClassName(XElement element)
@@ -143,5 +153,10 @@ public class SchemaVisitor : ISchemaVisitor<TypeContext>
             .GetDocumentPath(select: x => x.LocalName, where: x => x.Namespace != Constants.XMLNamespace)
             .Trim('/')
             .Replace('/', '_');
+    }
+
+    private static string GetVariableName()
+    {
+        return $"v_{Guid.NewGuid():n}";
     }
 }

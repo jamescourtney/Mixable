@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Xml.Linq;
 using System.Xml.Serialization;
 
 namespace Tester
@@ -10,14 +11,10 @@ namespace Tester
     {
         public static void Main(string[] args)
         {
-            XmlSerializer serializer = new XmlSerializer(typeof(Foo.Bar.Baz.Bat.Configuration));
+            using Stream fs = File.OpenRead("derived2.xml");
 
-            using (var sw = new StringWriter())
-            {
-                var c = (Foo.Bar.Baz.Bat.Configuration)serializer.Deserialize(File.OpenRead("derived2.xml"));
-                serializer.Serialize(sw, c);
-                Console.WriteLine(sw.ToString());
-            }
+            var doc = XDocument.Load(fs);
+            var config = new Foo.Bar.Baz.Bat.Configuration(doc.Root);
         }
     }
 }

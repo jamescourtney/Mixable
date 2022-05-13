@@ -1,7 +1,7 @@
-﻿using Mixable.Schema;
+﻿using Mixable.Core;
+using Mixable.Schema;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Xml.Linq;
 
 namespace Mixable.Python;
@@ -21,49 +21,9 @@ public class TypeContext
     }
 }
 
-public class PythonCodeWriter
-{
-    private const string OneIdent = "  ";
-
-    private int indentSize;
-
-    public StringBuilder StringBuilder { get; } = new();
-
-    public IDisposable WithBlock()
-    {
-        return new SimpleDisposable(this);
-    }
-
-    public void AppendLine(string line)
-    {
-        for (int i = 0; i < this.indentSize; ++i)
-        {
-            this.StringBuilder.Append(OneIdent);
-        }
-
-        this.StringBuilder.AppendLine(line);
-    }
-
-    private class SimpleDisposable : IDisposable
-    {
-        private readonly PythonCodeWriter writer;
-
-        public SimpleDisposable(PythonCodeWriter writer)
-        {
-            this.writer = writer;
-            this.writer.indentSize++;
-        }
-
-        public void Dispose()
-        {
-            writer.indentSize--;
-        }
-    }
-}
-
 public class SchemaVisitor : ISchemaVisitor<TypeContext>
 {
-    public PythonCodeWriter CodeWriter { get; } = new();
+    public IndentedCodeWriter CodeWriter { get; } = new(string.Empty, string.Empty, 2);
 
     public bool ShouldProcess(DocumentMetadata metadata)
     {
@@ -136,18 +96,33 @@ public class SchemaVisitor : ISchemaVisitor<TypeContext>
 
     public TypeContext Accept(ScalarSchemaElement scalar, IErrorCollector errorCollector)
     {
-        switch (scalar.ScalarType.Type)
+        Func<string, string, string> formatOptional = (v, t) => $"({t}.Parse({v}.text) if {v} != None ?  : default({t}))";
+        Func<string, string, string> formatRequired = (v, t) => $"{t}.Parse({v}.Value)";
+
+        switch ((scalar.ScalarType.Type, scalar.Modifier))
         {
-            case WellKnownType.Int:
+            case (WellKnownType.Int, NodeModifier.Optional):
+                return new TypeContext(s => $"(int({s}.text) if {s} != None else None)");
+
+            case (WellKnownType.Int, _):
                 return new TypeContext(s => $"int({s}.text)");
 
-            case WellKnownType.Double:
+            case (WellKnownType.Double, NodeModifier.Optional):
+                return new TypeContext(s => $"(float({s}.text) if {s} != None else None)");
+
+            case (WellKnownType.Double, _):
                 return new TypeContext(s => $"float({s}.text)");
 
-            case WellKnownType.Bool:
+            case (WellKnownType.Bool, NodeModifier.Optional):
+                return new TypeContext(s => $"({s}.text.strip().lower() == \"true\" if {s} != None else None)");
+
+            case (WellKnownType.Bool, _):
                 return new TypeContext(s => $"{s}.text.strip().lower() == \"true\"");
 
-            case WellKnownType.String:
+            case (WellKnownType.String, NodeModifier.Optional):
+                return new TypeContext(s => $"({s}.text if {s} != None else None)");
+
+            case (WellKnownType.String, _):
                 return new TypeContext(s => $"{s}.text");
 
             default:

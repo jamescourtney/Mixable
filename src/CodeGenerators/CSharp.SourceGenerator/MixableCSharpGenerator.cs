@@ -21,7 +21,7 @@ public class MixableCSharpGenerator : ISourceGenerator
 
                 if (processor.TryApplyVisitors(new ISchemaVisitor[] { visitor }))
                 {
-                    context.AddSource(Path.GetFileName(item.Path), visitor.StringBuilder.ToString());
+                    context.AddSource(Path.GetFileName(item.Path), visitor.CodeWriter.StringBuilder.ToString());
                 }
             }
         }
