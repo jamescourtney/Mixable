@@ -14,9 +14,9 @@ public class ListSchemaElement : SchemaElement
 
     public SchemaElement Template { get; }
 
-    public override T Accept<T>(ISchemaVisitor<T> visitor)
+    public override T Accept<T>(ISchemaVisitor<T> visitor, IErrorCollector errorCollector)
     {
-        return visitor.Accept(this);
+        return visitor.Accept(this, errorCollector);
     }
 
     protected internal override bool MatchesSchema(

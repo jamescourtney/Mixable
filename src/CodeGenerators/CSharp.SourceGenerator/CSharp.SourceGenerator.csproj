@@ -1,16 +1,21 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <Import Project="..\..\common.props" />
+
     <PropertyGroup>
-        <TargetFramework>netstandard2.0</TargetFramework>
-        <LangVersion>10.0</LangVersion>
+        <!-- source generators only support net standard 2.0 -->
+        <TargetFrameworks>netstandard2.0</TargetFrameworks>
         <Nullable>annotations</Nullable>
     </PropertyGroup>
-
+    
     <ItemGroup>
         <Compile Include="..\..\Mixable.Core\*.cs">
             <LinkBase>Mixable.Core</LinkBase>
         </Compile>
         <Compile Include="..\..\Mixable.Core\*\*.cs">
             <LinkBase>Mixable.Core</LinkBase>
+        </Compile>
+        <Compile Include="..\CSharp\*.cs">
+            <LinkBase>CSharp</LinkBase>
         </Compile>
     </ItemGroup>
 
@@ -21,4 +26,5 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
     </ItemGroup>
+    
 </Project>

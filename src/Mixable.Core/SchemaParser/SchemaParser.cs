@@ -48,11 +48,6 @@ public class SchemaParser
             return false;
         }
 
-        if (!DocumentMetadata.TryCreateFromXDocument(document, this.ErrorCollector, out _))
-        {
-            return false;
-        }
-
         root = this.Parse(document.Root, attributeValidator);
 
         if (this.ErrorCollector.HasErrors)

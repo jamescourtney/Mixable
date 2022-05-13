@@ -69,4 +69,12 @@ public static class XElementExtensions
 
         return sb.ToString();
     }
+
+    /// <summary>
+    /// Gets the document path using only local tag names.
+    /// </summary>
+    public static string GetLocalDocumentPath(this XElement element)
+    {
+        return element.GetDocumentPath(select: x => x.LocalName);
+    }
 }

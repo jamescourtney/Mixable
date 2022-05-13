@@ -2,7 +2,7 @@
 
 namespace Mixable.Schema;
 
-internal static class MixableInternal
+public static class MixableInternal
 {
     [ExcludeFromCodeCoverage]
     public static void Assert(
@@ -19,9 +19,8 @@ internal static class MixableInternal
     }
 }
 
-
 [ExcludeFromCodeCoverage]
-internal class MixableInternalException : Exception
+public class MixableInternalException : Exception
 {
     public MixableInternalException(
         string message,

@@ -3,12 +3,16 @@
         <CSharp>
             <Enabled>true</Enabled>
             <NamespaceName>Foo.Bar.Baz.Bat</NamespaceName>
-            <OutputFile>Test.cs</OutputFile>
+            <OutputFile>../CSharp/generated.cs</OutputFile>
         </CSharp>
+        <Python>
+            <Enabled>true</Enabled>
+            <OutputFile>../Python/generated.py</OutputFile>
+        </Python>
     </mx:Metadata>
     
     <Mapping>
-        <A mx:Flags="Final">4</A>
+        <A>4</A>
         <B mx:Flags="Abstract" mx:Type="string" />
         <C>
             <C>2.0</C>
@@ -35,11 +39,10 @@
         </Item>
         <Item>
             <Value>3</Value>
-            <OtherValue>4</OtherValue>
         </Item>
     </FancyList>
 
     <AbstractList mx:Type="List">
-        <Item>1</Item>
+        <Item>2</Item>
     </AbstractList>
 </Configuration>

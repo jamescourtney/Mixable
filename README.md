@@ -40,13 +40,19 @@ Mixable input files end in the `.mxml` file extension. The first step is to defi
 ```xml
 <Settings xmlns:mx="https://github.com/jamescourtney/mixable">
   <mx:Metadata>
-    <!-- Code is generated based on the template file, not the overrides -->
-    <mx:NamespaceName>Some.Namespace</mx:NamespaceName>
-    <mx:GenerateCSharp>true</mx:GenerateCSharp>
+    <CSharp>
+      <Enabled>true</Enabled>
+      <NamespaceName>Foo.Bar.Baz.Bat</NamespaceName>
+      <OutputFile>Test.cs</OutputFile>
+    </CSharp>
+    <Python>
+      <Enabled>true</Enabled>
+      <OutputFile>test.py</OutputFile>
+    </Python>
   </mx:Metadata>
   
   <HttpListener>
-    <ListeningPort>443</ListeningPort>
+    <ListeningPort mx:Flags="Final">443</ListeningPort>
     <TlsCert>myfancydomain.com</TlsCert>
     <RequireAuthentication>true</RequireAuthentication>
   </HttpListener>
@@ -56,8 +62,8 @@ Then define overrides per environment:
 ```xml
 <Settings xmlns:mx="https://github.com/jamescourtney/mixable">
   <mx:Metadata>
-    <mx:BaseFile>Template.mxml</mx:BaseFile>
-    <mx:OutputXmlFile>LocalHostConfig.xml</mx:OutputXmlFile>
+    <BaseFile>Template.mxml</BaseFile>
+    <MergedXmlFile>LocalHostConfig.xml</MergedXmlFile>
   </mx:Metadata>
   
   <HttpListener>

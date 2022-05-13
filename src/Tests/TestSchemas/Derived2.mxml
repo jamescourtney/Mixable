@@ -19,7 +19,7 @@
         </Item>
     </FancyList>
 
-    <AbstractList mx:ListMerge="Replace">
+    <AbstractList>
         <Item>4</Item>
         <Item>4</Item>
         <Item>4</Item>
