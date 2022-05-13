@@ -5,7 +5,7 @@ import unittest
 class SimpleTest(unittest.TestCase):
     # Returns True or False. 
     def test(self):
-        doc = parse('../TestSchemas/derived2.xml');
+        doc = parse('../TestSchemas/Derived2.xml');
         c = generated.Configuration(doc.getroot())
 
         self.assertEqual(c.Mapping.A, 182)
