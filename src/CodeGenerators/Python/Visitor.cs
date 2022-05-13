@@ -2,10 +2,12 @@
 using Mixable.Schema;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Xml.Linq;
 
 namespace Mixable.Python;
 
+[ExcludeFromCodeCoverage]
 public class TypeContext
 {
     private readonly Func<string, string> createNew;
@@ -21,6 +23,7 @@ public class TypeContext
     }
 }
 
+[ExcludeFromCodeCoverage]
 public class SchemaVisitor : ISchemaVisitor<TypeContext>
 {
     public IndentedCodeWriter CodeWriter { get; } = new(string.Empty, string.Empty, 2);

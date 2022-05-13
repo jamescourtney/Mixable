@@ -162,15 +162,4 @@ public class MxmlFileProcessor
     private class BailOutException : Exception
     {
     }
-
-    private static string GetDirectoryName(string path)
-    {
-        string? result = Path.GetDirectoryName(path);
-
-        MixableInternal.Assert(
-            result is not null,
-            "couldn't get directory name from path: " + path);
-
-        return result;
-    }
 }
