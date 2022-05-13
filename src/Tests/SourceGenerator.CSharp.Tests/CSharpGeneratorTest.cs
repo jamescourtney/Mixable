@@ -18,10 +18,9 @@ public class CSharpGeneratorTest
         Assert.True(compilationResult.Success);
         Assert.NotNull(assembly);
 
-        System.Xml.Serialization.XmlSerializer s = new(assembly.GetType("Foo.Bar.Baz.Bat.Configuration"));
-        dynamic value = s.Deserialize(
-            new StringReader(
-                File.ReadAllText(MakeAbsolutePath("XML/GeneralTest/Derived2.xml"))));
+        Type t = assembly.GetType("Foo.Bar.Baz.Bat.Configuration");
+        XDocument document = XDocument.Load("XML/GeneralTest/Derived2.xml");
+        dynamic value = Activator.CreateInstance(t, new[] { document.Root });
 
         Assert.Equal(4, (int)value.Mapping.A);
         Assert.Equal("derived2.xml", (string)value.Mapping.B);

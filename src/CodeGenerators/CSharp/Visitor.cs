@@ -48,7 +48,6 @@ public class SchemaVisitor : ISchemaVisitor<TypeContext>
         using (this.CodeWriter.WithBlock())
         {
             this.CodeWriter.AppendLine("using System.Collections.Generic;");
-            this.CodeWriter.AppendLine("using System.Xml.Serialization;");
             this.CodeWriter.AppendLine("using System.Xml.XPath;");
             this.CodeWriter.AppendLine("using System.Xml.Linq;");
             this.CodeWriter.AppendLine("using System.Linq;");

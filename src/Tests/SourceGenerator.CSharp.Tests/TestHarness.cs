@@ -76,13 +76,16 @@ public static class TestHarness
         List<MetadataReference> refs = new();
 
         refs.Add(MetadataReference.CreateFromFile(typeof(Binder).GetTypeInfo().Assembly.Location));
-        refs.Add(MetadataReference.CreateFromFile(typeof(System.Xml.Serialization.XmlArrayAttribute).Assembly.Location));
+        refs.Add(MetadataReference.CreateFromFile(typeof(System.Xml.Linq.XElement).Assembly.Location));
+        refs.Add(MetadataReference.CreateFromFile(typeof(System.Linq.Enumerable).Assembly.Location));
+        refs.Add(MetadataReference.CreateFromFile(typeof(System.Xml.XPath.XDocumentExtensions).Assembly.Location));
+        refs.Add(MetadataReference.CreateFromFile(typeof(System.Collections.Generic.List<>).Assembly.Location));
         refs.Add(MetadataReference.CreateFromFile(typeof(object).Assembly.Location));
 
         string assemblyPath = Path.GetDirectoryName(typeof(object).Assembly.Location);
 
         refs.AddRange(
-            new[] { "mscorlib.dll", "System.dll", "System.Core.dll", "System.Runtime.dll" }
+            new[] { "mscorlib.dll", "System.dll", "System.Core.dll", "System.Runtime.dll", "System.Collections.dll" }
             .Select(x => Path.Combine(assemblyPath, x))
             .Select(x => MetadataReference.CreateFromFile(x)));
 
