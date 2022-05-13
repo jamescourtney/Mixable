@@ -6,6 +6,8 @@ namespace Mixable.Tool
     {
         static void Main(string[] args)
         {
+            Console.WriteLine("Welcome to Mixable!");
+
             string fileName = args[0];
 
             MxmlFileProcessor processor = new MxmlFileProcessor(fileName, new ConsoleErrorCollector());

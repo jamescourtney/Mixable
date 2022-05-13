@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Configuration xmlns:mx="https://github.com/jamescourtney/mixable">
+  <mx:Metadata>
+    <BaseFile>Base.mxml</BaseFile>
+  </mx:Metadata>
+
+    <Mapping>
+        <A mx:Flags="Final">182</A>
+    </Mapping>
+
+    <List mx:ListMerge="Replace" />
+    <FancyList mx:ListMerge="Replace">
+        <Item>
+            <Value>100</Value>
+        </Item>
+        <Item>
+            <Value>101</Value>
+            <OtherValue>105</OtherValue>
+        </Item>
+    </FancyList>
+</Configuration>

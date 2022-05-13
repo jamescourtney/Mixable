@@ -59,7 +59,7 @@ public class SchemaVisitor : ISchemaVisitor<TypeContext>
         string childTagName = list.Template.XmlElement.Name.LocalName;
 
         return new TypeContext(parent => 
-            $"[ {create} for {variable1} in filter(lambda {variable2}: {variable2}.tag == '{childTagName}', {parent}.getchildren()) ]");
+            $"[ {create} for {variable1} in filter(lambda {variable2}: {variable2}.tag == '{childTagName}', list({parent})) ]");
     }
 
     public TypeContext Accept(MapSchemaElement map, IErrorCollector errorCollector)

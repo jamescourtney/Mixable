@@ -1,0 +1,27 @@
+﻿<Configuration xmlns:mx="https://github.com/jamescourtney/mixable">
+    <mx:Metadata>
+        <BaseFile>Derived.mxml</BaseFile>
+        <MergedXmlFile>Derived2.xml</MergedXmlFile>
+    </mx:Metadata>
+
+    <Mapping>
+        <B>foo</B>
+    </Mapping>
+
+    <List mx:ListMerge="Replace" />
+    <FancyList mx:ListMerge="Replace">
+        <Item>
+            <Value>100</Value>
+        </Item>
+        <Item>
+            <Value>101</Value>
+            <OtherValue>105</OtherValue>
+        </Item>
+    </FancyList>
+
+    <AbstractList>
+        <Item>4</Item>
+        <Item>4</Item>
+        <Item>4</Item>
+    </AbstractList>
+</Configuration>
