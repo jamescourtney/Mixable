@@ -1,5 +1,5 @@
 # 🇲🅘🇽🅐🅑🇱🅔
-[![.NET](https://github.com/jamescourtney/Mixable/actions/workflows/build.yml/badge.svg)](https://github.com/jamescourtney/Mixable/actions/workflows/build.yml) [![codecov](https://codecov.io/gh/jamescourtney/Mixable/branch/main/graph/badge.svg?token=2V5ccssaod)](https://codecov.io/gh/jamescourtney/Mixable)
+[![.NET](https://github.com/jamescourtney/Mixable/actions/workflows/build.yml/badge.svg)](https://github.com/jamescourtney/Mixable/actions/workflows/build.yml) [![Python](https://github.com/jamescourtney/Mixable/actions/workflows/python.yml/badge.svg?branch=main)](https://github.com/jamescourtney/Mixable/actions/workflows/python.yml) [![codecov](https://codecov.io/gh/jamescourtney/Mixable/branch/main/graph/badge.svg?token=2V5ccssaod)](https://codecov.io/gh/jamescourtney/Mixable)
 
 
 Mixable is a build-time tool that makes service configuration easier by allowing you to define your config in a way that makes sense. Simply provide your template and override XML files, and Mixable will validate your overrides, then generate merged XML along with a parser to read the files. This means that adding a new config settings means you only need to update one place, and Mixable does all the work to enlighten your code.
